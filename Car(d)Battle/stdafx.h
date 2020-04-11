@@ -10,6 +10,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include "Bitmap.h"
 #include <vector>
 #include <GL/glut.h>
 #include <libxl.h>

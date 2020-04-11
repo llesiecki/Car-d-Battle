@@ -38,6 +38,7 @@ std::string WorkBook::cell_to_string(int row, int col)
     case CELLTYPE_BLANK: return std::string();
     case CELLTYPE_ERROR: return std::string();
     }
+    return std::string();
 }
 
 bool WorkBook::to_Cards(Cards& cards)
