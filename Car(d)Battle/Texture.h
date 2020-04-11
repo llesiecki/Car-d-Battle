@@ -1,13 +1,13 @@
 #pragma once
 #include "stdafx.h"
-// Tekstura.
+
 class CTexture
 {
 public:
 	bool IsLoaded;
 
-	CTexture(char*);
-	CTexture(char*, int, int);
+	CTexture(std::string);
+	CTexture(std::string, int, int);
 	~CTexture(void);
 	bool Load(void);
 	GLuint GetId(void);
@@ -15,7 +15,7 @@ public:
 protected:
 	int _magFilter;
 	int _minFilter;
-	char* _file;
+	std::string _file;
 	GLuint _id;
 };
 

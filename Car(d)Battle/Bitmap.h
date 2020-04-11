@@ -62,9 +62,9 @@ public:
     string error;
     //methods
     Bitmap(void);
-    Bitmap(char*);
+    Bitmap(std::string);
     ~Bitmap();
-    bool loadBMP(char*);
+    bool loadBMP(std::string);
 private:
     //variables
     BitmapFileHeader bmfh;

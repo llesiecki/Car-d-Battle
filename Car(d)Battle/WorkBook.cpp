@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "WorkBook.h"
+#include <locale>
+#include <codecvt>
 
 WorkBook::WorkBook(const wchar_t* filename)
 {
@@ -23,22 +25,11 @@ std::string WorkBook::cell_to_string(int row, int col)
     CellType cellType = sheet->cellType(row, col);
     switch (cellType)
     {
-    case CELLTYPE_EMPTY: return std::string();
     case CELLTYPE_NUMBER: return std::to_string(sheet->readNum(row, col));
-    case CELLTYPE_STRING:
-    {
-        std::wstring wstr = std::wstring(sheet->readStr(row, col));
-        return std::string(wstr.begin(), wstr.end());
+    case CELLTYPE_STRING: return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(sheet->readStr(row, col));
+    case CELLTYPE_BOOLEAN: return std::string(sheet->readBool(row, col) ? "true" : "false");
+    default: return std::string();
     }
-    case CELLTYPE_BOOLEAN:
-    {
-        bool b = sheet->readBool(row, col);
-        return std::string(b ? "true" : "false");
-    }
-    case CELLTYPE_BLANK: return std::string();
-    case CELLTYPE_ERROR: return std::string();
-    }
-    return std::string();
 }
 
 bool WorkBook::to_Cards(Cards& cards)

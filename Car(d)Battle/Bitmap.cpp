@@ -16,7 +16,7 @@ Bitmap::Bitmap() {
 }
 
 //constructor loads the bitmap when it is created
-Bitmap::Bitmap(char* file) {
+Bitmap::Bitmap(std::string file) {
     reset();
     loadBMP(file);
 }
@@ -33,7 +33,7 @@ Bitmap::~Bitmap() {
 
 //load a bitmap from a file and represent it correctly
 //in memory
-bool Bitmap::loadBMP(char* file) {
+bool Bitmap::loadBMP(std::string file) {
     FILE* in;                  //file stream for reading
     char* tempData;       //temp storage for image data
     int numColours;            //total available colours
@@ -49,7 +49,7 @@ bool Bitmap::loadBMP(char* file) {
     }
 
     //open the file for reading in binary mode
-    fopen_s(&in, file, "rb");
+    fopen_s(&in, file.c_str(), "rb");
 
     //if the file does not exist return in error
     if (in == NULL) {
@@ -177,7 +177,7 @@ bool Bitmap::convert24(char* tempData) {
     if (height > 0) {
         offset = padWidth - byteWidth;
         //count backwards so you start at the front of the image
-        for (int i = 0; i < dataSize; i += 3) {
+        for (unsigned int i = 0; i < dataSize; i += 3) {
             //jump over the padding at the start of a new line
             if ((i + 1) % padWidth == 0) {
                 i += offset;
@@ -198,7 +198,7 @@ bool Bitmap::convert24(char* tempData) {
         //after the header  The only problem is that some programs
         //will pad not only the data, but also the file size to
         //be divisible by 4 bytes.
-        for (int i = 0; i < dataSize; i += 3) {
+        for (unsigned int i = 0; i < dataSize; i += 3) {
             //jump over the padding at the start of a new line
             if ((i + 1) % padWidth == 0) {
                 i += offset;
@@ -232,7 +232,7 @@ bool Bitmap::convert8(char* tempData) {
         offset = padWidth - byteWidth;
         int j = 0;
         //count backwards so you start at the front of the image
-        for (int i = 0; i < dataSize * RGB_BYTE_SIZE; i += 3) {
+        for (unsigned int i = 0; i < dataSize * RGB_BYTE_SIZE; i += 3) {
             //jump over the padding at the start of a new line
             if ((i + 1) % padWidth == 0) {
                 i += offset;
@@ -250,7 +250,7 @@ bool Bitmap::convert8(char* tempData) {
         offset = padWidth - byteWidth;
         int j = dataSize - 1;
         //count backwards so you start at the front of the image
-        for (int i = 0; i < dataSize * RGB_BYTE_SIZE; i += 3) {
+        for (unsigned int i = 0; i < dataSize * RGB_BYTE_SIZE; i += 3) {
             //jump over the padding at the start of a new line
             if ((i + 1) % padWidth == 0) {
                 i += offset;

@@ -2,7 +2,7 @@
 #include "Texture.h"
 
 
-CTexture::CTexture(char* file)
+CTexture::CTexture(std::string file)
 {
 	IsLoaded = false;
 	_id = -1;
@@ -11,7 +11,7 @@ CTexture::CTexture(char* file)
 	_minFilter = GL_LINEAR;
 }
 
-CTexture::CTexture(char* file, int magFilter, int minFilter)
+CTexture::CTexture(std::string file, int magFilter, int minFilter)
 {
 	IsLoaded = false;
 	_id = -1;
@@ -24,7 +24,7 @@ bool CTexture::Load(void)
 {
 	Bitmap* tex = new Bitmap();
 	if (!tex->loadBMP(_file)) {
-		printf("ERROR: Cannot read texture file \"%s\".\n", _file);
+		printf("ERROR: Cannot read texture file \"%s\".\n", _file.c_str());
 		return false;
 	}
 
@@ -57,8 +57,5 @@ CTexture::~CTexture(void)
 
 GLuint CTexture::GetId(void)
 {
-	if (!IsLoaded) {
-		Load();
-	}
 	return _id;
 }
