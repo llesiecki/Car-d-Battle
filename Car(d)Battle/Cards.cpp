@@ -3,14 +3,14 @@
 
 Cards::Cards(const wchar_t* filename)
 {
-	WorkBook workbook(L"arkusz.xls");
+	WorkBook workbook(filename);
 	workbook.to_Cards(*this);
-	back_tex = new CTexture(img_paths.back());
+	back_tex = new CTexture("textures\\" + img_paths.back());
 	img_paths.pop_back();
-	fields_tex = new CTexture(img_paths.back());
+	fields_tex = new CTexture("textures\\" + img_paths.back());
 	img_paths.pop_back();
 	for (std::string img_path : img_paths)
-		cards_texture.push_back(new CTexture(img_path));
+		cards_texture.push_back(new CTexture("textures\\cars\\" + img_path));
 }
 
 bool Cards::load_textures()
@@ -18,9 +18,9 @@ bool Cards::load_textures()
 	bool ret = true;
 	ret &= back_tex->Load();
 	ret &= fields_tex->Load();
-	/*for (auto tex : cards_texture)
+	for (auto tex : cards_texture)
 		ret &= tex->Load();
-	*/
+	
 	return ret;
 }
 
@@ -46,9 +46,9 @@ void Cards::create_lists()
 			glTexCoord2f(1.0, 0.0);
 				glVertex3f(0.0f, 0.0f, 0.0f);
 			glTexCoord2f(1.0, 1.0);
-				glVertex3f(0.0, 0.589, 0.0f);
+				glVertex3f(0.0f, 0.589f, 0.0f);
 			glTexCoord2f(0.0, 1.0);
-				glVertex3f(-0.707f, 0.589, 0.0f);
+				glVertex3f(-0.707f, 0.589f, 0.0f);
 			glTexCoord2f(0.0, 0.0);
 				glVertex3f(-0.707f, 0.0f, 0.0f);
 		glEnd();
@@ -61,16 +61,24 @@ void Cards::create_lists()
 		glBegin(GL_QUADS);
 
 			glTexCoord2f(1.0, 0.0);
-				glVertex3f(0.0f, 0.589, 0.0f);
+				glVertex3f(0.0f, 0.589f, 0.0f);
 			glTexCoord2f(1.0, 1.0);
 				glVertex3f(0.0, 1.178f, 0.0f);
 			glTexCoord2f(0.0, 1.0);
 				glVertex3f(-0.707f, 1.178f, 0.0f);
 			glTexCoord2f(0.0, 0.0);
-				glVertex3f(-0.707f, 0.589, 0.0f);
+				glVertex3f(-0.707f, 0.589f, 0.0f);
 		glEnd();
 		glPopMatrix();
 	glEndList();
+}
+
+std::vector<Card> Cards::get_cards_vec()
+{
+	std::vector<Card> cards;
+	for (unsigned int i = 0; i < cards_texture.size(); i++)
+		cards.push_back(Card(this, i));
+	return cards;
 }
 
 void Cards::print()

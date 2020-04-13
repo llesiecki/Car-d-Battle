@@ -3,9 +3,10 @@
 #include "stdafx.h"
 #include "Texture.h"
 
+class Card;
+
 class Cards
 {
-public:
 	std::vector< std::string > field_names, img_paths;
 	std::vector< std::vector<std::string> > cards_properties;
 	CTexture *back_tex, *fields_tex;
@@ -15,6 +16,8 @@ public:
 	Cards(const wchar_t* filename);
 	bool load_textures();
 	void create_lists();
+	std::vector<Card> get_cards_vec();
 	void print();
 	friend class WorkBook;
+	friend class Card;
 };

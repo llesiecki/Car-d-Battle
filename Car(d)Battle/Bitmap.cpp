@@ -54,7 +54,7 @@ bool Bitmap::loadBMP(std::string file) {
     //if the file does not exist return in error
     if (in == NULL) {
         error = "File not found";
-        fclose(in);
+        //fclose(in);
         return false;
     }
 

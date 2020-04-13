@@ -14,5 +14,6 @@
 #include <vector>
 #include <GL/glut.h>
 #include <libxl.h>
+#include "Card.h"
 #include "Cards.h"
 #include "WorkBook.h"
