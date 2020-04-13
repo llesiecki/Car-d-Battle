@@ -56,7 +56,7 @@ bool WorkBook::to_Cards(Cards& cards)
             cards.cards_properties.back().push_back(cell_to_string(row, col));
     }
 
-    for (unsigned int pos = 0; pos < cards.field_names.size(); pos++)
+    for (unsigned int pos = 0; pos < cards.field_names.size(); pos++)//add ".0" in acceleration if it's an integer
     {
         if (cards.field_names[pos] == "Acceleration")
         {
@@ -65,6 +65,7 @@ bool WorkBook::to_Cards(Cards& cards)
                 if (properties[pos].find(".") == std::string::npos)
                     properties[pos].append(".0");
             }
+            break;
         }
     }
     return true;

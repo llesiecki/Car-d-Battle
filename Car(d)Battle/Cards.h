@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Texture.h"
+#include "utilities\Texture.h"
 
 class Card;
 
