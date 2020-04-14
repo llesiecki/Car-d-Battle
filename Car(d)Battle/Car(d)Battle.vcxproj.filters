@@ -42,6 +42,9 @@
     <ClCompile Include="utilities\Texture.cpp">
       <Filter>utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cards.h">
@@ -67,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="utilities\Texture.h">
       <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

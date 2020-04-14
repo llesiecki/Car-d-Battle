@@ -27,6 +27,9 @@ float calc_text_width(std::string str)
 
 void Card::draw()
 {
+    glPushMatrix();
+    glRotatef(90, -1, 0, 0);
+    glTranslatef(0.707f / 2, -0.589, 0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, cards->back_tex->GetId());
     glCallList(cards->list_back);
@@ -36,8 +39,7 @@ void Card::draw()
     glCallList(cards->list_fields);
     glDisable(GL_TEXTURE_2D);
     glColor3f(0, 0, 0);
-    glTranslatef(-0.707f + 0.02f, 0.525f, -0.005f);
-    //renderBitmapString(0, 0, cards->cards_properties[id][0]);
+    glTranslatef(-0.707f + 0.02f, 0.525f, +0.005f);
     renderBitmapString(0, 0, cards->cards_properties[id][0]);
     glTranslatef(0, -0.589f / 7, 0);
     for (unsigned int i = 1; i < cards->field_names.size(); i++)
@@ -50,4 +52,5 @@ void Card::draw()
         glPopMatrix();
         glTranslatef(0, -0.589f / 7, 0);
     }
+    glPopMatrix();
 }

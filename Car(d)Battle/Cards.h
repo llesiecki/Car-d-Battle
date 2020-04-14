@@ -14,6 +14,7 @@ class Cards
 	GLuint list_front, list_back, list_fields;
 public:
 	Cards(const wchar_t* filename);
+	~Cards();
 	bool load_textures();
 	void create_lists();
 	std::vector<Card> get_cards_vec();

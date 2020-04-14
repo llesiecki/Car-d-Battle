@@ -11,6 +11,21 @@ Cards::Cards(const wchar_t* filename)
 	img_paths.pop_back();
 	for (std::string img_path : img_paths)
 		cards_texture.push_back(new CTexture("textures\\cars\\" + img_path));
+	list_back = list_fields = list_front = -1;
+}
+
+Cards::~Cards()
+{
+	if(list_back != -1)
+		glDeleteLists(list_back, 1);
+	if (list_fields != -1)
+		glDeleteLists(list_fields, 1);
+	if (list_front != -1)
+		glDeleteLists(list_front, 1);
+	delete back_tex;
+	delete fields_tex;
+	for (CTexture*& tex : cards_texture)
+		delete tex;
 }
 
 bool Cards::load_textures()
@@ -57,9 +72,7 @@ void Cards::create_lists()
 	list_front = glGenLists(1);
 	glNewList(list_front, GL_COMPILE);
 	glPushMatrix();
-	//glTranslatef(0, -1.0f, 0);
 		glBegin(GL_QUADS);
-
 			glTexCoord2f(1.0, 0.0);
 				glVertex3f(0.0f, 0.589f, 0.0f);
 			glTexCoord2f(1.0, 1.0);
