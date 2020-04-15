@@ -16,6 +16,12 @@
     <Filter Include="utilities">
       <UniqueIdentifier>{70ac1644-17f6-451d-9ed3-96ca4411cca7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\textures">
+      <UniqueIdentifier>{0a61c1ea-cdf4-4d08-940a-8b694c4de4b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\textures\cars">
+      <UniqueIdentifier>{5c1ad2ef-c921-4821-b1d3-16d5e16d49cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Car(d)Battle.cpp">
@@ -43,6 +49,9 @@
       <Filter>utilities</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,5 +83,180 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\tlo3.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\kartadol.bmp">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\kartadol.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\kartatyl.bmp">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\kartatyl.png">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\test.bmp">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\tlo3.bmp">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\cars\6.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\6.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\308.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\308.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\c3.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\c3.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\c6.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\c6.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\ceed.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\ceed.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\civic.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\civic.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\cooper.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\cooper.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\corolla.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\corolla.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\e60.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\e60.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\eclass.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\eclass.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\giulia.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\giulia.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\i20.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\i20.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\ibiza.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\ibiza.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\impreza.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\impreza.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\insignia.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\insignia.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\is.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\is.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\logan.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\logan.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\octavia.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\octavia.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\panda.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\panda.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\passat.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\passat.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\rx8.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\rx8.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\s40.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\s40.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\smax.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\smax.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\swift.bmp">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+    <Image Include="textures\cars\swift.png">
+      <Filter>Resource Files\textures\cars</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="carlist.xls">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

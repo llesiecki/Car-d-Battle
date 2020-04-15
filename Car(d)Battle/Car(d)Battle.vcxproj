@@ -153,6 +153,7 @@
     <ClCompile Include="Car(d)Battle.cpp" />
     <ClCompile Include="Card.cpp" />
     <ClCompile Include="Cards.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="utilities\Bitmap.cpp" />
@@ -163,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="Card.h" />
     <ClInclude Include="Cards.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -170,6 +172,66 @@
     <ClInclude Include="utilities\lodepng.h" />
     <ClInclude Include="utilities\Texture.h" />
     <ClInclude Include="WorkBook.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\cars\308.bmp" />
+    <Image Include="textures\cars\308.png" />
+    <Image Include="textures\cars\6.bmp" />
+    <Image Include="textures\cars\6.png" />
+    <Image Include="textures\cars\c3.bmp" />
+    <Image Include="textures\cars\c3.png" />
+    <Image Include="textures\cars\c6.bmp" />
+    <Image Include="textures\cars\c6.png" />
+    <Image Include="textures\cars\ceed.bmp" />
+    <Image Include="textures\cars\ceed.png" />
+    <Image Include="textures\cars\civic.bmp" />
+    <Image Include="textures\cars\civic.png" />
+    <Image Include="textures\cars\cooper.bmp" />
+    <Image Include="textures\cars\cooper.png" />
+    <Image Include="textures\cars\corolla.bmp" />
+    <Image Include="textures\cars\corolla.png" />
+    <Image Include="textures\cars\e60.bmp" />
+    <Image Include="textures\cars\e60.png" />
+    <Image Include="textures\cars\eclass.bmp" />
+    <Image Include="textures\cars\eclass.png" />
+    <Image Include="textures\cars\giulia.bmp" />
+    <Image Include="textures\cars\giulia.png" />
+    <Image Include="textures\cars\i20.bmp" />
+    <Image Include="textures\cars\i20.png" />
+    <Image Include="textures\cars\ibiza.bmp" />
+    <Image Include="textures\cars\ibiza.png" />
+    <Image Include="textures\cars\impreza.bmp" />
+    <Image Include="textures\cars\impreza.png" />
+    <Image Include="textures\cars\insignia.bmp" />
+    <Image Include="textures\cars\insignia.png" />
+    <Image Include="textures\cars\is.bmp" />
+    <Image Include="textures\cars\is.png" />
+    <Image Include="textures\cars\logan.bmp" />
+    <Image Include="textures\cars\logan.png" />
+    <Image Include="textures\cars\octavia.bmp" />
+    <Image Include="textures\cars\octavia.png" />
+    <Image Include="textures\cars\panda.bmp" />
+    <Image Include="textures\cars\panda.png" />
+    <Image Include="textures\cars\passat.bmp" />
+    <Image Include="textures\cars\passat.png" />
+    <Image Include="textures\cars\rx8.bmp" />
+    <Image Include="textures\cars\rx8.png" />
+    <Image Include="textures\cars\s40.bmp" />
+    <Image Include="textures\cars\s40.png" />
+    <Image Include="textures\cars\smax.bmp" />
+    <Image Include="textures\cars\smax.png" />
+    <Image Include="textures\cars\swift.bmp" />
+    <Image Include="textures\cars\swift.png" />
+    <Image Include="textures\kartadol.bmp" />
+    <Image Include="textures\kartadol.png" />
+    <Image Include="textures\kartatyl.bmp" />
+    <Image Include="textures\kartatyl.png" />
+    <Image Include="textures\test.bmp" />
+    <Image Include="textures\tlo3.bmp" />
+    <Image Include="textures\tlo3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="carlist.xls" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

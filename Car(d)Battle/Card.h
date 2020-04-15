@@ -5,10 +5,11 @@ class Cards;
 
 class Card
 {
-	Cards *cards;
+	const Cards &cards;
 	unsigned int id;
 public:
-	Card(Cards*, unsigned int);
+	Card(const Cards&, unsigned int);
+	Card(const Card&);//copy constructor
 
 	void draw();
 };

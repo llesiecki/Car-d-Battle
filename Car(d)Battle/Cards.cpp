@@ -90,7 +90,7 @@ std::vector<Card> Cards::get_cards_vec()
 {
 	std::vector<Card> cards;
 	for (unsigned int i = 0; i < cards_texture.size(); i++)
-		cards.push_back(Card(this, i));
+		cards.push_back(Card(*this, i));
 	return cards;
 }
 
