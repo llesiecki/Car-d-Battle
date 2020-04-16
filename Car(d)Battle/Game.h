@@ -32,7 +32,6 @@ class Game
 	std::map<int, std::vector<Card>> player_card;
 	//threadsafe animations:
 	std::mutex lock;
-	std::vector<Card> animated_card;
 
 	void draw_cards_stack(std::vector<Card>& cards_vec, bool invert);
 	void draw_players_cards();

@@ -54,6 +54,9 @@
     <ClCompile Include="Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="utilities\Vec3.cpp">
+      <Filter>utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cards.h">
@@ -84,6 +87,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\Vec3.h">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="IRenderableObiect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

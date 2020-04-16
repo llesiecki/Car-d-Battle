@@ -45,35 +45,40 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec, bool invert = true)
 
 void Game::distribute_cards()
 {
+    state = Game_state::No_action;
     int card_num = 0;
     while (!central_stack.empty())
     {
         lock.lock();
-        animated_card.push_back(central_stack.back());
-        auto it = animated_card.end();
+        Card& card = central_stack.back();
         lock.unlock();
-        central_stack.pop_back();
-        for (int i = 0; i < 44; i++)
+        for (int i = 0; i < 20; i++)
         {
             std::this_thread::sleep_for(17ms);
-            lock.lock();
             switch (card_num%players_num)
             {
             case 0:
+                card.pos.z -= 5.0f / 100;
+                break;
+            case 1:
+                card.pos.z += 5.0f / 100;
+                break;
+            case 2:
+                card.pos.x -= 5.0f / 100;
+                break;
+            case 3:
+                card.pos.x += 5.0f / 100;
                 break;
             }
-            lock.unlock();
         }
-    }
-}
-
-void Game::OnTimer(int id)
-{
-    Game& instance = Game::get_instance();
-    if (id == 1)
-    {
-        instance.state = Game_state::Cards_distribution;
-        instance.central_stack.clear();
+        lock.lock();
+        central_stack.pop_back();
+        lock.unlock();
+        card.pos = Vec3();
+        card.rot = Vec3();
+        card.angle = 0.0f;
+        player_stack[card_num % players_num].push_back(card);
+        card_num++;
     }
 }
 
@@ -91,6 +96,7 @@ void Game::start(int players_num)
         player_stack[i] = std::vector<Card>();
         player_stack[i].push_back(central_stack[i]);
     }
+    state = Game_state::Cards_distribution;
 }
 
 void Game::draw_players_stacks()
@@ -156,7 +162,7 @@ void Game::draw_players_cards()
 void Game::draw()
 {
     scene.draw();
-
+    std::thread th;
     switch (state)
     {
     case Game_state::No_action:
@@ -165,8 +171,8 @@ void Game::draw()
         draw_players_cards();
         break;
     case Game_state::Cards_distribution:
-        draw_cards_stack(central_stack);
-        draw_players_stacks();
+        th = std::thread(&Game::distribute_cards, this);
+        th.detach();
         break;
     case Game_state::Choose_category:
         break;
