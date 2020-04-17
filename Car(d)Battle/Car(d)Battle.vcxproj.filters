@@ -92,9 +92,6 @@
     <ClInclude Include="utilities\Vec3.h">
       <Filter>utilities</Filter>
     </ClInclude>
-    <ClInclude Include="IRenderableObiect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\tlo3.png">

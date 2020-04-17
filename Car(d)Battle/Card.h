@@ -11,9 +11,8 @@ class Card
 public:
 	Vec3 pos, rot;
 	float angle;
-	Card(const Cards&, unsigned int);
+	Card(const Cards&, unsigned int&);
 	Card(const Card&);//copy constructor
-	void render();
 	void draw();
 };
 

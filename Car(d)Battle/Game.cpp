@@ -31,6 +31,7 @@ void Game::load()
 void Game::draw_cards_stack(std::vector<Card>& cards_vec, bool invert = true)
 {
     glPushMatrix();
+    lock.lock();// &cards_vec may be modified by other threads during execution of this method
     for (unsigned int i = 0; i < cards_vec.size(); i++)
     {
         glPushMatrix();
@@ -40,6 +41,7 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec, bool invert = true)
         glPopMatrix();
         glTranslatef(random_translation_vec[i].first, 0.005f, random_translation_vec[i].second);
     }
+    lock.unlock();
     glPopMatrix();
 }
 
@@ -49,32 +51,48 @@ void Game::distribute_cards()
     int card_num = 0;
     while (!central_stack.empty())
     {
-        lock.lock();
         Card& card = central_stack.back();
-        lock.unlock();
-        for (int i = 0; i < 20; i++)
+        card.rot = Vec3(0.0f, 1.0f, 0.0f);
+        card.pos = Vec3();
+        card.angle = 0.0f;
+        const int iterations_max = 30;
+        float current_height = central_stack.size() * 0.005f;
+        float destination_height = player_stack[card_num % players_num].size() * 0.005f + 0.005f;
+        float height_difference = destination_height - current_height;
+        for (int i = 0; i < iterations_max; i++)
         {
             std::this_thread::sleep_for(17ms);
             switch (card_num%players_num)
             {
             case 0:
-                card.pos.z -= 5.0f / 100;
+                card.pos.x += -1.0f / iterations_max;
+                card.pos.z += 1.5f / iterations_max;
                 break;
             case 1:
-                card.pos.z += 5.0f / 100;
+                card.pos.x += 1.9f / iterations_max;
+                card.pos.z += 1.3f / iterations_max;
+                card.angle += 90.0f / iterations_max;
                 break;
             case 2:
-                card.pos.x -= 5.0f / 100;
+                card.pos.x += 1.0f / iterations_max;
+                card.pos.z += -1.2f / iterations_max;
                 break;
             case 3:
-                card.pos.x += 5.0f / 100;
+                card.pos.x += -1.9f / iterations_max;
+                card.pos.z += -0.7f / iterations_max;
+                card.angle += 90.0f / iterations_max;
                 break;
             }
+
+            if (height_difference > 0 && i < iterations_max/4)//can raise here
+                card.pos.y -= height_difference / 0.25f / iterations_max;
+
+            if (height_difference < 0 && i > iterations_max * 3 / 4)//can descend here
+                card.pos.y -= height_difference / 0.25f / iterations_max;
         }
         lock.lock();
         central_stack.pop_back();
         lock.unlock();
-        card.pos = Vec3();
         card.rot = Vec3();
         card.angle = 0.0f;
         player_stack[card_num % players_num].push_back(card);
@@ -90,12 +108,6 @@ void Game::start(int players_num)
         return;
     }
     this->players_num = players_num;
-
-    for (int i = 0; i < players_num; i++)
-    {
-        player_stack[i] = std::vector<Card>();
-        player_stack[i].push_back(central_stack[i]);
-    }
     state = Game_state::Cards_distribution;
 }
 
@@ -104,28 +116,28 @@ void Game::draw_players_stacks()
     //stacks:
     if (players_num < 2)
         return;
-    //player 1:
+    //player 0:
     glPushMatrix();
     glTranslatef(1.0f, 0.0f, 1.5f);
     draw_cards_stack(player_stack[0]);
     glPopMatrix();
-    //player 2:
+    //player 1:
     glPushMatrix();
-    glTranslatef(-1.0f, 0.0f, -1.2f);
-    glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+    glTranslatef(-1.9f, 0.0f, 1.3f);
+    glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
     draw_cards_stack(player_stack[1]);
     glPopMatrix();
     if (players_num < 3)
         return;
-    //player 3:
+    //player 2:
     glPushMatrix();
-    glTranslatef(-1.9f, 0.0f, 1.3f);
-    glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+    glTranslatef(-1.0f, 0.0f, -1.2f);
+    glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
     draw_cards_stack(player_stack[2]);
     glPopMatrix();
     if (players_num < 4)
         return;
-    //player 4:
+    //player 3:
     glPushMatrix();
     glTranslatef(1.9f, 0.0f, -0.7f);
     glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
