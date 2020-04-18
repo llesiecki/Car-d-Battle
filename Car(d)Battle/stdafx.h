@@ -7,6 +7,9 @@
 
 #include "targetver.h"
 
+constexpr float CARD_HEIGHT = 1.178f;
+constexpr float CARD_WIDTH = 0.707f;
+
 #include <string>
 #include <fstream>
 #include <iostream>

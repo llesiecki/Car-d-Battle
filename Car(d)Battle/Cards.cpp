@@ -47,11 +47,11 @@ void Cards::create_lists()
 			glTexCoord2f(1.0, 0.0);
 				glVertex3f(0.0f, 0.0f, 0.0f);
 			glTexCoord2f(0.0, 0.0);
-				glVertex3f(-0.707f, 0.0f, 0.0f);
+				glVertex3f(-CARD_WIDTH, 0.0f, 0.0f);
 			glTexCoord2f(0.0, 1.0);
-				glVertex3f(-0.707f, 1.178f, 0.0f);
+				glVertex3f(-CARD_WIDTH, CARD_HEIGHT, 0.0f);
 			glTexCoord2f(1.0, 1.0);
-				glVertex3f(0.0, 1.178f, 0.0f);
+				glVertex3f(0.0, CARD_HEIGHT, 0.0f);
 			glEnd();
 	glEndList();
 
@@ -61,11 +61,11 @@ void Cards::create_lists()
 			glTexCoord2f(1.0, 0.0);
 				glVertex3f(0.0f, 0.0f, 0.0f);
 			glTexCoord2f(1.0, 1.0);
-				glVertex3f(0.0f, 0.589f, 0.0f);
+				glVertex3f(0.0f, CARD_HEIGHT / 2, 0.0f);
 			glTexCoord2f(0.0, 1.0);
-				glVertex3f(-0.707f, 0.589f, 0.0f);
+				glVertex3f(-CARD_WIDTH, CARD_HEIGHT / 2, 0.0f);
 			glTexCoord2f(0.0, 0.0);
-				glVertex3f(-0.707f, 0.0f, 0.0f);
+				glVertex3f(-CARD_WIDTH, 0.0f, 0.0f);
 		glEnd();
 	glEndList();
 
@@ -74,13 +74,13 @@ void Cards::create_lists()
 	glPushMatrix();
 		glBegin(GL_QUADS);
 			glTexCoord2f(1.0, 0.0);
-				glVertex3f(0.0f, 0.589f, 0.0f);
+				glVertex3f(0.0f, CARD_HEIGHT / 2, 0.0f);
 			glTexCoord2f(1.0, 1.0);
-				glVertex3f(0.0, 1.178f, 0.0f);
+				glVertex3f(0.0, CARD_HEIGHT, 0.0f);
 			glTexCoord2f(0.0, 1.0);
-				glVertex3f(-0.707f, 1.178f, 0.0f);
+				glVertex3f(-CARD_WIDTH, CARD_HEIGHT, 0.0f);
 			glTexCoord2f(0.0, 0.0);
-				glVertex3f(-0.707f, 0.589f, 0.0f);
+				glVertex3f(-CARD_WIDTH, CARD_HEIGHT / 2, 0.0f);
 		glEnd();
 		glPopMatrix();
 	glEndList();

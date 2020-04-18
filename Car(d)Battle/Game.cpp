@@ -1,13 +1,17 @@
 #include "Game.h"
+#include <algorithm>
+#include <time.h>
 
 Game::Game()
 	:cards(L"carlist.xls")
 {
+srand(static_cast<unsigned int>(time(NULL)));
 	state = Game_state::No_action;
 	for (int i = 0; i < 24; i++)
 		random_translation_vec.push_back({ rand() / 1000000.0f - RAND_MAX / 2000000.0f, rand() / 1000000.0f - RAND_MAX / 2000000.0f });
 	players_num = -1;
     central_stack = cards.get_cards_vec();
+    std::random_shuffle(central_stack.begin(), central_stack.end(), [](int a) -> int {return rand() % a; });
     if (central_stack.size() != 24)
         std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
 }
@@ -47,7 +51,6 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec, bool invert = true)
 
 void Game::distribute_cards()
 {
-    state = Game_state::No_action;
     int card_num = 0;
     while (!central_stack.empty())
     {
@@ -55,7 +58,7 @@ void Game::distribute_cards()
         card.rot = Vec3(0.0f, 1.0f, 0.0f);
         card.pos = Vec3();
         card.angle = 0.0f;
-        const int iterations_max = 30;
+        const int iterations_max = 10;
         float current_height = central_stack.size() * 0.005f;
         float destination_height = player_stack[card_num % players_num].size() * 0.005f + 0.005f;
         float height_difference = destination_height - current_height;
@@ -94,9 +97,72 @@ void Game::distribute_cards()
         central_stack.pop_back();
         lock.unlock();
         card.rot = Vec3();
+        card.pos = Vec3();
         card.angle = 0.0f;
+        lock.lock();
         player_stack[card_num % players_num].push_back(card);
+        lock.unlock();
         card_num++;
+    }
+    current_player = rand() % players_num;
+    current_player = 0;//TEST!
+    state = Game_state::Choose_category;
+}
+
+void Game::card_to_hand_animation()
+{
+    for (int player_num = 0; player_num < players_num; player_num++)
+    {
+        Card& card = player_stack[player_num].back();
+        card.rot = Vec3(0.0f, 0.0f, 0.0f);
+        card.pos = Vec3();
+        card.angle = 0.0f;
+    }
+    const int iterations_max = 60;
+    for (int i = 0; i < iterations_max; i++)
+    {
+        std::this_thread::sleep_for(17ms);
+        for (int player_num = 0; player_num < players_num; player_num++)
+        {
+            Card& card = player_stack[player_num].back();
+            switch (player_num)
+            {
+            case 0:
+                card.pos.x += 1.0f / iterations_max;
+                card.pos.z += -0.5f / iterations_max;
+                card.pos.y -= 1.0f / iterations_max;
+                card.rot.z = 1.0f;
+                card.angle += 180 / iterations_max;
+                //card.pos.z += 1.5f / iterations_max;
+                break;
+            case 1:
+                card.pos.x += 1.0f / iterations_max;
+                card.pos.z += -0.5f / iterations_max;
+                card.rot.z = 1.0f;
+                card.angle += 180 / iterations_max;
+                break;
+            case 2:
+                card.pos.x += 1.0f / iterations_max;
+                card.pos.z += -0.5f / iterations_max;
+                card.rot.z = 1.0f;
+                card.angle += 180 / iterations_max;
+                break;
+            case 3:
+                card.pos.x += 1.0f / iterations_max;
+                card.pos.z += -0.5f / iterations_max;
+                card.rot.z = 1.0f;
+                card.angle += 180 / iterations_max;
+                break;
+            }
+        }
+    }
+    for (int player_num = 0; player_num < players_num; player_num++)
+    {
+        player_stack[player_num].back().angle = 30.0f;
+        player_stack[player_num].back().rot = Vec3(1.0f, 0.0f, 0.0f);
+        player_stack[player_num].back().pos = Vec3(0.0f, 1.0f, 0.0f);
+        player_card[player_num].push_back(player_stack[player_num].back());
+        player_stack[player_num].pop_back();
     }
 }
 
@@ -183,10 +249,14 @@ void Game::draw()
         draw_players_cards();
         break;
     case Game_state::Cards_distribution:
+        state = Game_state::No_action;
         th = std::thread(&Game::distribute_cards, this);
         th.detach();
         break;
     case Game_state::Choose_category:
+        state = Game_state::No_action;
+        th = std::thread(&Game::card_to_hand_animation, this);
+        th.detach();
         break;
     case Game_state::Show_players_cards:
         break;

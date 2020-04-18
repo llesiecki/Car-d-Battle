@@ -13,6 +13,6 @@ public:
 	float angle;
 	Card(const Cards&, unsigned int&);
 	Card(const Card&);//copy constructor
+	Card operator=(const Card&);
 	void draw();
 };
-

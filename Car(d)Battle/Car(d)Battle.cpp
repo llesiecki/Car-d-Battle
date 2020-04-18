@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Game.h"
-#include <time.h>
 
 void OnRender();
 void OnReshape(int, int);
@@ -16,7 +15,6 @@ Game& game = Game::get_instance();
 
 int main(int argc, char* argv[])
 {
-    srand(static_cast<unsigned int>(time(NULL)));
 	glutInit(&argc, argv);
 	glutInitWindowSize(480, 480);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);

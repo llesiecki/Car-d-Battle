@@ -30,14 +30,14 @@ class Game
 	std::vector<Card> central_stack;
 	std::map<int, std::vector<Card>> player_stack;
 	std::map<int, std::vector<Card>> player_card;
-	//threadsafe animations:
-	std::mutex lock;
+	std::mutex lock;//threadsafe animations
+	int current_player;
 
 	void draw_cards_stack(std::vector<Card>& cards_vec, bool invert);
 	void draw_players_cards();
 	void draw_players_stacks();
 	void distribute_cards();
-	static void OnTimer(int id);
+	void card_to_hand_animation();
 	friend void OnTimerCallback(int id);
 	Game();
 public:

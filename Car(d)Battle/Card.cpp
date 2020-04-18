@@ -7,9 +7,21 @@ Card::Card(const Cards& cards, unsigned int &id)
 }
 
 Card::Card(const Card& card)
-    : cards(card.cards), id(card.id)
+    : cards(card.cards)
 {
     angle = card.angle;
+    this->pos = card.pos;
+    this->rot = card.rot;
+    this->id = card.id;
+}
+
+Card Card::operator=(const Card& card)
+{
+    id = card.id;
+    angle = card.angle;
+    pos = card.pos;
+    rot = card.rot;
+	return Card(card);
 }
 
 void renderStrokeString(float x, float y, const std::string &text)
@@ -35,7 +47,7 @@ void Card::draw()
     glTranslatef(pos.x, pos.y, pos.z);
     glRotatef(angle, rot.x, rot.y, rot.z);
     glRotatef(90, -1, 0, 0);
-    glTranslatef(0.707f / 2, -0.589f, 0);
+    glTranslatef(CARD_WIDTH / 2, -CARD_HEIGHT / 2, 0);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, cards.back_tex->GetId());
     glCallList(cards.list_back);
@@ -45,9 +57,9 @@ void Card::draw()
     glCallList(cards.list_fields);
     glDisable(GL_TEXTURE_2D);
     glColor3f(0, 0, 0);
-    glTranslatef(-0.707f + 0.02f, 0.525f, +0.005f);
+    glTranslatef(-CARD_WIDTH + 0.02f, 0.525f, 0.005f);
     renderStrokeString(0, 0, cards.cards_properties[id][0]);
-    glTranslatef(0, -0.589f / 7, 0);//half of height devided by 7 because there is 7 fields
+    glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there is 7 fields
     for (unsigned int i = 1; i < cards.field_names.size(); i++)
     {
         if (!cards.field_names[i].empty())
@@ -55,11 +67,11 @@ void Card::draw()
             renderStrokeString(0, 0, cards.field_names[i] + ":");
             float width = calc_text_width(cards.cards_properties[id][i]);
             glPushMatrix();
-            glTranslatef(0.707f - 0.04f - width, 0, 0);
+            glTranslatef(CARD_WIDTH - 0.04f - width, 0, 0);
             renderStrokeString(0, 0, cards.cards_properties[id][i]);
             glPopMatrix();
         }
-        glTranslatef(0, -0.589f / 7, 0);//half of height devided by 7 because there is 7 fields
+        glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there is 7 fields
     }
     glPopMatrix();
 }
