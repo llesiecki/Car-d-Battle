@@ -109,7 +109,7 @@ void Game::distribute_cards()
     state = Game_state::Choose_category;
 }
 
-void Game::card_to_hand_animation()
+void Game::card_to_player()
 {
     for (int player_num = 0; player_num < players_num; player_num++)
     {
@@ -118,6 +118,9 @@ void Game::card_to_hand_animation()
         card.pos = Vec3();
         card.angle = 0.0f;
     }
+    float initial_height = player_stack[0].size() * 0.005f;
+    float dest_height = player_card[0].size() * 0.005f;
+    float height_diff = dest_height - initial_height;
     const int iterations_max = 60;
     for (int i = 0; i < iterations_max; i++)
     {
@@ -125,44 +128,45 @@ void Game::card_to_hand_animation()
         for (int player_num = 0; player_num < players_num; player_num++)
         {
             Card& card = player_stack[player_num].back();
-            switch (player_num)
+            card.pos.x += 1.0f / iterations_max;
+            card.pos.z += -0.5f / iterations_max;
+            if (player_num == 0)
             {
-            case 0:
-                card.pos.x += 1.0f / iterations_max;
-                card.pos.z += -0.5f / iterations_max;
-                card.pos.y -= 1.0f / iterations_max;
+                card.angle += 180.0f / iterations_max;
                 card.rot.z = 1.0f;
-                card.angle += 180 / iterations_max;
-                //card.pos.z += 1.5f / iterations_max;
-                break;
-            case 1:
-                card.pos.x += 1.0f / iterations_max;
-                card.pos.z += -0.5f / iterations_max;
-                card.rot.z = 1.0f;
-                card.angle += 180 / iterations_max;
-                break;
-            case 2:
-                card.pos.x += 1.0f / iterations_max;
-                card.pos.z += -0.5f / iterations_max;
-                card.rot.z = 1.0f;
-                card.angle += 180 / iterations_max;
-                break;
-            case 3:
-                card.pos.x += 1.0f / iterations_max;
-                card.pos.z += -0.5f / iterations_max;
-                card.rot.z = 1.0f;
-                card.angle += 180 / iterations_max;
-                break;
+                card.pos.y = -sqrtf(-static_cast<float>(i*2)/iterations_max*(static_cast<float>(i*2) / iterations_max -2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+                card.pos.y -= height_diff * i / iterations_max;
             }
         }
     }
     for (int player_num = 0; player_num < players_num; player_num++)
     {
-        player_stack[player_num].back().angle = 30.0f;
-        player_stack[player_num].back().rot = Vec3(1.0f, 0.0f, 0.0f);
-        player_stack[player_num].back().pos = Vec3(0.0f, 1.0f, 0.0f);
+        player_stack[player_num].back().reset_coords();
         player_card[player_num].push_back(player_stack[player_num].back());
         player_stack[player_num].pop_back();
+    }
+    if (current_player == 0)
+    {
+        Text3D text;
+        text.pos = Vec3(-0.6f, 0.01f, 0.2f);
+        text.angle = -60.0f;
+        text.rot = Vec3(1.0f, 0.0f, 0.0f);
+        text.scale = 0.001;
+        text.text = "Choose a category...";
+        text.line_width = 7.5f;
+        lock.lock();
+        unsigned int text_id = texts.size();
+        texts.push_back(text);
+        lock.unlock();
+
+
+    }
+    else//wait for server response
+    {
+        while (true)
+        {
+            std::this_thread::sleep_for(200ms);
+        }
     }
 }
 
@@ -170,7 +174,7 @@ void Game::start(int players_num)
 {
     if (players_num < 2 || players_num > 4)
     {
-        std::cerr << "Game is designed for 2-4 players.\n";
+        std::cerr << "The game is designed for 2-4 players.\n";
         return;
     }
     this->players_num = players_num;
@@ -221,19 +225,19 @@ void Game::draw_players_cards()
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, -0.7f);
     glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-    draw_cards_stack(player_card[1], false);
+    draw_cards_stack(player_card[1]);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(-1.4f, 0.0f, 0.3f);
     glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-    draw_cards_stack(player_card[2], false);
+    draw_cards_stack(player_card[2]);
     glPopMatrix();
 
     glPushMatrix();
     glTranslatef(1.4f, 0.0f, 0.3f);
     glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-    draw_cards_stack(player_card[3], false);
+    draw_cards_stack(player_card[3]);
     glPopMatrix();
 }
 
@@ -247,6 +251,10 @@ void Game::draw()
         draw_cards_stack(central_stack);
         draw_players_stacks();
         draw_players_cards();
+        lock.lock();
+        for (Text3D& text : texts)
+            text.render();
+        lock.unlock();
         break;
     case Game_state::Cards_distribution:
         state = Game_state::No_action;
@@ -255,7 +263,7 @@ void Game::draw()
         break;
     case Game_state::Choose_category:
         state = Game_state::No_action;
-        th = std::thread(&Game::card_to_hand_animation, this);
+        th = std::thread(&Game::card_to_player, this);
         th.detach();
         break;
     case Game_state::Show_players_cards:

@@ -5,6 +5,7 @@
 #include <map>
 #include <thread>
 #include <mutex>
+#include "Text3D.h"
 
 enum class Game_state
 {
@@ -32,12 +33,13 @@ class Game
 	std::map<int, std::vector<Card>> player_card;
 	std::mutex lock;//threadsafe animations
 	int current_player;
+	std::vector<Text3D> texts;
 
 	void draw_cards_stack(std::vector<Card>& cards_vec, bool invert);
 	void draw_players_cards();
 	void draw_players_stacks();
 	void distribute_cards();
-	void card_to_hand_animation();
+	void card_to_player();
 	friend void OnTimerCallback(int id);
 	Game();
 public:

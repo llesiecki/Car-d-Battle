@@ -10,9 +10,9 @@ Card::Card(const Card& card)
     : cards(card.cards)
 {
     angle = card.angle;
-    this->pos = card.pos;
-    this->rot = card.rot;
-    this->id = card.id;
+    pos = card.pos;
+    rot = card.rot;
+    id = card.id;
 }
 
 Card Card::operator=(const Card& card)
@@ -22,6 +22,13 @@ Card Card::operator=(const Card& card)
     pos = card.pos;
     rot = card.rot;
 	return Card(card);
+}
+
+void Card::reset_coords()
+{
+    pos = Vec3();
+    rot = Vec3();
+    angle = 0.0f;
 }
 
 void renderStrokeString(float x, float y, const std::string &text)

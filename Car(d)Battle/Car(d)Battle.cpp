@@ -10,6 +10,11 @@ void OnTimerCallback(int id)
 	glutTimerFunc(17, OnTimerCallback, 0);
 }
 
+void glutMouseCallback(int button, int state, int x, int y)
+{
+    std::cout << x << "\t" << y << std::endl;
+}
+
 Game Game::instance;
 Game& game = Game::get_instance();
 
@@ -29,6 +34,7 @@ int main(int argc, char* argv[])
 	glutTimerFunc(17, OnTimerCallback, 0);
 	glutDisplayFunc(OnRender);
     glutReshapeFunc(OnReshape);
+    glutMouseFunc(glutMouseCallback);
 	glutMainLoop();
 	return 0;
 }
