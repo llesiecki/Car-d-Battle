@@ -20,6 +20,16 @@ Game::~Game()
 {
 }
 
+void Game::set_cursor_pos(int x, int y)
+{
+    cursor_pos = { x, y };
+}
+
+void Game::set_screen_size(int width, int height)
+{
+    screen_size = { width, height };
+}
+
 Game& Game::get_instance()
 {
     return instance;
@@ -118,10 +128,12 @@ void Game::card_to_player()
         card.pos = Vec3();
         card.angle = 0.0f;
     }
+
     float initial_height = player_stack[0].size() * 0.005f;
     float dest_height = player_card[0].size() * 0.005f;
     float height_diff = dest_height - initial_height;
     const int iterations_max = 60;
+
     for (int i = 0; i < iterations_max; i++)
     {
         std::this_thread::sleep_for(17ms);
@@ -139,27 +151,62 @@ void Game::card_to_player()
             }
         }
     }
+
     for (int player_num = 0; player_num < players_num; player_num++)
     {
         player_stack[player_num].back().reset_coords();
         player_card[player_num].push_back(player_stack[player_num].back());
         player_stack[player_num].pop_back();
     }
+
+    Text3D text;
+    text.pos = Vec3(-0.6f, 0.01f, 0.2f);
+    text.angle = -60.0f;
+    text.rot = Vec3(1.0f, 0.0f, 0.0f);
+    text.scale = 0.001;
+    text.text = current_player == 0 ? "Choose a category..." : "Waiting for opponent...";
+    text.line_width = 7.5f;
+    lock.lock();
+    unsigned int text_id = texts.size();
+    texts.push_back(text);
+    lock.unlock();
+
     if (current_player == 0)
     {
-        Text3D text;
-        text.pos = Vec3(-0.6f, 0.01f, 0.2f);
-        text.angle = -60.0f;
-        text.rot = Vec3(1.0f, 0.0f, 0.0f);
-        text.scale = 0.001;
-        text.text = "Choose a category...";
-        text.line_width = 7.5f;
-        lock.lock();
-        unsigned int text_id = texts.size();
-        texts.push_back(text);
-        lock.unlock();
+        std::pair<std::pair<float, float>, std::pair<float, float>> categories[6] =//pair of upper left and lower right corners of each category
+        {
+            {{-0.1377f, 0.7395f}, {0.1387f, 0.7734f}},//Cylinders
+            {{-0.1397f, 0.77345f}, {0.1407f, 0.8084f}},//Capacity
+            {{-0.1407f, 0.8084f}, {0.1427f, 0.8453f}},//Power
+            {{-0.1427f, 0.8453f}, {0.1437f, 0.8832f}},//Torque
+            {{-0.1447f, 0.8832f}, {0.1457f, 0.9212f}},//Top speed
+            {{-0.1457f, 0.9212f}, {0.1467f, 0.9591f}}//Acceleration
+        };
 
-
+        //std::cout << (x * 1.0 - screen.x / 2.0) / screen.y << "\t" << y * 1.0f / screen.y << std::endl;
+        bool is_category_choosen = false;
+        int choosen_category = 0;
+        while (!is_category_choosen)
+        {
+            std::this_thread::sleep_for(17ms);
+            if (GetAsyncKeyState(1) & (1 << 15))
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    if (
+                        (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
+                        && (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
+                        && cursor_pos.y * 1.0f / screen_size.y > categories[i].first.second
+                        && cursor_pos.y * 1.0f / screen_size.y < categories[i].second.second)
+                    {
+                        choosen_category = i;
+                        //is_category_choosen = true;
+                        player_card[0].back().highlight_row(choosen_category);
+                        break;
+                    }
+                }
+            }
+        }
     }
     else//wait for server response
     {

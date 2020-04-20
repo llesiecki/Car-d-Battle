@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "Game.h"
 
+
+Game Game::instance;
+Game& game = Game::get_instance();
+
 void OnRender();
 void OnReshape(int, int);
 
@@ -10,13 +14,18 @@ void OnTimerCallback(int id)
 	glutTimerFunc(17, OnTimerCallback, 0);
 }
 
+POINT cursor, screen;
+
 void glutMouseCallback(int button, int state, int x, int y)
 {
-    std::cout << x << "\t" << y << std::endl;
+    //std::cout << (x*1.0-screen.x/2.0)/screen.y << "\t" << y*1.0f/screen.y << std::endl;
 }
 
-Game Game::instance;
-Game& game = Game::get_instance();
+void CursorPosUpdateCallback(int x, int y)
+{
+    cursor = { x, y };
+    game.set_cursor_pos(x, y);
+}
 
 int main(int argc, char* argv[])
 {
@@ -35,6 +44,7 @@ int main(int argc, char* argv[])
 	glutDisplayFunc(OnRender);
     glutReshapeFunc(OnReshape);
     glutMouseFunc(glutMouseCallback);
+    glutPassiveMotionFunc(CursorPosUpdateCallback);
 	glutMainLoop();
 	return 0;
 }
@@ -62,5 +72,7 @@ void OnReshape(int width, int height)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glViewport(0, 0, width, height);
+    game.set_screen_size(width, height);
+    screen = { width, height };
     gluPerspective(60.0f, static_cast<float>(width) / height, 0.01f, 100.0f);
 }

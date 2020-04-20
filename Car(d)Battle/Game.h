@@ -34,6 +34,8 @@ class Game
 	std::mutex lock;//threadsafe animations
 	int current_player;
 	std::vector<Text3D> texts;
+	POINT cursor_pos;
+	POINT screen_size;
 
 	void draw_cards_stack(std::vector<Card>& cards_vec, bool invert);
 	void draw_players_cards();
@@ -45,6 +47,8 @@ class Game
 public:
 	Game(Game&) = delete;
 	~Game();
+	void set_cursor_pos(int, int);
+	void set_screen_size(int, int);
 	void load();
 	void draw();
 	void start(int players_num);

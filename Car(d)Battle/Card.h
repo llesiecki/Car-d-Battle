@@ -8,6 +8,7 @@ class Card
 {
 	const Cards &cards;
 	unsigned int id;
+	int highlight;
 public:
 	Vec3 pos, rot;
 	float angle;
@@ -15,5 +16,6 @@ public:
 	Card(const Card&);//copy constructor
 	Card operator=(const Card&);
 	void reset_coords();
+	void highlight_row(int);
 	void draw();
 };
