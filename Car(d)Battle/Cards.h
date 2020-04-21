@@ -19,6 +19,7 @@ public:
 	void create_lists();
 	std::vector<Card> get_cards_vec();
 	void print();
+	std::string get_category_name(int num);
 	friend class WorkBook;
 	friend class Card;
 };

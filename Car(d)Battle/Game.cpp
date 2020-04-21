@@ -121,13 +121,7 @@ void Game::distribute_cards()
 
 void Game::card_to_player()
 {
-    for (int player_num = 0; player_num < players_num; player_num++)
-    {
-        Card& card = player_stack[player_num].back();
-        card.rot = Vec3(0.0f, 0.0f, 0.0f);
-        card.pos = Vec3();
-        card.angle = 0.0f;
-    }
+
 
     float initial_height = player_stack[0].size() * 0.005f;
     float dest_height = player_card[0].size() * 0.005f;
@@ -163,7 +157,7 @@ void Game::card_to_player()
     text.pos = Vec3(-0.6f, 0.01f, 0.2f);
     text.angle = -60.0f;
     text.rot = Vec3(1.0f, 0.0f, 0.0f);
-    text.scale = 0.001;
+    text.scale = 0.001f;
     text.text = current_player == 0 ? "Choose a category..." : "Waiting for opponent...";
     text.line_width = 7.5f;
     lock.lock();
@@ -189,24 +183,101 @@ void Game::card_to_player()
         while (!is_category_choosen)
         {
             std::this_thread::sleep_for(17ms);
-            if (GetAsyncKeyState(1) & (1 << 15))
+            for (int i = 0; i < 6; i++)
             {
-                for (int i = 0; i < 6; i++)
+                if (
+                    (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
+                    && (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
+                    && cursor_pos.y * 1.0f / screen_size.y > categories[i].first.second
+                    && cursor_pos.y * 1.0f / screen_size.y < categories[i].second.second)
                 {
-                    if (
-                        (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
-                        && (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
-                        && cursor_pos.y * 1.0f / screen_size.y > categories[i].first.second
-                        && cursor_pos.y * 1.0f / screen_size.y < categories[i].second.second)
-                    {
-                        choosen_category = i;
-                        //is_category_choosen = true;
-                        player_card[0].back().highlight_row(choosen_category);
-                        break;
-                    }
+                    choosen_category = i;
+                    player_card[0].back().highlight_row(choosen_category);
+                    if (GetAsyncKeyState(1) & (1 << 15))
+                        is_category_choosen = true;
+                    break;
                 }
+                player_card[0].back().highlight_row(-1);//no highlit
             }
         }
+        lock.lock();
+        texts.erase(texts.begin() + text_id);
+        lock.unlock();
+
+        for (int i = 0; i < iterations_max; i++)
+        {
+            std::this_thread::sleep_for(17ms);
+            for (int player_num = 1; player_num < players_num; player_num++)
+            {
+                Card & card = player_card[player_num].back();
+                //card.highlight_row(choosen_category);
+                card.angle += 180.0f / iterations_max;
+                card.rot.z = 1.0f;
+                card.pos.y = -sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+            }
+        }
+
+        std::this_thread::sleep_for(3s);
+
+        bool* winner = new bool[players_num]();
+        std::fill_n(winner, players_num, true);
+
+        for (int player_num = 0; player_num < players_num; player_num++)
+            for (int i = 0; i < players_num; i++)
+            {
+                if (player_num == i)//we will not compare a player with himself
+                    continue;
+                float left = std::stof(player_card[player_num].back().get_category_value(choosen_category));
+                float right = std::stof(player_card[i].back().get_category_value(choosen_category));
+                if (cards.get_category_name(choosen_category) == "Acceleration")//time to 60mph is the only parameter when the lowest value wins
+                    winner[player_num] &= left <= right;
+                else
+                    winner[player_num] &= left >= right;
+            }
+
+        int winners_num = 0;
+
+        for (int player_num = 0; player_num < players_num; player_num++)
+        {
+            winners_num += winner[player_num];
+            std::cout << winner[player_num] << std::endl;
+        }
+
+        if (winners_num != 1)//tiebreak
+        {
+
+            for (int i = 0; i < iterations_max; i++)
+            {
+                std::this_thread::sleep_for(17ms);
+                for (int player_num = 0; player_num < players_num; player_num++)
+                {
+                    if (!winner[player_num])
+                        continue;
+                    float initial_height = player_stack[player_num].size() * 0.005f;
+                    float dest_height = player_card[player_num].size() * 0.005f;
+                    float height_diff = dest_height - initial_height;
+                    Card& card = player_stack[player_num].back();
+                    card.pos.x += 1.0f / iterations_max;
+                    card.pos.z += -0.5f / iterations_max;
+                    card.angle += 180.0f / iterations_max;
+                    card.rot.z = 1.0f;
+                    card.pos.y = -sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+                    card.pos.y -= height_diff * i / iterations_max;
+                }
+            }
+            lock.lock();
+            for (int player_num = 0; player_num < players_num; player_num++)
+            {
+                if (!winner[player_num])
+                    continue;
+                player_stack[player_num].back().reset_coords();
+                player_card[player_num].push_back(player_stack[player_num].back());
+                player_stack[player_num].pop_back();
+            }
+            lock.unlock();
+        }
+
+        delete[] winner;
     }
     else//wait for server response
     {
@@ -270,14 +341,14 @@ void Game::draw_players_cards()
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(0.0f, 0.0f, -0.7f);
-    glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
+    glTranslatef(-1.4f, 0.0f, 0.3f);
+    glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
     draw_cards_stack(player_card[1]);
     glPopMatrix();
 
     glPushMatrix();
-    glTranslatef(-1.4f, 0.0f, 0.3f);
-    glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+    glTranslatef(0.0f, 0.0f, -0.7f);
+    glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
     draw_cards_stack(player_card[2]);
     glPopMatrix();
 

@@ -39,6 +39,15 @@ void Card::highlight_row(int row)
     highlight = row;
 }
 
+std::string Card::get_category_value(int num)
+{
+    num++;
+    if (num >= cards.field_names.size() || num < 0)
+        return std::string();
+
+    return cards.cards_properties[id][num];
+}
+
 void renderStrokeString(float x, float y, const std::string &text)
 {
     glPushMatrix();
@@ -79,12 +88,13 @@ void Card::draw()
     {
         if (!cards.field_names[i].empty())
         {
-            if (highlight == i-1)
+            if (highlight == i - 1)
             {
                 glPushMatrix();
-                glTranslatef(-0.02, -0.02f, -0.005f);
+                glTranslatef(-0.02f, -0.02f, -0.005f);
                 glColor3f(1.0f, 0.0f, 0.0f);
                 glBegin(GL_LINES);
+
                 glVertex3f(0.0f, 0.0f, 0.0f);
                 glVertex3f(0.0f, CARD_HEIGHT / 2 / 7, 0.0f);
 
@@ -96,6 +106,7 @@ void Card::draw()
 
                 glVertex3f(CARD_WIDTH, 0.0f, 0.0f);
                 glVertex3f(0.0f, 0.0f, 0.0f);
+
                 glEnd();
                 glColor3f(0, 0, 0);
                 glLineWidth(1.5f);

@@ -109,3 +109,12 @@ void Cards::print()
 	}
 	std::cout << '\n';
 }
+
+std::string Cards::get_category_name(int num)
+{
+	num++;
+	if (num >= field_names.size() || num < 0)
+		return std::string();
+	return field_names[num];
+}
+

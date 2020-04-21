@@ -17,5 +17,6 @@ public:
 	Card operator=(const Card&);
 	void reset_coords();
 	void highlight_row(int);
+	std::string get_category_value(int num);
 	void draw();
 };
