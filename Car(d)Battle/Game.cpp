@@ -48,12 +48,8 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec, bool invert = true)
     lock.lock();// &cards_vec may be modified by other threads during execution of this method
     for (unsigned int i = 0; i < cards_vec.size(); i++)
     {
-        glPushMatrix();
-        if(invert)
-            glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
-        cards_vec[i].draw();
-        glPopMatrix();
-        glTranslatef(random_translation_vec[i].first, 0.005f, random_translation_vec[i].second);
+        cards_vec[i].draw(invert);
+        glTranslatef(random_translation_vec[i].first, 0.007f, random_translation_vec[i].second);
     }
     lock.unlock();
     glPopMatrix();
@@ -65,51 +61,48 @@ void Game::distribute_cards()
     while (!central_stack.empty())
     {
         Card& card = central_stack.back();
-        card.rot = Vec3(0.0f, 1.0f, 0.0f);
-        card.pos = Vec3();
-        card.angle = 0.0f;
+        card.reset_coords();
         const int iterations_max = 10;
-        float current_height = central_stack.size() * 0.005f;
-        float destination_height = player_stack[card_num % players_num].size() * 0.005f + 0.005f;
+        float current_height = central_stack.size() * 0.007f;
+        float destination_height = player_stack[card_num % players_num].size() * 0.007f + 0.007f;
         float height_difference = destination_height - current_height;
+
         for (int i = 0; i < iterations_max; i++)
         {
             std::this_thread::sleep_for(17ms);
             switch (card_num%players_num)
             {
             case 0:
-                card.pos.x += -1.0f / iterations_max;
+                card.pos.x += 1.0f / iterations_max;
                 card.pos.z += 1.5f / iterations_max;
                 break;
             case 1:
-                card.pos.x += 1.9f / iterations_max;
+                card.rot = Vec3(0.0f, 1.0f, 0.0f);
+                card.pos.x += -1.9f / iterations_max;
                 card.pos.z += 1.3f / iterations_max;
                 card.angle += 90.0f / iterations_max;
                 break;
             case 2:
-                card.pos.x += 1.0f / iterations_max;
+                card.pos.x += -1.0f / iterations_max;
                 card.pos.z += -1.2f / iterations_max;
                 break;
             case 3:
-                card.pos.x += -1.9f / iterations_max;
+                card.rot = Vec3(0.0f, 1.0f, 0.0f);
+                card.pos.x += 1.9f / iterations_max;
                 card.pos.z += -0.7f / iterations_max;
                 card.angle += 90.0f / iterations_max;
                 break;
             }
 
             if (height_difference > 0 && i < iterations_max/4)//can raise here
-                card.pos.y -= height_difference / 0.25f / iterations_max;
+                card.pos.y += height_difference / 0.25f / iterations_max;
 
             if (height_difference < 0 && i > iterations_max * 3 / 4)//can descend here
-                card.pos.y -= height_difference / 0.25f / iterations_max;
+                card.pos.y += height_difference / 0.25f / iterations_max;
         }
         lock.lock();
         central_stack.pop_back();
-        lock.unlock();
-        card.rot = Vec3();
-        card.pos = Vec3();
-        card.angle = 0.0f;
-        lock.lock();
+        card.reset_coords();
         player_stack[card_num % players_num].push_back(card);
         lock.unlock();
         card_num++;
@@ -123,8 +116,8 @@ void Game::card_to_player()
 {
 
 
-    float initial_height = player_stack[0].size() * 0.005f;
-    float dest_height = player_card[0].size() * 0.005f;
+    float initial_height = player_stack[0].size() * 0.007f;
+    float dest_height = player_card[0].size() * 0.007f;
     float height_diff = dest_height - initial_height;
     const int iterations_max = 60;
 
@@ -134,14 +127,14 @@ void Game::card_to_player()
         for (int player_num = 0; player_num < players_num; player_num++)
         {
             Card& card = player_stack[player_num].back();
-            card.pos.x += 1.0f / iterations_max;
+            card.pos.x -= 1.0f / iterations_max;
             card.pos.z += -0.5f / iterations_max;
             if (player_num == 0)
             {
                 card.angle += 180.0f / iterations_max;
                 card.rot.z = 1.0f;
-                card.pos.y = -sqrtf(-static_cast<float>(i*2)/iterations_max*(static_cast<float>(i*2) / iterations_max -2)) * CARD_WIDTH / 2;//rotate around left edge of the card
-                card.pos.y -= height_diff * i / iterations_max;
+                card.pos.y = sqrtf(-static_cast<float>(i*2)/iterations_max*(static_cast<float>(i*2) / iterations_max -2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+                card.pos.y += height_diff * i / iterations_max;
             }
         }
     }
@@ -204,7 +197,7 @@ void Game::card_to_player()
         texts.erase(texts.begin() + text_id);
         lock.unlock();
 
-        for (int i = 0; i < iterations_max; i++)
+        for (int i = 1; i <= iterations_max; i++)
         {
             std::this_thread::sleep_for(17ms);
             for (int player_num = 1; player_num < players_num; player_num++)
@@ -213,9 +206,12 @@ void Game::card_to_player()
                 //card.highlight_row(choosen_category);
                 card.angle += 180.0f / iterations_max;
                 card.rot.z = 1.0f;
-                card.pos.y = -sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+                card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
             }
         }
+        //after above operation, card's pos y isn't == 0
+        //for (int player_num = 0; player_num < players_num; player_num++)
+            //player_card[player_num].back().pos.y = 0.0f;
 
         std::this_thread::sleep_for(3s);
 
@@ -253,16 +249,16 @@ void Game::card_to_player()
                 {
                     if (!winner[player_num])
                         continue;
-                    float initial_height = player_stack[player_num].size() * 0.005f;
-                    float dest_height = player_card[player_num].size() * 0.005f;
+                    float initial_height = player_stack[player_num].size() * 0.007f;
+                    float dest_height = player_card[player_num].size() * 0.007f;
                     float height_diff = dest_height - initial_height;
                     Card& card = player_stack[player_num].back();
-                    card.pos.x += 1.0f / iterations_max;
+                    card.pos.x -= 1.0f / iterations_max;
                     card.pos.z += -0.5f / iterations_max;
                     card.angle += 180.0f / iterations_max;
                     card.rot.z = 1.0f;
-                    card.pos.y = -sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
-                    card.pos.y -= height_diff * i / iterations_max;
+                    card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+                    card.pos.y += height_diff * i / iterations_max;
                 }
             }
             lock.lock();
@@ -270,8 +266,9 @@ void Game::card_to_player()
             {
                 if (!winner[player_num])
                     continue;
-                player_stack[player_num].back().reset_coords();
-                player_card[player_num].push_back(player_stack[player_num].back());
+                Card& card = player_stack[player_num].back();
+                card.reset_coords();
+                player_card[player_num].push_back(card);
                 player_stack[player_num].pop_back();
             }
             lock.unlock();

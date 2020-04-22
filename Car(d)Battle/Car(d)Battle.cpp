@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     glutCreateWindow("Car(d)Battle");
     game.load();
     game.start(4);
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
@@ -74,5 +74,5 @@ void OnReshape(int width, int height)
     glViewport(0, 0, width, height);
     game.set_screen_size(width, height);
     screen = { width, height };
-    gluPerspective(60.0f, static_cast<float>(width) / height, 0.01f, 100.0f);
+    gluPerspective(60.0f, static_cast<float>(width) / height, 0.01f, 10.0f);
 }

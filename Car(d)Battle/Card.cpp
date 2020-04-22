@@ -42,7 +42,7 @@ void Card::highlight_row(int row)
 std::string Card::get_category_value(int num)
 {
     num++;
-    if (num >= cards.field_names.size() || num < 0)
+    if (static_cast<unsigned int>(num) >= cards.field_names.size() || num < 0)
         return std::string();
 
     return cards.cards_properties[id][num];
@@ -65,11 +65,13 @@ float calc_text_width(std::string str)
     return width;
 }
 
-void Card::draw()
+void Card::draw(bool invert = false)
 {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, pos.z);
     glRotatef(angle, rot.x, rot.y, rot.z);
+    if (invert)
+        glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
     glRotatef(90, -1, 0, 0);
     glTranslatef(CARD_WIDTH / 2, -CARD_HEIGHT / 2, 0);
     glEnable(GL_TEXTURE_2D);
@@ -80,7 +82,7 @@ void Card::draw()
     glBindTexture(GL_TEXTURE_2D, cards.fields_tex->GetId());
     glCallList(cards.list_fields);
     glDisable(GL_TEXTURE_2D);
-    glColor3f(0, 0, 0);
+    glColor3f(0.0f, 0.0f, 0.0f);
     glTranslatef(-CARD_WIDTH + 0.02f, 0.525f, 0.005f);
     renderStrokeString(0, 0, cards.cards_properties[id][0]);
     glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there are 7 fields
