@@ -42,13 +42,13 @@ void Game::load()
     scene.load();
 }
 
-void Game::draw_cards_stack(std::vector<Card>& cards_vec, bool invert = true)
+void Game::draw_cards_stack(std::vector<Card>& cards_vec)
 {
     glPushMatrix();
     lock.lock();// &cards_vec may be modified by other threads during execution of this method
     for (unsigned int i = 0; i < cards_vec.size(); i++)
     {
-        cards_vec[i].draw(invert);
+        cards_vec[i].draw();
         glTranslatef(random_translation_vec[i].first, 0.007f, random_translation_vec[i].second);
     }
     lock.unlock();
@@ -114,10 +114,8 @@ void Game::distribute_cards()
 
 void Game::card_to_player()
 {
-
-
     float initial_height = player_stack[0].size() * 0.007f;
-    float dest_height = player_card[0].size() * 0.007f;
+    float dest_height = player_card[0].size() * 0.007f + 0.007f;
     float height_diff = dest_height - initial_height;
     const int iterations_max = 60;
 
@@ -145,6 +143,8 @@ void Game::card_to_player()
         player_card[player_num].push_back(player_stack[player_num].back());
         player_stack[player_num].pop_back();
     }
+
+    player_card[0].back().invert = false;
 
     Text3D text;
     text.pos = Vec3(-0.6f, 0.01f, 0.2f);
@@ -197,23 +197,49 @@ void Game::card_to_player()
         texts.erase(texts.begin() + text_id);
         lock.unlock();
 
-        for (int i = 1; i <= iterations_max; i++)
+        for (int i = 0; i < iterations_max; i++)
         {
             std::this_thread::sleep_for(17ms);
             for (int player_num = 1; player_num < players_num; player_num++)
             {
                 Card & card = player_card[player_num].back();
-                //card.highlight_row(choosen_category);
                 card.angle += 180.0f / iterations_max;
                 card.rot.z = 1.0f;
                 card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
             }
         }
         //after above operation, card's pos y isn't == 0
-        //for (int player_num = 0; player_num < players_num; player_num++)
-            //player_card[player_num].back().pos.y = 0.0f;
+        for (int player_num = 0; player_num < players_num; player_num++)
+        {
+            player_card[player_num].back().reset_coords();
+            player_card[player_num].back().invert = false;
+            player_card[player_num].back().highlight_row(choosen_category);//no highlit
+        }
 
         std::this_thread::sleep_for(3s);
+
+        for (int player_num = 0; player_num < players_num; player_num++)
+        {
+            player_card[player_num].back().rot.z = 1.0f;
+            player_card[0].back().highlight_row(-1);//no highlit
+        }
+
+        for (int i = 0; i < iterations_max; i++)
+        {
+            std::this_thread::sleep_for(17ms);
+            for (int player_num = 0; player_num < players_num; player_num++)
+            {
+                Card& card = player_card[player_num].back();
+                card.angle += 180.0f / iterations_max;
+                card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+            }
+        }
+        //after above operation, card's pos y isn't == 0
+        for (int player_num = 0; player_num < players_num; player_num++)
+        {
+            player_card[player_num].back().reset_coords();
+            player_card[player_num].back().invert = true;
+        }
 
         bool* winner = new bool[players_num]();
         std::fill_n(winner, players_num, true);
@@ -221,7 +247,7 @@ void Game::card_to_player()
         for (int player_num = 0; player_num < players_num; player_num++)
             for (int i = 0; i < players_num; i++)
             {
-                if (player_num == i)//we will not compare a player with himself
+                if (player_num == i)//we will not compare a player with himself. But we still compare player 2 and 3, then 3 and 2...
                     continue;
                 float left = std::stof(player_card[player_num].back().get_category_value(choosen_category));
                 float right = std::stof(player_card[i].back().get_category_value(choosen_category));
@@ -239,9 +265,8 @@ void Game::card_to_player()
             std::cout << winner[player_num] << std::endl;
         }
 
-        if (winners_num != 1)//tiebreak
+        while (winners_num != 1)//tiebreak
         {
-
             for (int i = 0; i < iterations_max; i++)
             {
                 std::this_thread::sleep_for(17ms);
@@ -250,15 +275,17 @@ void Game::card_to_player()
                     if (!winner[player_num])
                         continue;
                     float initial_height = player_stack[player_num].size() * 0.007f;
-                    float dest_height = player_card[player_num].size() * 0.007f;
+                    float dest_height = player_card[player_num].size() * 0.007f + 0.007f;
                     float height_diff = dest_height - initial_height;
                     Card& card = player_stack[player_num].back();
                     card.pos.x -= 1.0f / iterations_max;
                     card.pos.z += -0.5f / iterations_max;
-                    card.angle += 180.0f / iterations_max;
-                    card.rot.z = 1.0f;
-                    card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
-                    card.pos.y += height_diff * i / iterations_max;
+
+                    if (height_diff > 0 && i < iterations_max / 4)//can raise here
+                        card.pos.y += height_diff / 0.25f / iterations_max;
+
+                    if (height_diff < 0 && i > iterations_max * 3 / 4)//can descend here
+                        card.pos.y += height_diff / 0.25f / iterations_max;
                 }
             }
             lock.lock();
@@ -334,7 +361,7 @@ void Game::draw_players_cards()
 {
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 1.0f);
-    draw_cards_stack(player_card[0], false);
+    draw_cards_stack(player_card[0]);
     glPopMatrix();
 
     glPushMatrix();

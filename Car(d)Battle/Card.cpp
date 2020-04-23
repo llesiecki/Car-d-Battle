@@ -5,6 +5,7 @@ Card::Card(const Cards& cards, unsigned int &id)
 {
     angle = 0;
     highlight = -1;
+    invert = true;
 }
 
 Card::Card(const Card& card)
@@ -24,6 +25,7 @@ Card Card::operator=(const Card& card)
     pos = card.pos;
     rot = card.rot;
     highlight = card.highlight;
+    invert = card.invert;
 	return Card(card);
 }
 
@@ -65,7 +67,7 @@ float calc_text_width(std::string str)
     return width;
 }
 
-void Card::draw(bool invert = false)
+void Card::draw()
 {
     glPushMatrix();
     glTranslatef(pos.x, pos.y, pos.z);
