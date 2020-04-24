@@ -20,6 +20,13 @@ enum class Game_state
 	Finish
 };
 
+enum class Card_translation
+{
+	no_translation,
+	with_flip,
+	without_flip
+};
+
 class Game
 {
 	static Game instance;
@@ -42,6 +49,8 @@ class Game
 	void draw_players_stacks();
 	void distribute_cards();
 	void card_to_player();
+	void move_cards(const Card_translation[]);
+	void flip_cards(const bool *);
 	friend void OnTimerCallback(int id);
 	Game();
 public:

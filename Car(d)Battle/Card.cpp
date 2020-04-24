@@ -95,7 +95,7 @@ void Card::draw()
             if (highlight == i - 1)
             {
                 glPushMatrix();
-                glTranslatef(-0.02f, -0.02f, -0.005f);
+                glTranslatef(-0.02f, -0.02f, 0.005f);
                 glColor3f(1.0f, 0.0f, 0.0f);
                 glBegin(GL_LINES);
 
