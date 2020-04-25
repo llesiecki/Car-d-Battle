@@ -1,6 +1,7 @@
 #include "Game.h"
 #include <algorithm>
 #include <time.h>
+#include <assert.h>
 
 Game::Game()
 	:cards(L"carlist.xls")
@@ -214,6 +215,8 @@ void Game::card_to_player()
 
 	translation[0] = Card_translation::with_flip;
 
+	auto xd = { Card_translation::with_flip , Card_translation::with_flip };
+
 	for (int player_num = 1; player_num < players_num; player_num++)
 		translation[player_num] = Card_translation::without_flip;
 
@@ -285,6 +288,7 @@ void Game::card_to_player()
 
 	for (int player_num = 1; player_num < players_num; player_num++)
 		flip[player_num] = true;
+
 	flip_cards(flip);
 
 	for (int player_num = 0; player_num < players_num; player_num++)
@@ -293,17 +297,19 @@ void Game::card_to_player()
 	std::this_thread::sleep_for(3s);
 
 	for (int player_num = 0; player_num < players_num; player_num++)
-		player_card[0].back().highlight_row(-1);//no highlit
-
-	for (int player_num = 0; player_num < players_num; player_num++)
+	{
+		player_card[player_num].back().highlight_row(-1);//no highlit
 		flip[player_num] = true;
-
+	}
+	
 	flip_cards(flip);
 
 	bool* winner = new bool[players_num]();
 	std::fill_n(winner, players_num, true);
+	int winners_num = 0;
 
 	for (int player_num = 0; player_num < players_num; player_num++)
+	{
 		for (int i = 0; i < players_num; i++)
 		{
 			if (player_num == i)//we will not compare a player with himself. But we still compare player 2 and 3, then 3 and 2...
@@ -315,67 +321,238 @@ void Game::card_to_player()
 			else
 				winner[player_num] &= left >= right;
 		}
-
-	int winners_num = 0;
-
-	for (int player_num = 0; player_num < players_num; player_num++)
-	{
 		winners_num += winner[player_num];
 		std::cout << winner[player_num] << std::endl;
 	}
 
 	while (winners_num != 1)//tiebreak
 	{
+		assert(winners_num > 0);
+		bool *empty = new bool[players_num]();//all false by default initializer
+
 		for (int tiebreak_cards_num = 0; tiebreak_cards_num < 2; tiebreak_cards_num++)
 		{
+			int empty_stacks_num = 0;
 			for (int player_num = 0; player_num < players_num; player_num++)
-				translation[player_num] = winner[player_num] ? Card_translation::without_flip : Card_translation::no_translation;
-
-			move_cards(translation);
-		}
-
-		flip_cards(winner);
-
-		for (int player_num = 0; player_num < players_num; player_num++)
-			if (winner[player_num])
-				player_card[player_num].back().highlight_row(choosen_category);
-
-		std::this_thread::sleep_for(3s);
-
-		for (int player_num = 0; player_num < players_num; player_num++)
-			if (winner[player_num])
-				player_card[player_num].back().highlight_row(-1);//no highlight
-
-		for (int player_num = 0; player_num < players_num; player_num++)
-			for (int i = 0; i < players_num; i++)
 			{
-				if (player_num == i)//we will not compare a player with himself
-					continue;
-				if (!winner[player_num])
-					continue;
-				if (!winner[i])
-					continue;
-				float left = std::stof(player_card[player_num].back().get_category_value(choosen_category));
-				float right = std::stof(player_card[i].back().get_category_value(choosen_category));
-				if (cards.get_category_name(choosen_category) == "Acceleration")//time to 60mph is the only parameter when the lowest value wins
-					winner[player_num] &= left <= right;
+				if (winner[player_num])
+				{
+					translation[player_num] = Card_translation::without_flip;
+					if (player_stack[player_num].empty())
+					{
+						empty_stacks_num++;
+						empty[player_num] = true;
+						translation[player_num] = Card_translation::no_translation;
+					}
+				}
 				else
-					winner[player_num] &= left >= right;
+					translation[player_num] = Card_translation::no_translation;
 			}
-		winners_num = 0;
 
-		for (int player_num = 0; player_num < players_num; player_num++)
-		{
-			winners_num += winner[player_num];
-			flip[player_num] = !player_card[player_num].back().invert;
-			std::cout << winner[player_num] << std::endl;
+			if (winners_num - empty_stacks_num > 1)//there are players left for tiebreak
+			{
+				for (int player_num = 0; player_num < players_num; player_num++)
+					winner[player_num] &= !empty[player_num];//player loses when his stack is empty
+				move_cards(translation);
+			}
+			else if(winners_num == empty_stacks_num)//winners have no cards left - move back cards form hand to stack (and shuffle them)
+			{
+				for (int i = 0; i < iterations_max; i++)
+				{
+					std::this_thread::sleep_for(17ms);
+					for (int player_num = 0; player_num < players_num; player_num++)
+					{
+						if (!winner[player_num])
+							continue;
+						for (Card& card : player_card[player_num])
+						{
+							card.pos.x += 1.0f / iterations_max;
+							card.pos.z += 0.5f / iterations_max;
+						}
+					}
+				}
+
+				for (int player_num = 0; player_num < players_num; player_num++)
+				{
+					if (!winner[player_num])
+						continue;
+					for (Card& card : player_card[player_num])
+						card.reset_coords();
+					lock.lock();
+					player_stack[player_num] = player_card[player_num];
+					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
+					player_card[player_num].clear();
+					lock.unlock();
+				}
+
+				for (int player_num = 0; player_num < players_num; player_num++)
+				{
+					if (winner[player_num])
+						translation[player_num] = Card_translation::without_flip;
+					else
+						translation[player_num] = Card_translation::no_translation;
+				}
+				move_cards(translation);
+			}
+			else
+			{
+				for (int player_num = 0; player_num < players_num; player_num++)
+					winner[player_num] &= !empty[player_num];//player loses when his stack is empty
+			}
 		}
-		flip_cards(flip);
-	}
 
+		winners_num = 0;
+		for (int player_num = 0; player_num < players_num; player_num++)
+			winners_num += winner[player_num];
+		assert(winners_num > 0);
+
+		if (winners_num != 1)
+		{
+			flip_cards(winner);
+
+			for (int player_num = 0; player_num < players_num; player_num++)
+				if (winner[player_num])
+					player_card[player_num].back().highlight_row(choosen_category);
+
+			std::this_thread::sleep_for(3s);
+
+			winners_num = 0;
+
+			for (int player_num = 0; player_num < players_num; player_num++)
+			{
+				if (winner[player_num])
+					player_card[player_num].back().highlight_row(-1);//no highlight
+				for (int i = 0; i < players_num; i++)
+				{
+					if (player_num == i)//we will not compare a player with himself
+						continue;
+					if (!winner[player_num])
+						continue;
+					if (!winner[i])
+						continue;
+					float left = std::stof(player_card[player_num].back().get_category_value(choosen_category));
+					float right = std::stof(player_card[i].back().get_category_value(choosen_category));
+					if (cards.get_category_name(choosen_category) == "Acceleration")//time to 60mph is the only parameter when the lowest value wins
+						winner[player_num] &= left <= right;
+					else
+						winner[player_num] &= left >= right;
+				}
+				winners_num += winner[player_num];
+				flip[player_num] = !player_card[player_num].back().invert;
+				std::cout << winner[player_num] << std::endl;
+			}
+			flip_cards(flip);
+		}
+		assert(winners_num > 0);
+		delete[] empty;
+	}
+	assert(winners_num == 1);
 	std::cout << "Tiebreak solved!\n";
 
+	for (int player_num = 0; player_num < players_num; player_num++)
+		if (winner[player_num])
+			current_player = player_num;
 	delete[] winner;
+
+	for (int shift : {0, 3, 2, 1})
+	{
+		int player_num = (shift + current_player) % 4;
+		if (player_num >= players_num)
+			continue;
+		for (int i = 0; i < iterations_max; i++)
+		{
+			std::this_thread::sleep_for(17ms);
+			if (i < iterations_max / 4)
+			{
+				for (Card& card : player_stack[current_player])
+					card.pos.y += (player_card[player_num].size() * 0.007f + 0.007f) / (iterations_max / 4);
+			}
+			else
+			{
+				Vec3 move;
+				float angle = 0.0f;
+				if (current_player == player_num)
+					move = Vec3(1.0f, 0.0f, 0.5f);
+				else if (current_player == 0 && player_num == 3)
+				{
+					move = Vec3(-1.2f, 0.0f, -0.4f);
+					angle = -90.0f;
+				}
+				else if (current_player == 0 && player_num == 2)
+				{
+					move = Vec3(-1.0f, 0.0f, -2.2f);
+					angle = 180.0f;
+				}
+				else if (current_player == 0 && player_num == 1)
+				{
+					move = Vec3(1.2f, 0.0f, -2.4f);
+					angle = 90.0f;
+				}
+				else if (current_player == 1 && player_num == 3)
+				{
+					move = Vec3(-1.0f, 0.0f, -3.3f);
+					angle = 180.0f;
+				}
+				else if (current_player == 1 && player_num == 2)
+				{
+					move = Vec3(1.9f, 0.0f, -2.0f);
+					angle = 90.0f;
+				}
+				else if (current_player == 1 && player_num == 0)
+				{
+					move = Vec3(-1.9f, 0.0f, 0.3f);
+					angle = -90.0f;
+				}
+				else if (current_player == 2 && player_num == 3)
+				{
+					move = Vec3(1.5, 0.0f, -2.4f);
+					angle = 90.0f;
+				}
+				else if (current_player == 2 && player_num == 1)
+				{
+					move = Vec3(-1.5f, 0.0f, -0.4f);
+					angle = -90.0f;
+				}
+				else if (current_player == 2 && player_num == 0)
+				{
+					move = Vec3(-1.0f, 0.0f, -2.2f);
+					angle = 180.0f;
+				}
+				else if (current_player == 3 && player_num == 2)
+				{
+					move = Vec3(-1.9f, 0.0f, 0.0f);
+					angle = -90.0f;
+				}
+				else if (current_player == 3 && player_num == 1)
+				{
+					move = Vec3(-1.0f, 0.0f, -3.3f);
+					angle = 180.0f;
+				}
+				else if (current_player == 3 && player_num == 0)
+				{
+					move = Vec3(1.9f, 0.0f, -1.7f);
+					angle = 90.0f;
+				}
+
+				for (Card& card : player_card[player_num])
+				{
+					card.pos.x += move.x / (iterations_max * 3 / 4);
+					card.pos.z += move.z / (iterations_max * 3 / 4);
+					if (angle != 0.0f)
+					{
+						card.rot = Vec3(0.0f, 1.0f, 0.0f);
+						card.angle += angle / (iterations_max * 3 / 4);
+					}
+				}
+			}
+		}
+		lock.lock();
+		for (Card& card : player_card[player_num])
+			card.reset_coords();
+		player_stack[current_player].insert(player_stack[current_player].begin(), player_card[player_num].begin(), player_card[player_num].end());
+		player_card[player_num].clear();
+		lock.unlock();
+	}
 }
 
 void Game::start(int players_num)
