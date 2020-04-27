@@ -6,7 +6,7 @@
 Game::Game()
 	:cards(L"carlist.xls")
 {
-	unsigned int seed = static_cast<unsigned int>(time(NULL));
+	srand(static_cast<unsigned int>(time(NULL)));
 	state = Game_state::no_action;
 	for (int i = 0; i < 24; i++)
 		random_translation_vec.push_back({ rand() / 1000000.0f - RAND_MAX / 2000000.0f, rand() / 1000000.0f - RAND_MAX / 2000000.0f });
@@ -274,6 +274,7 @@ void Game::choose_category()
 						choosen_category = i;
 					break;
 				}
+				player_card[0].back().highlight_row(-1);//no highlit
 			}
 		}
 		player_card[0].back().highlight_row(-1);//no highlit
@@ -376,12 +377,9 @@ void Game::tiebreak()
 	while (winners_num != 1)//tiebreak
 	{
 		assert(winners_num > 0);
-		bool* empty = new bool[players_num];//all false by default initializer
-		
 
 		for (int tiebreak_cards_num = 0; tiebreak_cards_num < 2; tiebreak_cards_num++)
 		{
-			std::fill_n(empty, players_num, false);
 			int empty_stacks_num = 0;
 			Card_translation* translation = new Card_translation[players_num];
 			for (int player_num = 0; player_num < players_num; player_num++)
@@ -392,7 +390,6 @@ void Game::tiebreak()
 					if (player_stack[player_num].empty())
 					{
 						empty_stacks_num++;
-						empty[player_num] = true;
 						translation[player_num] = Card_translation::no_translation;
 					}
 				}
@@ -404,7 +401,7 @@ void Game::tiebreak()
 			{
 				for (int player_num = 0; player_num < players_num; player_num++)
 				{
-					if (empty[player_num])
+					if (player_stack[player_num].empty())
 					{
 						loser[player_num] = true;
 						winner[player_num] = false;
@@ -461,7 +458,7 @@ void Game::tiebreak()
 			{
 				for (int player_num = 0; player_num < players_num; player_num++)
 				{
-					if (empty[player_num])
+					if (player_stack[player_num].empty())
 					{
 						loser[player_num] = true;
 						winner[player_num] = false;
@@ -520,7 +517,6 @@ void Game::tiebreak()
 			delete[] flip;
 		}
 		assert(winners_num > 0);
-		delete[] empty;
 	}
 	assert(winners_num == 1);
 	//std::cout << "Tiebreak solved!\n";
