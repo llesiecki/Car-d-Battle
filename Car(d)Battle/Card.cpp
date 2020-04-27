@@ -85,7 +85,7 @@ void Card::draw()
     glCallList(cards.list_fields);
     glDisable(GL_TEXTURE_2D);
     glColor3f(0.0f, 0.0f, 0.0f);
-    glTranslatef(-CARD_WIDTH + 0.02f, 0.525f, 0.005f);
+    glTranslatef(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f);
     renderStrokeString(0, 0, cards.cards_properties[id][0]);
     glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there are 7 fields
     for (unsigned int i = 1; i < cards.field_names.size(); i++)
@@ -95,7 +95,7 @@ void Card::draw()
             if (highlight == i - 1)
             {
                 glPushMatrix();
-                glTranslatef(-0.02f, -0.02f, 0.005f);
+                glTranslatef(-0.02f, -0.02f, 0.0035f);
                 glColor3f(1.0f, 0.0f, 0.0f);
                 glBegin(GL_LINES);
 

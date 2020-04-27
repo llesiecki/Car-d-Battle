@@ -6,8 +6,7 @@
 Game::Game()
 	:cards(L"carlist.xls")
 {
-	srand(static_cast<unsigned int>(time(NULL)));
-	//srand(static_cast<unsigned int>(1));//TEST!!!
+	unsigned int seed = static_cast<unsigned int>(time(NULL));
 	state = Game_state::no_action;
 	for (int i = 0; i < 24; i++)
 		random_translation_vec.push_back({ rand() / 1000000.0f - RAND_MAX / 2000000.0f, rand() / 1000000.0f - RAND_MAX / 2000000.0f });
@@ -54,7 +53,7 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec)
 	for (unsigned int i = 0; i < cards_vec.size(); i++)
 	{
 		cards_vec[i].draw();
-		glTranslatef(random_translation_vec[i].first, 0.007f, random_translation_vec[i].second);
+		glTranslatef(random_translation_vec[i].first, 0.005f, random_translation_vec[i].second);
 	}
 	lock.unlock();
 	glPopMatrix();
@@ -69,8 +68,8 @@ void Game::move_cards(const Card_translation transltion_type[])
 		if (transltion_type[player_num] == Card_translation::no_translation)
 			continue;
 
-		float initial_height = player_stack[player_num].size() * 0.007f;
-		float dest_height = player_card[player_num].size() * 0.007f + 0.007f;
+		float initial_height = player_stack[player_num].size() * 0.005f;
+		float dest_height = player_card[player_num].size() * 0.005f + 0.005f;
 		height_diff[player_num] = dest_height - initial_height;
 
 		if (transltion_type[player_num] == Card_translation::without_flip)
@@ -161,8 +160,8 @@ void Game::distribute_cards()
 		Card& card = central_stack.back();
 		card.reset_coords();
 		const int iterations_max = 10;
-		float current_height = central_stack.size() * 0.007f;
-		float destination_height = player_stack[card_num % players_num].size() * 0.007f + 0.007f;
+		float current_height = central_stack.size() * 0.005f;
+		float destination_height = player_stack[card_num % players_num].size() * 0.005f + 0.005f;
 		float height_difference = destination_height - current_height;
 
 		for (int i = 0; i < iterations_max; i++)
@@ -199,7 +198,7 @@ void Game::distribute_cards()
 				card.pos.y += height_difference / 0.25f / iterations_max;
 		}
 		lock.lock();
-		central_stack.pop_back();
+		central_stack.pop_back();//buggy
 		card.reset_coords();
 		player_stack[card_num % players_num].push_back(card);
 		lock.unlock();
@@ -359,7 +358,7 @@ void Game::compare_by_choosen_category()
 		}
 
 		winners_num += winner[player_num];
-		std::cout << winner[player_num] << std::endl;
+		//std::cout << winner[player_num] << std::endl;
 	}
 	assert(winners_num > 0);
 	if(winners_num != 1)
@@ -377,10 +376,12 @@ void Game::tiebreak()
 	while (winners_num != 1)//tiebreak
 	{
 		assert(winners_num > 0);
-		bool* empty = new bool[players_num]();//all false by default initializer
+		bool* empty = new bool[players_num];//all false by default initializer
+		
 
 		for (int tiebreak_cards_num = 0; tiebreak_cards_num < 2; tiebreak_cards_num++)
 		{
+			std::fill_n(empty, players_num, false);
 			int empty_stacks_num = 0;
 			Card_translation* translation = new Card_translation[players_num];
 			for (int player_num = 0; player_num < players_num; player_num++)
@@ -399,7 +400,7 @@ void Game::tiebreak()
 					translation[player_num] = Card_translation::no_translation;
 			}
 
-			if (winners_num - empty_stacks_num > 1)//there are players left for tiebreak
+			if (winners_num - empty_stacks_num >= 2)//there are players left for tiebreak
 			{
 				for (int player_num = 0; player_num < players_num; player_num++)
 				{
@@ -407,9 +408,12 @@ void Game::tiebreak()
 					{
 						loser[player_num] = true;
 						winner[player_num] = false;
+
+						std::cout << "lose: " << player_num << "\n";
 					}
 				}
 				move_cards(translation);
+				std::cout << "1\n";
 			}
 			else if (winners_num == empty_stacks_num)//winners have no cards left - move back cards form hand to stack (and shuffle them)
 			{
@@ -440,6 +444,7 @@ void Game::tiebreak()
 					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
 					player_card[player_num].clear();
 					lock.unlock();
+
 				}
 
 				for (int player_num = 0; player_num < players_num; player_num++)
@@ -450,8 +455,9 @@ void Game::tiebreak()
 						translation[player_num] = Card_translation::no_translation;
 				}
 				move_cards(translation);
+				std::cout << "2\n";
 			}
-			else
+			else//olny 1 player with non-empty stack left - the final winner
 			{
 				for (int player_num = 0; player_num < players_num; player_num++)
 				{
@@ -461,6 +467,7 @@ void Game::tiebreak()
 						winner[player_num] = false;
 					}
 				}
+				std::cout << "3\n";
 			}
 			delete[] translation;
 		}
@@ -507,7 +514,7 @@ void Game::tiebreak()
 				}
 				winners_num += winner[player_num];
 				flip[player_num] = !player_card[player_num].back().invert;
-				std::cout << winner[player_num] << std::endl;
+				//std::cout << "p" << winner[player_num] << std::endl;
 			}
 			flip_cards(flip);
 			delete[] flip;
@@ -516,7 +523,7 @@ void Game::tiebreak()
 		delete[] empty;
 	}
 	assert(winners_num == 1);
-	std::cout << "Tiebreak solved!\n";
+	//std::cout << "Tiebreak solved!\n";
 	state = Game_state::transfer_cards_to_winner;
 }
 
@@ -531,6 +538,8 @@ void Game::cards_to_winner()
 		int player_num = (shift + current_player) % 4;
 		if (player_num >= players_num)
 			continue;
+		if (player_card[player_num].empty())
+			continue;
 		const int iterations_max = 60;
 		for (int i = 0; i < iterations_max; i++)
 		{
@@ -538,7 +547,7 @@ void Game::cards_to_winner()
 			if (i < iterations_max / 4)
 			{
 				for (Card& card : player_stack[current_player])
-					card.pos.y += (player_card[player_num].size() * 0.007f + 0.007f) / (iterations_max / 4);
+					card.pos.y += (player_card[player_num].size() * 0.005f) / (iterations_max / 4);
 			}
 			else
 			{
@@ -632,6 +641,16 @@ void Game::cards_to_winner()
 		state = Game_state::next_round;
 }
 
+void Game::debug()
+{
+	while (true)
+	{
+		std::this_thread::sleep_for(1s);
+		for (int i = 0; i < players_num; i++)
+			std::cout << i << ": " << winner[i] << loser[i] << std::endl;
+	}
+}
+
 void Game::start(int players_num)
 {
 	if (players_num < 2 || players_num > 4)
@@ -640,7 +659,9 @@ void Game::start(int players_num)
 		return;
 	}
 	winner = new bool[players_num];
-	loser = new bool[players_num];
+	loser = new bool[players_num]();
+	//std::thread th = std::thread(&Game::debug, this);
+	//th.detach();
 	std::fill_n(loser, players_num, false);
 	this->players_num = players_num;
 	state = Game_state::cards_distribution;

@@ -48,6 +48,8 @@ class Game
 	POINT cursor_pos;
 	POINT screen_size;
 
+	void debug();
+
 	void draw_cards_stack(std::vector<Card>& cards_vec);
 	void draw_players_cards();
 	void draw_players_stacks();
