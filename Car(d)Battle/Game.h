@@ -6,6 +6,7 @@
 #include <thread>
 #include <mutex>
 #include "Text3D.h"
+#include "Client.h"
 
 enum class Game_state
 {
@@ -47,8 +48,7 @@ class Game
 	std::vector<Text3D> texts;
 	POINT cursor_pos;
 	POINT screen_size;
-
-	void debug();
+	Client* network_client;
 
 	void draw_cards_stack(std::vector<Card>& cards_vec);
 	void draw_players_cards();

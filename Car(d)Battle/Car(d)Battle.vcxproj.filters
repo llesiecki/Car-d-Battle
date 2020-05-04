@@ -57,6 +57,9 @@
     <ClCompile Include="utilities\Vec3.cpp">
       <Filter>utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cards.h">
@@ -93,6 +96,9 @@
       <Filter>utilities</Filter>
     </ClInclude>
     <ClInclude Include="Text3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

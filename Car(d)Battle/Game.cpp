@@ -16,6 +16,7 @@ Game::Game()
 	std::random_shuffle(central_stack.begin(), central_stack.end(), [](int a) -> int {return rand() % a; });
 	winner = nullptr;
 	loser = nullptr;
+	network_client = nullptr;
 	if (central_stack.size() != 24)
 		std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
 }
@@ -283,6 +284,13 @@ void Game::choose_category()
 	{
 		while (choosen_category == -1)
 		{
+			if (network_client == nullptr)
+			{
+				network_client = new Client(80, 128);
+				network_client->start();
+			}
+			network_client->http_get(std::string("www.cplusplus.com"), std::string("/info/"));
+			std::cout << network_client->get_response();
 			//std::this_thread::sleep_for(200ms);
 			cin >> choosen_category;
 		}
@@ -635,16 +643,6 @@ void Game::cards_to_winner()
 		state = Game_state::finish;
 	else
 		state = Game_state::next_round;
-}
-
-void Game::debug()
-{
-	while (true)
-	{
-		std::this_thread::sleep_for(1s);
-		for (int i = 0; i < players_num; i++)
-			std::cout << i << ": " << winner[i] << loser[i] << std::endl;
-	}
 }
 
 void Game::start(int players_num)
