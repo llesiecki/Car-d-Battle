@@ -93,6 +93,7 @@ bool Client::send_request(const std::string& address, const std::string& request
         response += buffer;
         ZeroMemory(buffer, buffer_len);
     }
+
     response_ready = true;
     delete[] buffer;
     closesocket(Socket);
