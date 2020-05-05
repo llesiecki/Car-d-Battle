@@ -26,6 +26,7 @@ Client::Client(unsigned short port, int buffer_len)
     this->port = port;
     started = false;
     response_ready = false;
+    Socket = INVALID_SOCKET;
 }
 
 Client::~Client()
@@ -39,7 +40,7 @@ bool Client::start()
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa))
     {
-        cerr << "WSAStartup failed.\n";
+        std::cerr << "WSAStartup failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
         return false;
     }
     started = true;
@@ -61,48 +62,72 @@ bool Client::send_request(const std::string& address, const std::string& request
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-    getaddrinfo(address.c_str(), std::to_string(port).c_str(), &hints, &result);
+    if(getaddrinfo(address.c_str(), std::to_string(port).c_str(), &hints, &result))
+        std::cerr << "getaddrinfo failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
 
-    for (auto ptr = result; ptr != NULL; ptr = ptr->ai_next)
+    auto ptr = result;
+
+    do
     {
-
         // Create a SOCKET for connecting to server
         Socket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
         if (Socket == INVALID_SOCKET)
         {
-            printf("socket failed with error: %d\n", WSAGetLastError());
-            WSACleanup();
-            return 1;
+            std::cerr << "socket failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+            continue;
         }
 
         // Connect to server.
-        cout << "Connecting...\n";
-        if (connect(Socket, ptr->ai_addr, ptr->ai_addrlen) != 0)
+        if (connect(Socket, ptr->ai_addr, ptr->ai_addrlen))
         {
-            cout << "Could not connect";
+            std::cerr << "connect failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+            Socket = INVALID_SOCKET;
             continue;
         }
         break;
     }
+    while (ptr = ptr->ai_next);
 
     freeaddrinfo(result);
 
-    send(Socket, request.c_str(), request.length(), 0);
-    shutdown(Socket, SD_SEND);
+    if (!ptr)
+    {
+        std::cerr << "connect faild: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+        return false;
+    }
+
+    if(Socket == INVALID_SOCKET)
+        std::cerr << "socket failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+
+    if(send(Socket, request.c_str(), request.length(), 0) == SOCKET_ERROR)
+        std::cerr << "send failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+
+    if(shutdown(Socket, SD_SEND) == SOCKET_ERROR)
+        std::cerr << "shutdown failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
     response_ready = false;
     response.clear();
-    char* buffer = new char[buffer_len] {};
 
-    while (recv(Socket, buffer, buffer_len - 1, 0))
+    int bytes_recived;
+    char* buffer = new char[buffer_len];
+
+    do
     {
-        response += buffer;
         ZeroMemory(buffer, buffer_len);
-    }
+        bytes_recived = recv(Socket, buffer, buffer_len - 1, 0);
+        response += buffer;
+        if (bytes_recived < 0)
+        {
+            std::cerr << "recv failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+            break;
+        }
+
+    } while (bytes_recived);
 
     response_ready = true;
     delete[] buffer;
-    closesocket(Socket);
-    return false;
+    if(closesocket(Socket))
+        std::cerr << "closesocket failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+    return true;
 }
 
 std::string& Client::get_response()
