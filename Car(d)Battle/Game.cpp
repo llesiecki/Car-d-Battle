@@ -23,6 +23,12 @@ Game::Game()
 
 Game::~Game()
 {
+	if (winner)
+		delete[] winner;
+	if (loser)
+		delete[] loser;
+	if (network_client)
+		delete network_client;
 }
 
 void Game::set_cursor_pos(int x, int y)
@@ -289,10 +295,16 @@ void Game::choose_category()
 				network_client = new Client(80, 128);
 				network_client->start();
 			}
-			network_client->http_get(std::string("www.cplusplus.com"), std::string("/info/"));
-			std::cout << network_client->get_response();
-			//std::this_thread::sleep_for(200ms);
-			cin >> choosen_category;
+			network_client->http_get(std::string("card-battle.cba.pl"), std::string("/server.php"));
+			std::string &response = network_client->get_response();
+			size_t data_pos = response.find("Car(d) Battle data:");
+			if (data_pos != std::string::npos)
+			{
+				data_pos += strlen("Car(d) Battle data:");
+				choosen_category = std::stoi(response.substr(data_pos));
+			}
+			else
+				std::this_thread::sleep_for(200ms);
 		}
 	}
 
@@ -365,9 +377,7 @@ void Game::compare_by_choosen_category()
 			else
 				winner[player_num] &= left >= right;
 		}
-
 		winners_num += winner[player_num];
-		//std::cout << winner[player_num] << std::endl;
 	}
 	assert(winners_num > 0);
 	if(winners_num != 1)
@@ -413,12 +423,9 @@ void Game::tiebreak()
 					{
 						loser[player_num] = true;
 						winner[player_num] = false;
-
-						std::cout << "lose: " << player_num << "\n";
 					}
 				}
 				move_cards(translation);
-				std::cout << "1\n";
 			}
 			else if (winners_num == empty_stacks_num)//winners have no cards left - move back cards form hand to stack (and shuffle them)
 			{
@@ -460,7 +467,6 @@ void Game::tiebreak()
 						translation[player_num] = Card_translation::no_translation;
 				}
 				move_cards(translation);
-				std::cout << "2\n";
 			}
 			else//olny 1 player with non-empty stack left - the final winner
 			{
@@ -472,7 +478,6 @@ void Game::tiebreak()
 						winner[player_num] = false;
 					}
 				}
-				std::cout << "3\n";
 			}
 			delete[] translation;
 		}
@@ -519,7 +524,6 @@ void Game::tiebreak()
 				}
 				winners_num += winner[player_num];
 				flip[player_num] = !player_card[player_num].back().invert;
-				//std::cout << "p" << winner[player_num] << std::endl;
 			}
 			flip_cards(flip);
 			delete[] flip;
@@ -527,7 +531,6 @@ void Game::tiebreak()
 		assert(winners_num > 0);
 	}
 	assert(winners_num == 1);
-	//std::cout << "Tiebreak solved!\n";
 	state = Game_state::transfer_cards_to_winner;
 }
 

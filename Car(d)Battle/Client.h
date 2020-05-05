@@ -13,6 +13,7 @@ class Client
 	std::string response;
 public:
 	Client(unsigned short, int);
+	~Client();
 	bool start();
 	bool http_get(const std::string&, std::string);
 	bool send_request(const std::string&, const std::string&);

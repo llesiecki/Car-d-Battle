@@ -28,6 +28,12 @@ Client::Client(unsigned short port, int buffer_len)
     response_ready = false;
 }
 
+Client::~Client()
+{
+    if(started)
+        WSACleanup();
+}
+
 bool Client::start()
 {
     WSADATA wsa;
@@ -51,33 +57,32 @@ bool Client::send_request(const std::string& address, const std::string& request
         return false;
 
     ZeroMemory(&hints, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
     getaddrinfo(address.c_str(), std::to_string(port).c_str(), &hints, &result);
 
-    auto ptr = result;
-
-    while (ptr = ptr->ai_next)
+    for (auto ptr = result; ptr != NULL; ptr = ptr->ai_next)
     {
+
         // Create a SOCKET for connecting to server
         Socket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
         if (Socket == INVALID_SOCKET)
         {
-            std::cerr << GetLastErrorAsString(WSAGetLastError()) << std::endl;
+            printf("socket failed with error: %d\n", WSAGetLastError());
             WSACleanup();
-            return false;
+            return 1;
         }
-        if (connect(Socket, ptr->ai_addr, ptr->ai_addrlen) != 0)
-            continue;
-        break;
-    }
 
-    if (!ptr)
-    {
-        std::cerr << "Could not connect";
-        return false;
+        // Connect to server.
+        cout << "Connecting...\n";
+        if (connect(Socket, ptr->ai_addr, ptr->ai_addrlen) != 0)
+        {
+            cout << "Could not connect";
+            continue;
+        }
+        break;
     }
 
     freeaddrinfo(result);
@@ -97,7 +102,6 @@ bool Client::send_request(const std::string& address, const std::string& request
     response_ready = true;
     delete[] buffer;
     closesocket(Socket);
-    WSACleanup();
     return false;
 }
 
