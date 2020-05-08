@@ -2,7 +2,7 @@
 
 Scene::Scene()
 {
-	background = new CTexture("textures\\tlo3.bmp");
+	background = new CTexture("textures\\background.bmp");
 	list_background = -1;
 }
 

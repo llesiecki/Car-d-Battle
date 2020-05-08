@@ -19,4 +19,5 @@ public:
 	bool send_request(const std::string&, const std::string&);
 	std::string& get_response();
 	bool is_response_ready();
+	bool is_ready();
 };

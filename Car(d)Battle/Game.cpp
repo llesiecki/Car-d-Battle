@@ -23,12 +23,31 @@ Game::Game()
 
 Game::~Game()
 {
+	kill_threads = true;
+	for (auto& th : threads)
+	{
+		if (th.joinable())
+			th.join();
+	}
 	if (winner)
 		delete[] winner;
 	if (loser)
 		delete[] loser;
 	if (network_client)
 		delete network_client;
+}
+
+bool Game::thread_sleep_ms(unsigned int delay)
+{
+	while (delay >= 200)
+	{
+		if (kill_threads)
+			return true;
+		std::this_thread::sleep_for(200ms);
+		delay -= 200;
+	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+	return false;
 }
 
 void Game::set_cursor_pos(int x, int y)
@@ -39,11 +58,6 @@ void Game::set_cursor_pos(int x, int y)
 void Game::set_screen_size(int width, int height)
 {
 	screen_size = { width, height };
-}
-
-Game& Game::get_instance()
-{
-	return instance;
 }
 
 void Game::load()
@@ -88,7 +102,8 @@ void Game::move_cards(const Card_translation transltion_type[])
 	const int iterations_max = 60;
 	for (int i = 0; i < iterations_max; i++)
 	{
-		std::this_thread::sleep_for(17ms);
+		if(thread_sleep_ms(17))
+			return;
 		for (int player_num = 0; player_num < players_num; player_num++)
 		{
 			if (transltion_type[player_num] == Card_translation::no_translation)
@@ -129,7 +144,7 @@ void Game::move_cards(const Card_translation transltion_type[])
 	delete[] height_diff;
 }
 
-void Game::flip_cards(const bool* flip)
+void Game::flip_cards(const bool flip[])
 {
 	for (int player_num = 0; player_num < players_num; player_num++)
 		if (flip[player_num])
@@ -139,7 +154,8 @@ void Game::flip_cards(const bool* flip)
 
 	for (int i = 0; i < iterations_max; i++)
 	{
-		std::this_thread::sleep_for(17ms);
+		if (thread_sleep_ms(17))
+			return;
 		for (int player_num = 0; player_num < players_num; player_num++)
 		{
 			if (!flip[player_num])
@@ -173,7 +189,8 @@ void Game::distribute_cards()
 
 		for (int i = 0; i < iterations_max; i++)
 		{
-			std::this_thread::sleep_for(17ms);
+			if (thread_sleep_ms(17))
+				return;
 			switch (card_num%players_num)
 			{
 			case 0:
@@ -205,7 +222,7 @@ void Game::distribute_cards()
 				card.pos.y += height_difference / 0.25f / iterations_max;
 		}
 		lock.lock();
-		central_stack.pop_back();//buggy
+		central_stack.pop_back();
 		card.reset_coords();
 		player_stack[card_num % players_num].push_back(card);
 		lock.unlock();
@@ -267,7 +284,8 @@ void Game::choose_category()
 
 		while (choosen_category == -1)
 		{
-			std::this_thread::sleep_for(17ms);
+			if (thread_sleep_ms(17))
+				return;
 			for (int i = 0; i < 6; i++)//6 categories
 			{
 				if (
@@ -304,7 +322,10 @@ void Game::choose_category()
 				choosen_category = std::stoi(response.substr(data_pos));
 			}
 			else
-				std::this_thread::sleep_for(200ms);
+			{
+				if (thread_sleep_ms(200))
+					return;
+			}
 		}
 	}
 
@@ -340,7 +361,8 @@ void Game::compare_by_choosen_category()
 		player_card[player_num].back().highlight_row(choosen_category);
 	}
 
-	std::this_thread::sleep_for(3s);
+	if (thread_sleep_ms(3000))
+		return;
 
 	bool* flip = new bool[players_num]();
 	for (int player_num = 0; player_num < players_num; player_num++)
@@ -432,7 +454,8 @@ void Game::tiebreak()
 				const int iterations_max = 60;
 				for (int i = 0; i < iterations_max; i++)
 				{
-					std::this_thread::sleep_for(17ms);
+					if (thread_sleep_ms(17))
+						return;
 					for (int player_num = 0; player_num < players_num; player_num++)
 					{
 						if (!winner[player_num])
@@ -495,7 +518,8 @@ void Game::tiebreak()
 				if (winner[player_num])
 					player_card[player_num].back().highlight_row(choosen_category);
 
-			std::this_thread::sleep_for(3s);
+			if (thread_sleep_ms(3000))
+				return;
 
 			winners_num = 0;
 			bool* flip = new bool[players_num]();
@@ -550,7 +574,8 @@ void Game::cards_to_winner()
 		const int iterations_max = 60;
 		for (int i = 0; i < iterations_max; i++)
 		{
-			std::this_thread::sleep_for(17ms);
+			if (thread_sleep_ms(17))
+				return;
 			if (i < iterations_max / 4)
 			{
 				for (Card& card : player_stack[current_player])
@@ -734,48 +759,40 @@ void Game::draw()
 	for (Text3D& text : texts)
 		text.render();
 	lock.unlock();
-	std::thread th;
 	switch (state)
 	{
 	case Game_state::no_action:
 		break;
 	case Game_state::cards_distribution:
 		state = Game_state::no_action;
-		th = std::thread(&Game::distribute_cards, this);
-		th.detach();
+		threads.push_back(std::thread(&Game::distribute_cards, this));
 		break;
 	case Game_state::cards_to_players:
 		state = Game_state::no_action;
-		th = std::thread(&Game::cards_to_players, this);
-		th.detach();
+		threads.push_back(std::thread(&Game::cards_to_players, this));
 		break;
 	case Game_state::choose_category:
 		state = Game_state::no_action;
-		th = std::thread(&Game::choose_category, this);
-		th.detach();
+		threads.push_back(std::thread(&Game::choose_category, this));
 		break;
 	case Game_state::show_players_cards:
 		state = Game_state::no_action;
-		th = std::thread(&Game::show_players_cards, this);
-		th.detach();
+		threads.push_back(std::thread(&Game::show_players_cards, this));
 		break;
 	case Game_state::compare_by_choosen_category:
 		state = Game_state::no_action;
-		th = std::thread(&Game::compare_by_choosen_category, this);
-		th.detach();
+		threads.push_back(std::thread(&Game::compare_by_choosen_category, this));
 		break;
 	case Game_state::tie_break:
 		state = Game_state::no_action;
-		th = std::thread(&Game::tiebreak, this);
-		th.detach();
+		threads.push_back(std::thread(&Game::tiebreak, this));
 		break;
 	case Game_state::next_round:
 		state = Game_state::cards_to_players;
 		break;
 	case Game_state::transfer_cards_to_winner:
 		state = Game_state::no_action;
-		th = std::thread(&Game::cards_to_winner, this);
-		th.detach();
+		threads.push_back(std::thread(&Game::cards_to_winner, this));
 		break;
 	case Game_state::finish:
 		state = Game_state::no_action;

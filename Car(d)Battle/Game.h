@@ -31,7 +31,6 @@ enum class Card_translation
 
 class Game
 {
-	static Game instance;
 	Game_state state;
 	Cards cards;
 	std::vector<std::pair<float, float>> random_translation_vec;//for non regular cards stack
@@ -49,7 +48,10 @@ class Game
 	POINT cursor_pos;
 	POINT screen_size;
 	Client* network_client;
+	std::vector<thread> threads;
+	bool kill_threads;
 
+	bool thread_sleep_ms(unsigned int);
 	void draw_cards_stack(std::vector<Card>& cards_vec);
 	void draw_players_cards();
 	void draw_players_stacks();
@@ -62,10 +64,10 @@ class Game
 	void cards_to_winner();
 
 	void move_cards(const Card_translation[]);
-	void flip_cards(const bool *);
+	void flip_cards(const bool[]);
 	friend void OnTimerCallback(int id);
-	Game();
 public:
+	Game();
 	Game(Game&) = delete;
 	~Game();
 	void set_cursor_pos(int, int);
@@ -73,5 +75,4 @@ public:
 	void load();
 	void draw();
 	void start(int players_num);
-	static Game& get_instance();
 };

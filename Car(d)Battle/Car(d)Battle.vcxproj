@@ -157,6 +157,7 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="UI.cpp" />
     <ClCompile Include="utilities\Bitmap.cpp" />
     <ClCompile Include="utilities\lodepng.cpp" />
     <ClCompile Include="utilities\Texture.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Text3D.h" />
+    <ClInclude Include="UI.h" />
     <ClInclude Include="utilities\Bitmap.h" />
     <ClInclude Include="utilities\lodepng.h" />
     <ClInclude Include="utilities\Texture.h" />

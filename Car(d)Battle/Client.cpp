@@ -139,3 +139,8 @@ bool Client::is_response_ready()
 {
     return response_ready;
 }
+
+bool Client::is_ready()
+{
+	return started;
+}
