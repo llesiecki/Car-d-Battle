@@ -15,7 +15,7 @@ public:
 	Client(unsigned short, int);
 	~Client();
 	bool start();
-	bool http_get(const std::string&, std::string);
+	bool http_get(const std::string&, const std::string&);
 	bool send_request(const std::string&, const std::string&);
 	std::string& get_response();
 	bool is_response_ready();

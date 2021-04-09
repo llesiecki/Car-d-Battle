@@ -21,9 +21,8 @@ std::string GetLastErrorAsString(int errorMessageID)
 
 
 Client::Client(unsigned short port, int buffer_len)
+    :result(nullptr), hints({}), buffer_len(buffer_len), port(port)
 {
-    this->buffer_len = buffer_len;
-    this->port = port;
     started = false;
     response_ready = false;
     Socket = INVALID_SOCKET;
@@ -46,7 +45,7 @@ bool Client::start()
     started = true;
     return true;
 }
-bool Client::http_get(const std::string& address, std::string path)
+bool Client::http_get(const std::string& address, const std::string& path)
 {
     std::string sendbuf = "GET " + path + " HTTP/1.1\r\nHost: " + address + "\r\nConnection: close\r\n\r\n";
     return send_request(address, sendbuf);
@@ -88,13 +87,13 @@ bool Client::send_request(const std::string& address, const std::string& request
     }
     while (ptr = ptr->ai_next);
 
-    freeaddrinfo(result);
-
     if (!ptr)
     {
         std::cerr << "connect faild: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
         return false;
     }
+
+    freeaddrinfo(result);
 
     if(Socket == INVALID_SOCKET)
         std::cerr << "socket failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
@@ -107,21 +106,21 @@ bool Client::send_request(const std::string& address, const std::string& request
     response_ready = false;
     response.clear();
 
-    int bytes_recived;
+    int bytes_received;
     char* buffer = new char[buffer_len];
 
     do
     {
         ZeroMemory(buffer, buffer_len);
-        bytes_recived = recv(Socket, buffer, buffer_len - 1, 0);
+        bytes_received = recv(Socket, buffer, buffer_len - 1, 0);
         response += buffer;
-        if (bytes_recived < 0)
+        if (bytes_received < 0)
         {
             std::cerr << "recv failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
             break;
         }
 
-    } while (bytes_recived);
+    } while (bytes_received);
 
     response_ready = true;
     delete[] buffer;

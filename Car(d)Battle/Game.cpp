@@ -286,6 +286,7 @@ void Game::choose_category()
 		{
 			if (thread_sleep_ms(17))
 				return;
+
 			for (int i = 0; i < 6; i++)//6 categories
 			{
 				if (

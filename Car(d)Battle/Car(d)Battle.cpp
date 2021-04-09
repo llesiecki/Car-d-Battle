@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Game.h"
 
 void OnRender();
 void OnReshape(int, int);
@@ -9,8 +10,6 @@ void OnTimerCallback(int id)
 	glutTimerFunc(17, OnTimerCallback, 0);
 }
 
-POINT cursor, screen;
-
 void glutMouseCallback(int button, int state, int x, int y)
 {
     //std::cout << (x*1.0-screen.x/2.0)/screen.y << "\t" << y*1.0f/screen.y << std::endl;
@@ -18,8 +17,8 @@ void glutMouseCallback(int button, int state, int x, int y)
 
 void CursorPosUpdateCallback(int x, int y)
 {
-    cursor = { x, y };
-    //game.set_cursor_pos(x, y);
+    game.set_cursor_pos(x, y);
+    //std::cout << (x * 1.0 - screen.x / 2.0) / screen.y << "\t" << y * 1.0f / screen.y << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -28,8 +27,8 @@ int main(int argc, char* argv[])
 	glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
     glutCreateWindow("Car(d)Battle");
-    /*game.load();
-    game.start(4);*/
+    game.load();
+    game.start(4);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -56,7 +55,7 @@ void OnRender()
         0.0f, 1.0f, 0.0f //vertical vector
     );
 
-    /*game.draw();*/
+    game.draw();
 
     glFlush();
     glutSwapBuffers();
@@ -67,7 +66,6 @@ void OnReshape(int width, int height)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glViewport(0, 0, width, height);
-    /*game.set_screen_size(width, height);*/
-    screen = { width, height };
+    game.set_screen_size(width, height);
     gluPerspective(60.0f, static_cast<float>(width) / height, 0.01f, 10.0f);
 }

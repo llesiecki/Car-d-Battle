@@ -76,3 +76,5 @@ public:
 	void draw();
 	void start(int players_num);
 };
+
+static Game game;
