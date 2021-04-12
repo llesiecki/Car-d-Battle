@@ -1,10 +1,10 @@
 #include "UI.h"
+#include <regex>
 
-UI::UI()
-	:network_client(80, 512)
+UI::UI(Game & game)
+	:network_client(80, 512), game(game), battle_id(0)
 {
 	network_client.start();
-
 }
 
 
@@ -12,121 +12,81 @@ UI::~UI()
 {
 }
 
-int UI::create_battle()
+std::map<std::string, std::string> UI::get_server_response(const std::string& script, const std::map<std::string, std::string>& query = {})
 {
+	std::map<std::string, std::string> data;
+
 	if (!network_client.is_ready())
 	{
 		network_client.start();
 		if (!network_client.is_ready())
 		{
 			std::cerr << "Failed to start client\n";
-			return 0;
+			return data;
 		}
 	}
-	network_client.http_get(std::string("card-battle.cba.pl"), std::string("/server.php?create_battle=1"));
+
+	std::string request = "/" + script + ".php?";
+	for (auto element : query)
+		request.append(element.first + "=" + element.second + "&");
+	request.pop_back();//remove last, unnecessary "&" from the request or "?", when no variables provided
+	network_client.http_get(std::string("card-battle.cba.pl"), request);
 	std::string& response = network_client.get_response();
-	size_t data_pos = response.find("Car(d) Battle battle_id:");
-	if (data_pos == std::string::npos)
+	std::regex response_capture("([A-Za-z0-9_]+):([A-Za-z0-9_]*)");
+	std::sregex_iterator it(response.begin(), response.end(), response_capture);
+	std::sregex_iterator end;
+	while (it != end)
 	{
-		std::cerr << "Failed to recive battle data\n";
-		return 0;
+		if (it->size() != 3)
+			continue;
+		data[(*it)[1]] = (*it)[2];
+		++it;
 	}
-	data_pos += strlen("Car(d) Battle battle_id:");
-	battle_id = std::stoi(response.substr(data_pos));
-	return battle_id;
+	if (data["error"].empty())
+		return data;
+	else
+		throw data["error"];
 }
 
-int UI::join_battle(int id)
+int UI::create_battle()
 {
-	if (!network_client.is_ready())
-	{
-		network_client.start();
-		if (!network_client.is_ready())
-		{
-			std::cerr << "Failed to start client\n";
-			return 0;
-		}
-	}
-	network_client.http_get(std::string("card-battle.cba.pl"), std::string("/server.php?join_battle=") + std::to_string(id));
-	std::string& response = network_client.get_response();
-	size_t data_pos = response.find("Car(d) Battle join_battle:");
-	if (data_pos == std::string::npos)
-	{
-		std::cerr << "Failed to recive battle data\n";
-		return 0;
-	}
-	data_pos += strlen("Car(d) Battle join_battle:");
-	battle_id = std::stoi(response.substr(data_pos));
-	return battle_id;
+	auto response = get_server_response("create_battle");
+	return std::stoi(response["battle_id"]);
+}
+
+int UI::join_battle(int id, const std::string & passwd = "")
+{
+	std::map<std::string, std::string> query;
+	query["battle_id"] = std::to_string(id);
+	query["user_token"] = user_token;
+	query["passwd"] = passwd;
+	auto response = get_server_response("join_battle", query);
+	return std::stoi(response["battle_id"]);
 }
 
 int UI::start_battle()
 {
-	if (!network_client.is_ready())
-	{
-		network_client.start();
-		if (!network_client.is_ready())
-		{
-			std::cerr << "Failed to start client\n";
-			return 0;
-		}
-	}
-	network_client.http_get(std::string("card-battle.cba.pl"), std::string("/server.php?start_battle=") + std::to_string(battle_id));
-	std::string& response = network_client.get_response();
-	size_t data_pos = response.find("Car(d) Battle start_battle:");
-	if (data_pos == std::string::npos)
-	{
-		std::cerr << "Failed to recive battle data\n";
-		return 0;
-	}
-	data_pos += strlen("Car(d) Battle start_battle:");
-	battle_id = std::stoi(response.substr(data_pos));
-	return battle_id;
+	std::map<std::string, std::string> query;
+	query["battle_id"] = std::to_string(battle_id);
+	query["user_token"] = user_token;
+	auto response = get_server_response("start_battle", query);
+	return std::stoi(response["battle_id"]);
 }
 
-bool UI::register_user(std::string& username, std::string& passwd)
+std::string UI::register_user(const std::string & username, const std::string & passwd)
 {
-	if (!network_client.is_ready())
-	{
-		network_client.start();
-		if (!network_client.is_ready())
-		{
-			std::cerr << "Failed to start client\n";
-			return false;
-		}
-	}
-	network_client.http_get(std::string("card-battle.cba.pl"), std::string("/server.php?register_user=1&username=") + username + "&passwd=" + passwd);
-	std::string& response = network_client.get_response();
-	size_t data_pos = response.find("Car(d) Battle register_user:");
-	if (data_pos == std::string::npos)
-	{
-		std::cerr << "Failed to recive battle data\n";
-		return false;
-	}
-	data_pos += strlen("Car(d) Battle register_user:");
-	return std::stoi(response.substr(data_pos));
+	std::map<std::string, std::string> query;
+	query["username"] = username;
+	query["passwd"] = passwd;
+	auto response = get_server_response("register_user", query);
+	return response["user_token"];
 }
 
-bool UI::login_user(std::string& username, std::string& passwd)
+std::string UI::login_user(const std::string & username, const std::string & passwd)
 {
-	if (!network_client.is_ready())
-	{
-		network_client.start();
-		if (!network_client.is_ready())
-		{
-			std::cerr << "Failed to start client\n";
-			return false;
-		}
-	}
-	network_client.http_get(std::string("card-battle.cba.pl"), std::string("/server.php?login_user=1&username=") + username + "&passwd=" + passwd);
-	std::string& response = network_client.get_response();
-	size_t data_pos = response.find("Car(d) Battle login_user:");
-	if (data_pos == std::string::npos)
-	{
-		std::cerr << "Failed to recive battle data\n";
-		return false;
-	}
-	data_pos += strlen("Car(d) Battle login_user:");
-	user_id = std::stoi(response.substr(data_pos));
-	return user_id;
+	std::map<std::string, std::string> query;
+	query["username"] = username;
+	query["passwd"] = passwd;
+	auto response = get_server_response("login_user", query);
+	return response["user_token"];
 }

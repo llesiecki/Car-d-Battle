@@ -24,6 +24,7 @@ Game::Game()
 Game::~Game()
 {
 	kill_threads = true;
+	std::this_thread::sleep_for(400ms);
 	for (auto& th : threads)
 	{
 		if (th.joinable())
