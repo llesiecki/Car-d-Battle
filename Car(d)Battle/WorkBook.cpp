@@ -5,6 +5,7 @@
 #include <algorithm>
 
 WorkBook::WorkBook(const wchar_t* filename)
+    :book(nullptr), sheet(nullptr)
 {
     good = false;
     book = xlCreateBook();
@@ -14,11 +15,17 @@ WorkBook::WorkBook(const wchar_t* filename)
         if (sheet)
             good = true;
     }
+    if (!good)
+    {
+        std::wstring wstr(filename);
+        throw std::runtime_error("Couldn't open file: " + std::string(wstr.begin(), wstr.end()) + "for reading.\n");
+    }
 }
 
 WorkBook::~WorkBook()
 {
-    book->release();
+    if(good)
+        book->release();
 }
 
 std::string WorkBook::cell_to_string(int row, int col)
