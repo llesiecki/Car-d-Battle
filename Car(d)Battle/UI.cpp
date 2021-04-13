@@ -45,7 +45,7 @@ std::map<std::string, std::string> UI::get_server_response(const std::string& sc
 	if (data["error"].empty())
 		return data;
 	else
-		throw data["error"];
+		throw std::runtime_error(data["error"]);
 }
 
 int UI::create_battle()

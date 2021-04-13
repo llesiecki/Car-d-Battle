@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Cards.h"
+#include <future>
+#include <list>
 
 Cards::Cards(const wchar_t* filename)
 {
@@ -31,11 +33,39 @@ Cards::~Cards()
 bool Cards::load_textures()
 {
 	bool ret = true;
-	ret &= back_tex->Load();
-	ret &= fields_tex->Load();
+	std::vector<CTexture*> to_load;
+	std::list<std::future<bool>> loading;
+	to_load = cards_texture;
+	to_load.push_back(back_tex);
+	to_load.push_back(fields_tex);
+
+	unsigned int max_threads = std::thread::hardware_concurrency();
+	if (max_threads > 1)//leave one thread for others, when more than one thread is available in the system
+		--max_threads;
+
+	for (auto it = to_load.begin(); it != to_load.end(); ++it)
+	{
+		while (loading.size() >= max_threads)
+		{
+			std::this_thread::sleep_for(100ms);
+			loading.remove_if(
+				[](const std::future<bool>& fut)
+				{ return fut.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; });
+		}
+		loading.push_back(std::async(std::launch::async, &CTexture::Load, *it));
+	}
+	while (!loading.empty())
+	{
+		std::this_thread::sleep_for(100ms);
+		loading.remove_if(
+			[](const std::future<bool>& fut)
+			{ return fut.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready; });
+	}
 	for (auto tex : cards_texture)
-		ret &= tex->Load();
-	
+		tex->Bind();
+	back_tex->Bind();
+	fields_tex->Bind();
+
 	return ret;
 }
 

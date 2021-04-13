@@ -42,4 +42,5 @@ void Scene::load()
 	glPopMatrix();
 	glEndList();
 	background->Load();
+	background->Bind();
 }
