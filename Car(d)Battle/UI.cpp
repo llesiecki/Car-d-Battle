@@ -100,3 +100,47 @@ int UI::get_current_category()
 	auto response = get_server_response("get_current_category", query);
 	return std::stoi(response["current_category"]);
 }
+
+void UI::render()
+{
+	if (pause)
+		render_pause_menu();
+}
+
+void UI::render_pause_menu()
+{
+	//glPushMatrix();
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	//gluOrtho2D(100, 0, 100, 0);
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+	//glDisable(GL_LIGHTING);
+	//glColor3f(0.7f, 1.0f, 0.0f);
+	//Text2D menu_title = { 55.0f, 10.0f, "Pause Menu" };
+	//menu_title.render();
+	//glEnable(GL_LIGHTING);
+	//glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	{
+		glLoadIdentity();
+		gluOrtho2D(100, 0, 100, 0);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		{
+			glLoadIdentity();
+			glDisable(GL_LIGHTING);
+			glDisable(GL_CULL_FACE);
+			glColor3f(0.7f, 1.0f, 0.0f);
+			Text2D menu_title = { 55.0f, 10.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
+			menu_title.render();
+			glEnable(GL_LIGHTING);
+			glEnable(GL_CULL_FACE);
+			glMatrixMode(GL_PROJECTION);
+		}
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+	}
+	glPopMatrix();
+}

@@ -313,8 +313,11 @@ void Game::choose_category()
 		while (choosen_category == -1)
 		{
 			choosen_category = ui.get_current_category();
-			if (thread_sleep_ms(500))
-				return;
+			if (choosen_category != -1)
+			{
+				if (thread_sleep_ms(500))
+					return;
+			}
 		}
 	}
 
@@ -738,6 +741,7 @@ void Game::draw_players_cards()
 
 void Game::draw()
 {
+	ui.render();
 	scene.draw();
 	draw_cards_stack(central_stack);
 	draw_players_stacks();
