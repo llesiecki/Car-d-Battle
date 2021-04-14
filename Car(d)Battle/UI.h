@@ -1,6 +1,9 @@
 #pragma once
 #include "stdafx.h"
-#include "Game.h"
+#include "Client.h"
+#include <map>
+
+class Game;
 
 class UI
 {
@@ -20,6 +23,6 @@ class UI
 
 public:
 	UI(Game &);
+	int get_current_category();
 	~UI();
-
 };

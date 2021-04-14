@@ -4,12 +4,14 @@
 #include <assert.h>
 
 Game::Game()
-	:cards(L"carlist.xls")
+	:cards(L"carlist.xls"), ui(*this)
 {
 	srand(static_cast<unsigned int>(time(NULL)));
 	state = Game_state::no_action;
 	for (int i = 0; i < 24; i++)
-		random_translation_vec.push_back({ rand() / 1000000.0f - RAND_MAX / 2000000.0f, rand() / 1000000.0f - RAND_MAX / 2000000.0f });
+		random_translation_vec.push_back({
+			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 30.0f,
+			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 30.0f });
 	players_num = -1;
 	choosen_category = -1;
 	central_stack = cards.get_cards_vec();
@@ -71,11 +73,11 @@ void Game::load()
 void Game::draw_cards_stack(std::vector<Card>& cards_vec)
 {
 	glPushMatrix();
-	lock.lock();// &cards_vec may be modified by other threads during execution of this method
+	lock.lock();//other threads may attempt to modify cards_vec during execution of this member function
 	for (unsigned int i = 0; i < cards_vec.size(); i++)
 	{
-		cards_vec[i].draw();
 		glTranslatef(random_translation_vec[i].first, 0.005f, random_translation_vec[i].second);
+		cards_vec[i].draw();
 	}
 	lock.unlock();
 	glPopMatrix();
@@ -310,24 +312,9 @@ void Game::choose_category()
 	{
 		while (choosen_category == -1)
 		{
-			if (network_client == nullptr)
-			{
-				network_client = new Client(80, 128);
-				network_client->start();
-			}
-			network_client->http_get(std::string("card-battle.cba.pl"), std::string("/server.php"));
-			std::string &response = network_client->get_response();
-			size_t data_pos = response.find("Car(d) Battle data:");
-			if (data_pos != std::string::npos)
-			{
-				data_pos += strlen("Car(d) Battle data:");
-				choosen_category = std::stoi(response.substr(data_pos));
-			}
-			else
-			{
-				if (thread_sleep_ms(200))
-					return;
-			}
+			choosen_category = ui.get_current_category();
+			if (thread_sleep_ms(500))
+				return;
 		}
 	}
 
@@ -684,8 +671,6 @@ void Game::start(int players_num)
 	}
 	winner = new bool[players_num];
 	loser = new bool[players_num]();
-	//std::thread th = std::thread(&Game::debug, this);
-	//th.detach();
 	std::fill_n(loser, players_num, false);
 	this->players_num = players_num;
 	state = Game_state::cards_distribution;

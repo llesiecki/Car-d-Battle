@@ -7,6 +7,7 @@
 #include <mutex>
 #include "Text3D.h"
 #include "Client.h"
+#include "UI.h"
 
 enum class Game_state
 {
@@ -35,6 +36,7 @@ class Game
 	Cards cards;
 	std::vector<std::pair<float, float>> random_translation_vec;//for non regular cards stack
 	Scene scene;
+	UI ui;
 	int players_num;
 	std::vector<Card> central_stack;
 	std::map<int, std::vector<Card>> player_stack;

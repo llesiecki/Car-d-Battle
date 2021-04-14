@@ -7,7 +7,6 @@ UI::UI(Game & game)
 	network_client.start();
 }
 
-
 UI::~UI()
 {
 }
@@ -30,7 +29,7 @@ std::map<std::string, std::string> UI::get_server_response(const std::string& sc
 	for (auto element : query)
 		request.append(element.first + "=" + element.second + "&");
 	request.pop_back();//remove last, unnecessary "&" from the request or "?", when no variables provided
-	network_client.http_get(std::string("card-battle.cba.pl"), request);
+	network_client.http_get(std::string(SERVER_ADDRESS), request);
 	std::string& response = network_client.get_response();
 	std::regex response_capture("([A-Za-z0-9_]+):([A-Za-z0-9_]*)");
 	std::sregex_iterator it(response.begin(), response.end(), response_capture);
@@ -50,7 +49,9 @@ std::map<std::string, std::string> UI::get_server_response(const std::string& sc
 
 int UI::create_battle()
 {
-	auto response = get_server_response("create_battle");
+	std::map<std::string, std::string> query;
+	query["user_token"] = user_token;
+	auto response = get_server_response("create_battle", query);
 	return std::stoi(response["battle_id"]);
 }
 
@@ -89,4 +90,13 @@ std::string UI::login_user(const std::string & username, const std::string & pas
 	query["passwd"] = passwd;
 	auto response = get_server_response("login_user", query);
 	return response["user_token"];
+}
+
+int UI::get_current_category()
+{
+	std::map<std::string, std::string> query;
+	query["battle_id"] = std::to_string(battle_id);
+	query["user_token"] = user_token;
+	auto response = get_server_response("get_current_category", query);
+	return std::stoi(response["current_category"]);
 }
