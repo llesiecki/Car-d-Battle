@@ -19,6 +19,7 @@ Game::Game()
 	winner = nullptr;
 	loser = nullptr;
 	network_client = nullptr;
+	pause = false;
 	if (central_stack.size() != 24)
 		std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
 }
@@ -739,17 +740,26 @@ void Game::draw_players_cards()
 	glPopMatrix();
 }
 
+void Game::set_pause(bool pause)
+{
+	this->pause = pause;
+}
 void Game::draw()
 {
 	ui.render();
-	scene.draw();
-	draw_cards_stack(central_stack);
-	draw_players_stacks();
-	draw_players_cards();
-	lock.lock();
-	for (Text3D& text : texts)
-		text.render();
-	lock.unlock();
+
+	if (!pause)
+	{
+		scene.draw();
+		draw_cards_stack(central_stack);
+		draw_players_stacks();
+		draw_players_cards();
+		lock.lock();
+		for (Text3D& text : texts)
+			text.render();
+		lock.unlock();
+	}
+
 	switch (state)
 	{
 	case Game_state::no_action:

@@ -54,7 +54,10 @@ bool Client::http_get(const std::string& address, const std::string& path)
 bool Client::send_request(const std::string& address, const std::string& request)
 {
     if (!started)
-        return false;
+    {
+        if(!start())
+            throw std::runtime_error("Couldn't start network client.\n");
+    }
 
     ZeroMemory(&hints, sizeof(hints));
     hints.ai_family = AF_INET;

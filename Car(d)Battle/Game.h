@@ -46,6 +46,7 @@ class Game
 	int choosen_category;
 	bool* winner;
 	bool* loser;
+	bool pause;
 	std::vector<Text3D> texts;
 	POINT cursor_pos;
 	POINT screen_size;
@@ -77,6 +78,7 @@ public:
 	void load();
 	void draw();
 	void start(int players_num);
+	void set_pause(bool);
 };
 
 static Game game;
