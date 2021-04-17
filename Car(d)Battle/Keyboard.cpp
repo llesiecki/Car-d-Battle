@@ -57,7 +57,6 @@ unsigned int Keyboard::update()
 		if (current_key_state[i] != previous_key_state[i])//key state change
 		{
 			time_pressed[i] = 0;
-
 			handlers_lock.lock();
 			for (auto& h : handlers)
 			{

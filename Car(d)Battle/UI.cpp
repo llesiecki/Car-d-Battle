@@ -3,13 +3,32 @@
 #include <thread>
 
 UI::UI(Game & game)
-	:network_client(80, 512), game(game), battle_id(0)
+	:network_client(80, 512), game(game), battle_id(0), kb(FindWindowW(NULL, LGAME_NAME))
 {
+	pause = false;
 	network_client.start();
+	std::string keys_to_observe = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
+	keys_to_observe.push_back(VK_LBUTTON);
+	keys_to_observe.push_back(VK_BACK);
+	keys_to_observe.push_back(VK_RETURN);
+	keys_to_observe.push_back(VK_SHIFT);
+	keys_to_observe.push_back(VK_ESCAPE);
+	keys_to_observe.push_back(VK_DELETE);
+	for (char vk_code : keys_to_observe)
+	{
+		std::function<void(BYTE)> fp = std::bind(&UI::on_press_handler, this, std::_Ph<1>());
+		int handler_id = kb.observe_key(vk_code, fp, Key_action::on_press);
+		handlers.push_back(handler_id);
+	}
 }
 
 UI::~UI()
 {
+}
+
+void UI::on_press_handler(BYTE key)
+{
+	std::cout << key << "\n";
 }
 
 std::map<std::string, std::string> UI::get_server_response(const std::string& script, const std::map<std::string, std::string>& query = {})

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Client.h"
 #include "Text2D.h"
+#include "Keyboard.h"
 #include <map>
 
 class Game;
@@ -15,7 +16,10 @@ class UI
 	Client network_client;
 	Game& game;
 	bool pause;
+	Keyboard kb;
+	std::vector<unsigned int> handlers;
 
+	void on_press_handler(BYTE);
 	std::map<std::string, std::string> get_server_response(const std::string &, const std::map<std::string, std::string> &);
 	int create_battle();
 	int join_battle(int, const std::string &);

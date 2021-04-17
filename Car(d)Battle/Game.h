@@ -80,5 +80,3 @@ public:
 	void start(int players_num);
 	void set_pause(bool);
 };
-
-static Game game;

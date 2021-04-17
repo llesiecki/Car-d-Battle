@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include <mutex>
-#include <functional>
 #include <future>
 
 #pragma once
