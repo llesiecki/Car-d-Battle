@@ -1,48 +1,73 @@
-#include "stdafx.h"
 #include "Cards.h"
 
 Cards::Cards(const wchar_t* filename)
 {
 	WorkBook workbook(filename);
-	workbook.to_Cards(*this);
-	back_tex = new CTexture("textures\\" + img_paths.back());
+	for (int col = 2; col < workbook.get_col_num(); ++col)
+		card_values.field_names.push_back(workbook.cell_to_string(0, col));
+
+	std::vector<std::string> img_paths;
+
+	for (int row = 1; row < workbook.get_row_num(); ++row)
+		img_paths.push_back(workbook.cell_to_string(row, 0));
+
+	for (int row = 1; row <= workbook.get_row_num() - 3; ++row)
+	{
+		cards.push_back(Card(row - 1, new CTexture("textures\\cars\\" + img_paths[row - 1]), card_values));
+		cards.back().car_name = workbook.cell_to_string(row, 1);
+		for (int col = 2; col < workbook.get_col_num(); ++col)
+			cards.back().values.push_back(workbook.cell_to_string(row, col));
+	}
+
+	for (unsigned int index = 0; index < card_values.field_names.size(); index++)//add ".0" in acceleration if it's an integer
+	{
+		if (card_values.field_names[index] == "Acceleration")
+		{
+			for (auto& card : cards)
+			{
+				if (card.values[index].find(".") == std::string::npos)
+					card.values[index].append(".0");
+			}
+			break;
+		}
+	}
+
+	card_values.back_tex = new CTexture("textures\\" + img_paths.back());
 	img_paths.pop_back();
-	fields_tex = new CTexture("textures\\" + img_paths.back());
+	card_values.fields_tex = new CTexture("textures\\" + img_paths.back());
 	img_paths.pop_back();
-	for (std::string img_path : img_paths)
-		cards_texture.push_back(new CTexture("textures\\cars\\" + img_path));
-	list_back = list_fields = list_front = -1;
+	card_values.list_back = card_values.list_fields = card_values.list_front = -1;
 }
 
 Cards::~Cards()
 {
-	if(list_back != -1)
-		glDeleteLists(list_back, 1);
-	if (list_fields != -1)
-		glDeleteLists(list_fields, 1);
-	if (list_front != -1)
-		glDeleteLists(list_front, 1);
-	delete back_tex;
-	delete fields_tex;
-	for (CTexture*& tex : cards_texture)
-		delete tex;
+	if(card_values.list_back != -1)
+		glDeleteLists(card_values.list_back, 1);
+	if (card_values.list_fields != -1)
+		glDeleteLists(card_values.list_fields, 1);
+	if (card_values.list_front != -1)
+		glDeleteLists(card_values.list_front, 1);
+	delete card_values.back_tex;
+	delete card_values.fields_tex;
+	for (Card& card : cards)
+		card.delete_tex();
 }
 
 bool Cards::load_textures()
 {
 	bool ret = true;
-	ret &= back_tex->Load();
-	ret &= fields_tex->Load();
-	for (auto tex : cards_texture)
-		ret &= tex->Load();
+	ret &= card_values.back_tex->Load();
+	ret &= card_values.fields_tex->Load();
+	for (Card& card : cards)
+		card.load_tex();
 	
 	return ret;
 }
 
 void Cards::create_lists()
 {
-	list_back = glGenLists(1);
-	glNewList(list_back, GL_COMPILE);
+	card_values.list_back = glGenLists(1);
+	glNewList(card_values.list_back, GL_COMPILE);
 		glBegin(GL_QUADS);
 			glTexCoord2f(1.0, 0.0);
 				glVertex3f(0.0f, 0.0f, 0.0f);
@@ -55,8 +80,8 @@ void Cards::create_lists()
 			glEnd();
 	glEndList();
 
-	list_fields = glGenLists(1);
-	glNewList(list_fields, GL_COMPILE);
+	card_values.list_fields = glGenLists(1);
+	glNewList(card_values.list_fields, GL_COMPILE);
 		glBegin(GL_QUADS);
 			glTexCoord2f(1.0, 0.0);
 				glVertex3f(0.0f, 0.0f, 0.0f);
@@ -69,8 +94,8 @@ void Cards::create_lists()
 		glEnd();
 	glEndList();
 
-	list_front = glGenLists(1);
-	glNewList(list_front, GL_COMPILE);
+	card_values.list_front = glGenLists(1);
+	glNewList(card_values.list_front, GL_COMPILE);
 	glPushMatrix();
 		glBegin(GL_QUADS);
 			glTexCoord2f(1.0, 0.0);
@@ -88,33 +113,27 @@ void Cards::create_lists()
 
 std::vector<Card> Cards::get_cards_vec()
 {
-	std::vector<Card> cards;
-	for (unsigned int i = 0; i < cards_texture.size(); i++)
-		cards.push_back(Card(*this, i));
 	return cards;
 }
 
 void Cards::print()
 {
-	for (std::string field : field_names)
+	for (std::string field : card_values.field_names)
 	{
 		std::cout << field << '\t';
 	}
 	std::cout << std::endl;
-	for (unsigned int i = 0; i < cards_properties.size(); i++)
+	for (Card& card : cards)
 	{
-		//std::cout << "path : " << img_paths[i] << '\t';
-		for (unsigned int j = 0; j < cards_properties[i].size(); j++)
-			std::cout << cards_properties[i][j] << '\t';
+		for (std::string value : card.values)
+			std::cout << value << '\t';
 	}
 	std::cout << '\n';
 }
 
 std::string Cards::get_category_name(int num)
 {
-	num++;
-	if (static_cast<unsigned int>(num) >= field_names.size() || num < 0)
+	if (static_cast<unsigned int>(num) >= card_values.field_names.size() || num < 0)
 		return std::string();
-	return field_names[num];
+	return card_values.field_names[num];
 }
-

@@ -1,32 +1,42 @@
 #include "Card.h"
 
-Card::Card(const Cards& cards, unsigned int &id)
-    :cards(cards), id(id)
+Card::Card(unsigned int id, CTexture* car_tex, CommonCardValues& common_values)
+    :common_values(common_values)
 {
-    angle = 0;
+    this->id = id;
+    this->car_tex = car_tex;
+    angle = 0.0f;
     highlight = -1;
     invert = true;
 }
 
 Card::Card(const Card& card)
-    : cards(card.cards)
+    :common_values(card.common_values)
 {
-    angle = card.angle;
-    pos = card.pos;
-    rot = card.rot;
     id = card.id;
     highlight = card.highlight;
+    car_tex = card.car_tex;
+    car_name = card.car_name;
+    pos = card.pos;
+    rot = card.rot;
+    angle = card.angle;
+    invert = card.invert;
+    values = card.values;
 }
 
 Card Card::operator=(const Card& card)
 {
     id = card.id;
-    angle = card.angle;
+    highlight = card.highlight;
+    car_tex = card.car_tex;
+    common_values = card.common_values;
+    car_name = card.car_name;
     pos = card.pos;
     rot = card.rot;
-    highlight = card.highlight;
+    angle = card.angle;
     invert = card.invert;
-	return Card(card);
+    values = card.values;
+	return Card(*this);
 }
 
 void Card::reset_coords()
@@ -43,11 +53,10 @@ void Card::highlight_row(int row)
 
 std::string Card::get_category_value(int num)
 {
-    num++;
-    if (static_cast<unsigned int>(num) >= cards.field_names.size() || num < 0)
+    if (static_cast<unsigned int>(num) >= values.size() || num < 0)
         return std::string();
 
-    return cards.cards_properties[id][num];
+    return values[num];
 }
 
 void renderStrokeString(float x, float y, const std::string &text)
@@ -77,53 +86,60 @@ void Card::draw()
     glRotatef(90, -1, 0, 0);
     glTranslatef(CARD_WIDTH / 2, -CARD_HEIGHT / 2, 0);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, cards.back_tex->GetId());
-    glCallList(cards.list_back);
-    glBindTexture(GL_TEXTURE_2D, cards.cards_texture[id]->GetId());
-    glCallList(cards.list_front);
-    glBindTexture(GL_TEXTURE_2D, cards.fields_tex->GetId());
-    glCallList(cards.list_fields);
+    glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
+    glCallList(common_values.list_back);
+    glBindTexture(GL_TEXTURE_2D, car_tex->GetId());
+    glCallList(common_values.list_front);
+    glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->GetId());
+    glCallList(common_values.list_fields);
     glDisable(GL_TEXTURE_2D);
     glColor3f(0.0f, 0.0f, 0.0f);
     glTranslatef(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f);
-    renderStrokeString(0, 0, cards.cards_properties[id][0]);
+    renderStrokeString(0, 0, car_name);
     glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there are 7 fields
-    for (unsigned int i = 1; i < cards.field_names.size(); i++)
+    for (unsigned int i = 0; i < common_values.field_names.size(); i++)
     {
-        if (!cards.field_names[i].empty())
+        if (highlight == i)
         {
-            if (highlight == i - 1)
-            {
-                glPushMatrix();
-                glTranslatef(-0.02f, -0.02f, 0.0035f);
-                glColor3f(1.0f, 0.0f, 0.0f);
-                glBegin(GL_LINES);
-
-                glVertex3f(0.0f, 0.0f, 0.0f);
-                glVertex3f(0.0f, CARD_HEIGHT / 2 / 7, 0.0f);
-
-                glVertex3f(0.0f, CARD_HEIGHT / 2 / 7, 0.0f);
-                glVertex3f(CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f);
-
-                glVertex3f(CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f);
-                glVertex3f(CARD_WIDTH, 0.0f, 0.0f);
-
-                glVertex3f(CARD_WIDTH, 0.0f, 0.0f);
-                glVertex3f(0.0f, 0.0f, 0.0f);
-
-                glEnd();
-                glColor3f(0, 0, 0);
-                glLineWidth(1.5f);
-                glPopMatrix();
-            }
-            renderStrokeString(0, 0, cards.field_names[i] + ":");
-            float width = calc_text_width(cards.cards_properties[id][i]);
             glPushMatrix();
-            glTranslatef(CARD_WIDTH - 0.04f - width, 0, 0);
-            renderStrokeString(0, 0, cards.cards_properties[id][i]);
+            glTranslatef(-0.02f, -0.02f, 0.0035f);
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glBegin(GL_LINES);
+
+            glVertex3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(0.0f, CARD_HEIGHT / 2 / 7, 0.0f);
+
+            glVertex3f(0.0f, CARD_HEIGHT / 2 / 7, 0.0f);
+            glVertex3f(CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f);
+
+            glVertex3f(CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f);
+            glVertex3f(CARD_WIDTH, 0.0f, 0.0f);
+
+            glVertex3f(CARD_WIDTH, 0.0f, 0.0f);
+            glVertex3f(0.0f, 0.0f, 0.0f);
+
+            glEnd();
+            glColor3f(0, 0, 0);
+            glLineWidth(1.5f);
             glPopMatrix();
         }
+        renderStrokeString(0, 0, common_values.field_names[i] + ":");
+        float width = calc_text_width(values[i]);
+        glPushMatrix();
+        glTranslatef(CARD_WIDTH - 0.04f - width, 0, 0);
+        renderStrokeString(0, 0, values[i]);
+        glPopMatrix();
         glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there is 7 fields
     }
     glPopMatrix();
+}
+
+void Card::delete_tex()
+{
+    delete car_tex;
+}
+
+void Card::load_tex()
+{
+    car_tex->Load();
 }

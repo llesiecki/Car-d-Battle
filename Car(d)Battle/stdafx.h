@@ -20,6 +20,4 @@ constexpr wchar_t LGAME_NAME[] = L"Car(d)Battle";
 #include "utilities\Bitmap.h"
 #include <GL/glut.h>
 #include <libxl.h>
-#include "Card.h"
-#include "Cards.h"
-#include "WorkBook.h"
+#include "utilities/Vec3.h"

@@ -1,13 +1,17 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Scene.h"
+#include <algorithm>
+#include <time.h>
+#include <assert.h>
 #include <map>
 #include <thread>
 #include <mutex>
+#include "Scene.h"
 #include "Text3D.h"
 #include "Client.h"
 #include "UI.h"
+#include "Cards.h"
 
 enum class Game_state
 {

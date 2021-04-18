@@ -1,7 +1,4 @@
 #include "Game.h"
-#include <algorithm>
-#include <time.h>
-#include <assert.h>
 
 Game::Game()
 	:cards(L"carlist.xls"), ui(*this)
@@ -230,9 +227,9 @@ void Game::distribute_cards()
 				card.pos.y += height_difference / 0.25f / iterations_max;
 		}
 		lock.lock();
-		central_stack.pop_back();
 		card.reset_coords();
 		player_stack[card_num % players_num].push_back(card);
+		central_stack.pop_back();
 		lock.unlock();
 		card_num++;
 	}
