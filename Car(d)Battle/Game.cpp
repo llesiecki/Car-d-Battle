@@ -7,8 +7,8 @@ Game::Game()
 	state = Game_state::no_action;
 	for (int i = 0; i < 24; i++)
 		random_translation_vec.push_back({
-			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 30.0f,
-			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 30.0f });
+			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f,
+			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f });
 	players_num = -1;
 	choosen_category = -1;
 	central_stack = cards.get_cards_vec();
@@ -410,7 +410,7 @@ void Game::tiebreak()
 
 	while (winners_num != 1)//tiebreak
 	{
-		assert(winners_num > 0);
+		assert(winners_num > 1);
 
 		for (int tiebreak_cards_num = 0; tiebreak_cards_num < 2; tiebreak_cards_num++)
 		{
@@ -462,17 +462,37 @@ void Game::tiebreak()
 					}
 				}
 
+				bool cards_equal_in_selected_category = true;
+				std::string category_value;
 				for (int player_num = 0; player_num < players_num; player_num++)
 				{
 					if (!winner[player_num])
 						continue;
 					for (Card& card : player_card[player_num])
+					{
 						card.reset_coords();
+						if(category_value.empty())
+							category_value = card.values[choosen_category];
+						else if(cards_equal_in_selected_category)
+						{
+							if (category_value != card.values[choosen_category])
+								cards_equal_in_selected_category = false;
+						}
+					}
+						
 					lock.lock();
 					player_stack[player_num] = player_card[player_num];
-					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
 					player_card[player_num].clear();
+					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
 					lock.unlock();
+
+					//it is possible, that all the winners left have the same value in the selected category.
+					//in this case the category should be randomized
+					if (cards_equal_in_selected_category)
+					{
+						choosen_category = rand() % 6;
+						std::cout << "The category has been randomized because all players taking part in the tie break have the same value in the previous category." << std::endl;
+					}
 
 				}
 

@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     glFrontFace(GL_CCW);
     glLineWidth(1.5);
 
-    static void (*render_timer)(int) = [](int plce_holder){//See Note 1
+    static void (*render_timer)(int) = [](int place_holder){//See Note 1
         game.draw();
         glutTimerFunc(17, render_timer, 0); };
 
