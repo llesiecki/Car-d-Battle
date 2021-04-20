@@ -28,7 +28,7 @@ UI::~UI()
 
 void UI::on_press_handler(BYTE key)
 {
-	std::cout << key << "\n";
+	//std::cout << key << "\n";
 }
 
 std::map<std::string, std::string> UI::get_server_response(const std::string& script, const std::map<std::string, std::string>& query = {})

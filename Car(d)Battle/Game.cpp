@@ -11,18 +11,23 @@ Game::Game()
 			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f });
 	players_num = -1;
 	choosen_category = -1;
-	central_stack = cards.get_cards_vec();
-	std::random_shuffle(central_stack.begin(), central_stack.end(), [](int a) -> int {return rand() % a; });
 	winner = nullptr;
 	loser = nullptr;
 	network_client = nullptr;
 	pause = false;
-	if (central_stack.size() != 24)
-		std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
 }
 
-Game::~Game()
+void Game::clean()
 {
+	for (Card& card : central_stack)
+	{
+		card.reset_coords();
+		card.highlight_row(-1);
+	}
+
+	central_stack.clear();
+	player_card.clear();
+	player_stack.clear();
 	kill_threads = true;
 	std::this_thread::sleep_for(400ms);
 	for (auto& th : threads)
@@ -30,12 +35,20 @@ Game::~Game()
 		if (th.joinable())
 			th.join();
 	}
+	threads.clear();
+	kill_threads = false;
 	if (winner)
 		delete[] winner;
 	if (loser)
 		delete[] loser;
 	if (network_client)
 		delete network_client;
+
+}
+
+Game::~Game()
+{
+	clean();
 }
 
 bool Game::thread_sleep_ms(unsigned int delay)
@@ -590,6 +603,72 @@ void Game::cards_to_winner()
 		{
 			if (thread_sleep_ms(17))
 				return;
+
+			Vec3 move;
+			float angle = 0.0f;
+			if (current_player == player_num)
+				move = Vec3(1.0f, 0.0f, 0.5f);
+			else if (current_player == 0 && player_num == 3)
+			{
+				move = Vec3(-1.2f, 0.0f, -0.4f);
+				angle = -90.0f;
+			}
+			else if (current_player == 0 && player_num == 2)
+			{
+				move = Vec3(-1.0f, 0.0f, -2.2f);
+				angle = 180.0f;
+			}
+			else if (current_player == 0 && player_num == 1)
+			{
+				move = Vec3(1.2f, 0.0f, -2.4f);
+				angle = 90.0f;
+			}
+			else if (current_player == 1 && player_num == 3)
+			{
+				move = Vec3(-1.0f, 0.0f, -3.3f);
+				angle = 180.0f;
+			}
+			else if (current_player == 1 && player_num == 2)
+			{
+				move = Vec3(1.9f, 0.0f, -2.0f);
+				angle = 90.0f;
+			}
+			else if (current_player == 1 && player_num == 0)
+			{
+				move = Vec3(-1.9f, 0.0f, 0.3f);
+				angle = -90.0f;
+			}
+			else if (current_player == 2 && player_num == 3)
+			{
+				move = Vec3(1.5, 0.0f, -2.4f);
+				angle = 90.0f;
+			}
+			else if (current_player == 2 && player_num == 1)
+			{
+				move = Vec3(-1.5f, 0.0f, -0.4f);
+				angle = -90.0f;
+			}
+			else if (current_player == 2 && player_num == 0)
+			{
+				move = Vec3(-1.0f, 0.0f, -2.2f);
+				angle = 180.0f;
+			}
+			else if (current_player == 3 && player_num == 2)
+			{
+				move = Vec3(-1.9f, 0.0f, 0.0f);
+				angle = -90.0f;
+			}
+			else if (current_player == 3 && player_num == 1)
+			{
+				move = Vec3(-1.0f, 0.0f, -3.3f);
+				angle = 180.0f;
+			}
+			else if (current_player == 3 && player_num == 0)
+			{
+				move = Vec3(1.9f, 0.0f, -1.7f);
+				angle = 90.0f;
+			}
+
 			if (i < iterations_max / 4)
 			{
 				for (Card& card : player_stack[current_player])
@@ -597,71 +676,6 @@ void Game::cards_to_winner()
 			}
 			else
 			{
-				Vec3 move;
-				float angle = 0.0f;
-				if (current_player == player_num)
-					move = Vec3(1.0f, 0.0f, 0.5f);
-				else if (current_player == 0 && player_num == 3)
-				{
-					move = Vec3(-1.2f, 0.0f, -0.4f);
-					angle = -90.0f;
-				}
-				else if (current_player == 0 && player_num == 2)
-				{
-					move = Vec3(-1.0f, 0.0f, -2.2f);
-					angle = 180.0f;
-				}
-				else if (current_player == 0 && player_num == 1)
-				{
-					move = Vec3(1.2f, 0.0f, -2.4f);
-					angle = 90.0f;
-				}
-				else if (current_player == 1 && player_num == 3)
-				{
-					move = Vec3(-1.0f, 0.0f, -3.3f);
-					angle = 180.0f;
-				}
-				else if (current_player == 1 && player_num == 2)
-				{
-					move = Vec3(1.9f, 0.0f, -2.0f);
-					angle = 90.0f;
-				}
-				else if (current_player == 1 && player_num == 0)
-				{
-					move = Vec3(-1.9f, 0.0f, 0.3f);
-					angle = -90.0f;
-				}
-				else if (current_player == 2 && player_num == 3)
-				{
-					move = Vec3(1.5, 0.0f, -2.4f);
-					angle = 90.0f;
-				}
-				else if (current_player == 2 && player_num == 1)
-				{
-					move = Vec3(-1.5f, 0.0f, -0.4f);
-					angle = -90.0f;
-				}
-				else if (current_player == 2 && player_num == 0)
-				{
-					move = Vec3(-1.0f, 0.0f, -2.2f);
-					angle = 180.0f;
-				}
-				else if (current_player == 3 && player_num == 2)
-				{
-					move = Vec3(-1.9f, 0.0f, 0.0f);
-					angle = -90.0f;
-				}
-				else if (current_player == 3 && player_num == 1)
-				{
-					move = Vec3(-1.0f, 0.0f, -3.3f);
-					angle = 180.0f;
-				}
-				else if (current_player == 3 && player_num == 0)
-				{
-					move = Vec3(1.9f, 0.0f, -1.7f);
-					angle = 90.0f;
-				}
-
 				for (Card& card : player_card[player_num])
 				{
 					card.pos.x += move.x / (iterations_max * 3 / 4);
@@ -694,6 +708,19 @@ void Game::start(int players_num)
 		std::cerr << "The game is designed for 2-4 players.\n";
 		return;
 	}
+	central_stack = cards.get_cards_vec();
+	for (Card& card : central_stack)
+	{
+		card.reset_coords();
+		card.highlight_row(-1);
+	}
+
+	player_card.clear();
+	player_stack.clear();
+
+	std::random_shuffle(central_stack.begin(), central_stack.end(), [](int a) -> int {return rand() % a; });
+	if (central_stack.size() != 24)
+		std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
 	winner = new bool[players_num];
 	loser = new bool[players_num]();
 	std::fill_n(loser, players_num, false);
@@ -831,9 +858,18 @@ void Game::draw()
 		for (int winner_num = 0; winner_num < players_num; winner_num++)
 			if (winner[winner_num])
 			{
-				std::cout << "The Winner is the player number " << winner_num << std::endl;
+				std::cout << "The Winner is player number " << winner_num << std::endl;
 				break;
 			}
+		clean();
+		unsigned int opp_num;
+		do
+		{
+			std::cout << "Number of opponents for the next round: ";
+			std::cin >> opp_num;
+		}
+		while (opp_num < 1 && opp_num > 3);
+		start(opp_num + 1);
 		break;
 	default:
 		break;

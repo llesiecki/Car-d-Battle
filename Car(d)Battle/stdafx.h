@@ -11,6 +11,7 @@ constexpr char SERVER_ADDRESS[] = "localhost";
 constexpr float CARD_HEIGHT = 1.178f;
 constexpr float CARD_WIDTH = 0.707f;
 constexpr wchar_t LGAME_NAME[] = L"Car(d)Battle";
+constexpr char GAME_NAME[] = "Car(d)Battle";
 
 #include <string>
 #include <fstream>

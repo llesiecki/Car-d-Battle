@@ -69,6 +69,7 @@ class Game
 	void compare_by_choosen_category();
 	void tiebreak();
 	void cards_to_winner();
+	void clean();
 
 	void move_cards(const Card_translation[]);
 	void flip_cards(const bool[]);

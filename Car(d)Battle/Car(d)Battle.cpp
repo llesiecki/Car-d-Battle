@@ -6,10 +6,18 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv);
 	glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-    glutCreateWindow("Car(d)Battle");
+    glutCreateWindow(GAME_NAME);
     static Game game;//See Note 1
     game.load();
-    game.start(4);
+
+    unsigned int opp_num;
+    do
+    {
+        std::cout << "Number of opponents for the next round: ";
+        std::cin >> opp_num;
+    } 		while (opp_num < 1 && opp_num > 3);
+    game.start(opp_num + 1);
+
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
