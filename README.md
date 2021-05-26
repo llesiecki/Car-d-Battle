@@ -1,4 +1,4 @@
-# Car-d-Battle
+# Car(d) Battle
 A card game focused on car parameters.
 ![Car(d)Battle](https://user-images.githubusercontent.com/37122127/119583742-873d1180-bdc7-11eb-8389-6f67f44bfbe9.png)
 This game is developed with pure C++ and OpenGL, no game engines, no frameworks.
