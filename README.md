@@ -1,6 +1,9 @@
 # Car(d) Battle
 A card game focused on car parameters.
 ![Car(d)Battle](https://user-images.githubusercontent.com/37122127/119583742-873d1180-bdc7-11eb-8389-6f67f44bfbe9.png)
+
+![Car(d)Battle](https://user-images.githubusercontent.com/37122127/120085423-43545000-c0d8-11eb-9db7-61e4e7824eb5.gif)
+
 This game is developed with pure C++ and OpenGL, no game engines, no frameworks.
 # Description
 It's a classic card battle game. There are 24 cards evenly distributed to all players. Each card represents a different car and has 6 fields: Cylinders, Capacity, Power, Torque, Top Speed and Acceleration.  
