@@ -116,7 +116,7 @@ bool Keyboard::justPressed(char key)
 unsigned int Keyboard::observe_key(BYTE key, std::function<void(BYTE)> func, Key_action act)
 {
 	handlers_lock.lock();
-	handler* h = new handler{func, key, handlers.size(), act};
+	handler* h = new handler{func, key, static_cast<unsigned int>(handlers.size()), act};
 	handlers.push_back(h);
 	handlers_lock.unlock();
 	return h->id;

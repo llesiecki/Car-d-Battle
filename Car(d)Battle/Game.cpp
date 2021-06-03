@@ -796,17 +796,28 @@ void Game::draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluPerspective(60.0f, static_cast<float>(screen_size.x) / screen_size.y, 0.01f, 10.0f);
+
+	glPushMatrix();
+	glLoadIdentity();
+	glTranslatef(0.0f, 0.0f, 0.44f);
+	glutSolidCube(0.1);
+	glPopMatrix();
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glPushMatrix();
 	gluLookAt(
 		0.0f, 2.3f, 1.15f,//camera position
 		0.0f, 0.0f, 0.44f,// camera look-at point
 		0.0f, 1.0f, 0.0f //vertical vector
 	);
 
-	ui.render();
-
-	if (!pause)
+	/*if (!pause)
 	{
 		scene.draw();
 		draw_cards_stack(central_stack);
@@ -817,6 +828,8 @@ void Game::draw()
 			text.render();
 		lock.unlock();
 	}
+	ui.render();*/
+	glPopMatrix();
 
 	switch (state)
 	{

@@ -5,7 +5,7 @@ int main(int argc, char* argv[])
 {
 	glutInit(&argc, argv);
 	glutInitWindowSize(1280, 720);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutCreateWindow(GAME_NAME);
     static Game game;//See Note 1
     game.load();
@@ -14,7 +14,8 @@ int main(int argc, char* argv[])
     do
     {
         std::cout << "Number of opponents for the next round: ";
-        std::cin >> opp_num;
+        //std::cin >> opp_num;
+        opp_num = 3;
     } 		while (opp_num < 1 && opp_num > 3);
     game.start(opp_num + 1);
 
