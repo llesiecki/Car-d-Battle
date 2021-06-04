@@ -1,6 +1,7 @@
 #include "UI.h"
 #include <regex>
 #include <thread>
+#include "Game.h"
 
 UI::UI(Game & game)
 	:network_client(80, 512), game(game), battle_id(0), kb(FindWindowW(NULL, LGAME_NAME))
@@ -29,7 +30,10 @@ UI::~UI()
 void UI::on_press_handler(BYTE key)
 {
 	if (key == VK_ESCAPE)
+	{
 		pause ^= true;
+		game.set_pause(pause);
+	}
 }
 
 std::map<std::string, std::string> UI::get_server_response(const std::string& script, const std::map<std::string, std::string>& query = {})
@@ -183,21 +187,27 @@ void UI::render_pause_menu()
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	{
-		//glLoadIdentity();
-		//gluOrtho2D(100, 0, 100, 0);
-		//glDisable(GL_LIGHTING);
-		//glDisable(GL_CULL_FACE);
-		//glColor3f(0.7f, 1.0f, 0.0f);
-		//Text2D menu_title = { 55.0f, 10.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
-		//menu_title.render();
-		//glEnable(GL_LIGHTING);
-		//glEnable(GL_CULL_FACE);
+
 
 
 		glPushMatrix();
-		glLoadIdentity();
-		glTranslatef(0.0f, 0.0f, 0.2f);
-		glutSolidCube(0.1);
+		glTranslatef(0.0f, 0.0f, -0.2f);
+		glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
+		glBegin(GL_QUADS);
+		glVertex2f(0.0f, 0.0f);
+		glVertex2f(0.1f, 0.0f);
+		glVertex2f(0.1f, 0.1f);
+		glVertex2f(0.0, 0.1f);
+		glEnd();
+		glPopMatrix();
+
+		glPushMatrix();
+		gluOrtho2D(100, 0, 100, 0);
+		glDisable(GL_CULL_FACE);
+		glColor3f(0.7f, 1.0f, 0.0f);
+		Text2D menu_title = { 55.0f, 9.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
+		menu_title.render();
+		glEnable(GL_CULL_FACE);
 		glPopMatrix();
 
 	}
