@@ -132,84 +132,27 @@ void UI::render()
 
 void UI::render_pause_menu()
 {
-	//glPushMatrix();
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	//gluOrtho2D(100, 0, 100, 0);
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-	//glDisable(GL_LIGHTING);
-	//glColor3f(0.7f, 1.0f, 0.0f);
-	//Text2D menu_title = { 55.0f, 10.0f, "Pause Menu" };
-	//menu_title.render();
-	//glEnable(GL_LIGHTING);
-	//glPopMatrix();
-
-
-
-	//glMatrixMode(GL_PROJECTION);
-	//glPushMatrix();
-	//{
-	//	glLoadIdentity();
-	//	gluOrtho2D(100, 0, 100, 0);
-	//	glMatrixMode(GL_MODELVIEW);
-	//	glPushMatrix();
-	//	{
-	//		glLoadIdentity();
-	//		glDisable(GL_LIGHTING);
-	//		glDisable(GL_CULL_FACE);
-	//		glColor3f(0.7f, 1.0f, 0.0f);
-	//		Text2D menu_title = { 55.0f, 10.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
-	//		menu_title.render();
-	//		glEnable(GL_LIGHTING);
-	//		glEnable(GL_CULL_FACE);
-
-	//		glMatrixMode(GL_PROJECTION);
-	//		glPushMatrix();
-	//		//glTranslatef(-0.5, -0.5, 0.0f);
-
-	//		glLoadIdentity();
-	//		glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-	//		glBegin(GL_QUADS);
-	//		glVertex2f(0.0f, 0.0f);
-	//		glVertex2f(0.1f, 0.0f);
-	//		glVertex2f(0.1f, 0.1f);
-	//		glVertex2f(0.0, 0.1f);
-	//		glEnd();
-	//		glPopMatrix();
-	//	}
-	//	glPopMatrix();
-	//	glMatrixMode(GL_MODELVIEW);
-	//}
-	//glPopMatrix();
-
-
 	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0.0, 100.0, 100.0, 0.0, -1.0, 1.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
 	glPushMatrix();
 	{
-
-
-
-		glPushMatrix();
-		glTranslatef(0.0f, 0.0f, -0.2f);
 		glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
 		glBegin(GL_QUADS);
 		glVertex2f(0.0f, 0.0f);
-		glVertex2f(0.1f, 0.0f);
-		glVertex2f(0.1f, 0.1f);
-		glVertex2f(0.0, 0.1f);
+		glVertex2f(0.0f, 10.f);
+		glVertex2f(10.0f, 10.0f);
+		glVertex2f(10.0f, 0.0f);
 		glEnd();
-		glPopMatrix();
 
-		glPushMatrix();
-		gluOrtho2D(100, 0, 100, 0);
-		glDisable(GL_CULL_FACE);
-		glColor3f(0.7f, 1.0f, 0.0f);
-		Text2D menu_title = { 55.0f, 9.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
+		glColor3f(1.0f, 0.0f, 1.0f);
+		Text2D menu_title = { 5.0f, 10.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
 		menu_title.render();
-		glEnable(GL_CULL_FACE);
 		glPopMatrix();
-
 	}
 	glPopMatrix();
 }
