@@ -794,8 +794,8 @@ void Game::set_pause(bool pause)
 }
 void Game::draw()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -803,26 +803,30 @@ void Game::draw()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glPushMatrix();
-	gluLookAt(
-		0.0f, 2.3f, 1.15f,//camera position
-		0.0f, 0.0f, 0.44f,// camera look-at point
-		0.0f, 1.0f, 0.0f //vertical vector
-	);
-	ui.render();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
-	if (!pause)
-	{
-		scene.draw();
-		draw_cards_stack(central_stack);
-		draw_players_stacks();
-		draw_players_cards();
-		lock.lock();
-		for (Text3D& text : texts)
-			text.render();
-		lock.unlock();
-	}
+	glPushMatrix();
+		gluLookAt(
+			0.0f, 2.3f, 1.15f,//camera position
+			0.0f, 0.0f, 0.44f,// camera look-at point
+			0.0f, 1.0f, 0.0f //vertical vector
+		);
+
+		//if (!pause)
+		{
+			scene.draw();
+			draw_cards_stack(central_stack);
+			draw_players_stacks();
+			draw_players_cards();
+			lock.lock();
+			for (Text3D& text : texts)
+				text.render();
+			lock.unlock();
+		}
 	glPopMatrix();
+
+	ui.render();
 
 	switch (state)
 	{
