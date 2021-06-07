@@ -126,12 +126,6 @@ int UI::get_current_category()
 
 void UI::render()
 {
-	if (pause)
-		render_pause_menu();
-}
-
-void UI::render_pause_menu()
-{
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0.0, 100.0, 100.0, 0.0, -1.0, 1.0);
@@ -139,6 +133,12 @@ void UI::render_pause_menu()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	if (pause)
+		render_pause_menu();
+}
+
+void UI::render_pause_menu()
+{
 	glPushMatrix();
 	{
 		glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
@@ -150,9 +150,8 @@ void UI::render_pause_menu()
 		glEnd();
 
 		glColor3f(1.0f, 0.0f, 1.0f);
-		Text2D menu_title = { 5.0f, 10.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
+		Text2D menu_title = { 0.0f, 10.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
 		menu_title.render();
-		glPopMatrix();
 	}
 	glPopMatrix();
 }
