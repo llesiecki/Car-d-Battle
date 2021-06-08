@@ -1,19 +1,9 @@
 #include "stdafx.h"
 #include "Game.h"
-
-#include "freetype/ft2build.h"
-#include FT_FREETYPE_H
+#include "TrueTypeFont.h"
 
 int main(int argc, char* argv[])
 {
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft))
-    {
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-        return -1;
-    }
-
-
 	glutInit(&argc, argv);
 	glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
