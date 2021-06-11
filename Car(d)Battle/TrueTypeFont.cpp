@@ -9,6 +9,11 @@ TrueTypeFont::TrueTypeFont()
     }
 }
 
+TrueTypeFont::~TrueTypeFont()
+{
+    FT_Done_FreeType(ft);
+}
+
 void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 {
     if (fonts.find(name) != fonts.end())
@@ -35,7 +40,7 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
             continue;
         }
         // generate texture
-        unsigned int texture;
+        GLuint texture;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexImage2D(

@@ -11,7 +11,7 @@
 class TrueTypeFont
 {
     struct Character {
-        unsigned int            TextureID;  // ID handle of the glyph texture
+        GLuint                  TextureID;  // ID handle of the glyph texture
         std::pair<int, int>     Size;       // Size of glyph
         std::pair<int, int>     Bearing;    // Offset from baseline to left/top of glyph
         unsigned int            Advance;    // Offset to advance to next glyph
@@ -21,6 +21,7 @@ class TrueTypeFont
     std::map<std::string, std::map<char, Character>> fonts;
 
     TrueTypeFont();
+    ~TrueTypeFont();
 
     friend TrueTypeFont& Singleton<TrueTypeFont>();
 
