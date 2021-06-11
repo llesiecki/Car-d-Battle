@@ -73,7 +73,6 @@ class Game
 
 	void move_cards(const Card_translation[]);
 	void flip_cards(const bool[]);
-	friend void OnTimerCallback(int id);
 public:
 	Game();
 	Game(Game&) = delete;
