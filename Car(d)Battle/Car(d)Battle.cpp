@@ -1,9 +1,13 @@
 #include "stdafx.h"
 #include "Game.h"
 #include "TrueTypeFont.h"
+#include "GLFW/glfw3.h"
+#include "GLFW/glfw3native.h"
 
 int main(int argc, char* argv[])
 {
+    glfwInit();//GLFW test
+    glfwTerminate();// GLFW test
 	glutInit(&argc, argv);
 	glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
