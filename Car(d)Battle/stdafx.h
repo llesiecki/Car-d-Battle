@@ -5,6 +5,8 @@
 
 #pragma once
 
+#define GLFW_INCLUDE_NONE
+
 #include "targetver.h"
 
 constexpr char SERVER_ADDRESS[] = "localhost";
@@ -19,6 +21,8 @@ constexpr char GAME_NAME[] = "Car(d)Battle";
 #include <functional>
 #include <vector>
 #include "utilities\Bitmap.h"
-#include <GL/glut.h>
+//#include <GL/glut.h>
+#include "GLFW/glfw3.h"
+#include "Glad/glad.h"
 #include <libxl.h>
 #include "utilities/Vec3.h"
