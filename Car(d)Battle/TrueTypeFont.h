@@ -14,7 +14,7 @@ class TrueTypeFont
         GLuint                  TextureID;  // ID handle of the glyph texture
         std::pair<int, int>     Size;       // Size of glyph
         std::pair<int, int>     Bearing;    // Offset from baseline to left/top of glyph
-        unsigned int            Advance;    // Offset to advance to next glyph
+        FT_Pos                  Advance;    // Offset to advance to next glyph
     };
 
     FT_Library ft;
