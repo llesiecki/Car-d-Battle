@@ -1,13 +1,16 @@
 #include "stdafx.h"
-#include "Game.h"
-#include "TrueTypeFont.h"
-#include "GLFW/glfw3.h"
-#include "GLFW/glfw3native.h"
+//#include "Game.h"
 
 int main(int argc, char* argv[])
 {
-    glfwInit();//GLFW test
-    glfwTerminate();// GLFW test
+    //GLFW test
+    if(glfwInit() != GLFW_TRUE)
+        exit(1);
+	gladLoadGL();
+    glfwTerminate();
+
+    //Commented out due to refactor with GLFW
+    /*
 	glutInit(&argc, argv);
 	glutInitWindowSize(1280, 720);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -39,6 +42,7 @@ int main(int argc, char* argv[])
     glutReshapeFunc([](int w, int h) {return game.set_screen_size(w, h); });
     glutPassiveMotionFunc([](int x, int y) {return game.set_cursor_pos(x, y); });
 	glutMainLoop();
+    */
 	return 0;
 }
 

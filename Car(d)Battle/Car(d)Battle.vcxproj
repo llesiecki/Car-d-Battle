@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\GLFW\include;$(ProjectDir)\freeglut\include;$(ProjectDir)\libxl\include_cpp;$(ProjectDir)\freetype</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Glad\include;$(ProjectDir)\GLFW\include;$(ProjectDir)\freeglut\include;$(ProjectDir)\libxl\include_cpp;$(ProjectDir)\freetype</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -161,6 +161,7 @@
     <ClCompile Include="Cards.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Glad\src\glad.c" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
