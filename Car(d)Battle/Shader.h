@@ -6,8 +6,8 @@ class Shader
 	int id;
 public:
 	Shader();
-	Shader(std::string);
-	void load(std::string);
+	Shader(const std::string &);
+	void load(const std::string &);
 	void enable();
 	void disable();
 
