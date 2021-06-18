@@ -3,13 +3,14 @@
 
 class Shader
 {
-	int id;
+	std::vector<GLuint> shader_ids;
+	GLuint program_id;
 public:
 	Shader();
-	Shader(const std::string &);
-	void load(const std::string &);
+	~Shader();
+	void load(const std::string &, GLenum);
+	void link();
 	void enable();
 	void disable();
-
 };
 
