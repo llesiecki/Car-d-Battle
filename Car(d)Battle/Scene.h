@@ -1,11 +1,13 @@
 #pragma once
 #include "stdafx.h"
 #include "utilities/Texture.h"
+#include "Shader.h"
 
 class Scene
 {
 	CTexture* background;
-	GLuint list_background;
+	GLuint vbo_background;
+	Shader shader_bg;
 public:
 	Scene();
 	~Scene();
