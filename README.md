@@ -37,7 +37,10 @@ The game also uses a native C++ code for **.PNG** pictures decompression to bitm
 # Software
 * Language: [C++](https://www.cplusplus.com/) 17
 * Graphics API: [OpenGL](https://www.opengl.org/)
-* OpenGL Implementation: [freeglut](http://freeglut.sourceforge.net/)
+* OpenGL Implementation: [freeglut](http://freeglut.sourceforge.net/) (old)
+> **_NOTE:_** The project is being moved from the frreglut to the GLFW and Glad
+* OpenGL Implementation: [GLFW](https://www.glfw.org/)
+* OpenGL Loader-Generator: [Glad](https://glad.dav1d.de/)
 * Platform: [Windows](https://www.microsoft.com/en-us/windows) 7 SP1 and newer
 * Library for M$ Excel sheets reading: [LibXL](https://www.libxl.com/)
-* .PNG decoding: [LodePNG](https://github.com/lvandeve/lodepng)
+* .PNG decoding: [LodePNG](https://github.com/lvandeve/lodepng))
