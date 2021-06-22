@@ -32,7 +32,10 @@ int main(int argc, char* argv[])
 
     static Game game;//See Note 1
     
-    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int w, int h) {return game.set_screen_size(w, h); });
+    glfwSetFramebufferSizeCallback(window,
+        [](GLFWwindow* window, int w, int h)
+        {return game.set_screen_size(w, h);
+        });
 
     while (!glfwWindowShouldClose(window))
     {
