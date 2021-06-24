@@ -4,6 +4,7 @@ Scene::Scene()
 {
 	background = new CTexture("textures\\background.bmp");
 	vbo_background = -1;
+	vao_background = -1;
 
 	std::string shader_source =
 		"#version 330 core\n"
@@ -29,50 +30,48 @@ Scene::~Scene()
 {
 	if(vbo_background != -1)
 		delete background;
-	glDeleteLists(list_background, 1);
+	glDeleteVertexArrays(1, &vao_background);
+	glDeleteBuffers(1, &vbo_background);
 }
 
 void Scene::draw()
 {
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_background);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<const void *>(0));
-	glEnableVertexAttribArray(0);
 	shader_bg.enable();
-
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, background->GetId());
-		glCallList(list_background);
+	glBindVertexArray(vao_background);
+	glDrawArrays(GL_TRIANGLES, 0, 4);
 	glDisable(GL_TEXTURE_2D);
 }
 
 void Scene::load()
 {
-	GLfloat vertices[] = {
-		-1.0f, 0.0f, -1.0f,
-		-1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, 1.0f,
-		1.0f, 0.0f, -1.0f
+	GLfloat vertices_data[] = {//pos.x, pos.y, pos.z, tex.x, tex.y
+		-3.2f, -0.005f, -1.8f, 0.0f, 1.0f
+		-3.2f, -0.005f, 1.8f, 0.0f, 0.0f,
+		3.2f, -0.005f, 1.8f, 1.0f, 0.0f,
+		3.2f, -0.005f, -1.8f, 1.0f, 1.0f
 	};
+
+	glGenVertexArrays(1, &vao_background);
 	glGenBuffers(1, &vbo_background);
+
+	glBindVertexArray(vao_background);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_background);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_data), vertices_data, GL_STATIC_DRAW);
+
+	//attrib 0 - vertex coords
+	//attrib num, qty of buffer items, type, normalize?, size of a single vertex, offset
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), static_cast<void*>(0));
+	glEnableVertexAttribArray(0);
+
+	//attrib 1 - tex coords
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), static_cast<void*>(0));
+	glEnableVertexAttribArray(1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 	
-	glNewList(list_background, GL_COMPILE);
-	glPushMatrix();
-	glTranslatef(0.0f, -0.005f, 0.0f);
-	glScalef(16.0f, 0.0f, 9.0f);//texture format
-	glScalef(0.2f, 0.0f, 0.2f);
-		glBegin(GL_QUADS);
-			glTexCoord2f(0.0, 1.0);
-				glVertex3f(-1.0f, 0.0f, -1.0f);
-			glTexCoord2f(0.0, 0.0);
-				glVertex3f(-1.0f, 0.0f, 1.0f);
-			glTexCoord2f(1.0, 0.0);
-				glVertex3f(1.0f, 0.0f, 1.0f);
-			glTexCoord2f(1.0, 1.0);
-				glVertex3f(1.0f, 0.0f, -1.0f);
-		glEnd();
-	glPopMatrix();
-	glEndList();
 	background->Load();
 }

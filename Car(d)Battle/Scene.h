@@ -6,7 +6,7 @@
 class Scene
 {
 	CTexture* background;
-	GLuint vbo_background;
+	GLuint vbo_background, vao_background;
 	Shader shader_bg;
 public:
 	Scene();
