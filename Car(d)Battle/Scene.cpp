@@ -3,8 +3,9 @@
 Scene::Scene()
 {
 	background = new CTexture("textures\\background.bmp");
-	vbo_background = -1;
-	vao_background = -1;
+	vbo_background = 0;
+	vao_background = 0;
+	ebo_background = 0;
 
 	std::string shader_source =
 		"#version 330 core\n"
@@ -40,7 +41,7 @@ void Scene::draw()
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, background->GetId());
 	glBindVertexArray(vao_background);
-	glDrawArrays(GL_TRIANGLES, 0, 4);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
 	glDisable(GL_TEXTURE_2D);
 }
 
@@ -53,13 +54,22 @@ void Scene::load()
 		3.2f, -0.005f, -1.8f, 1.0f, 1.0f
 	};
 
+	GLuint indices[] = {
+		0, 1, 3,   // first triangle
+		1, 2, 3    // second triangle
+	};
+
 	glGenVertexArrays(1, &vao_background);
 	glGenBuffers(1, &vbo_background);
+	glGenBuffers(1, &ebo_background);
 
 	glBindVertexArray(vao_background);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_background);
 
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_background);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_data), vertices_data, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_background);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	//attrib 0 - vertex coords
 	//attrib num, qty of buffer items, type, normalize?, size of a single vertex, offset
@@ -70,6 +80,7 @@ void Scene::load()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), static_cast<void*>(0));
 	glEnableVertexAttribArray(1);
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	
