@@ -1,7 +1,7 @@
 #include "Shader.h"
 
 Shader::Shader()
-	: program_id(glCreateProgram())
+	: program_id(glCreateProgram()), shaders_max(64)
 {
 }
 
@@ -17,6 +17,7 @@ void Shader::load(const std::string & source, GLenum type)
 {
 	shader_ids.push_back(glCreateShader(type));
 	const char* p_source = source.c_str();
+
 	glShaderSource(shader_ids.back(), 1, &p_source, NULL);
 	glCompileShader(shader_ids.back());
 
@@ -27,7 +28,9 @@ void Shader::load(const std::string & source, GLenum type)
 	if (!success)
 	{
 		glGetShaderInfoLog(shader_ids.back(), sizeof(info_log), NULL, info_log);
-		std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
+		std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n" << info_log << std::endl;
+		glDeleteShader(shader_ids.back());
+		shader_ids.pop_back();
 	}
 }
 
@@ -37,6 +40,14 @@ void Shader::link()
 		glAttachShader(program_id, id);
 
 	glLinkProgram(program_id);
+
+	GLsizei count;
+	std::shared_ptr<GLuint> shaders = std::make_shared<GLuint>(shaders_max);
+
+	glGetAttachedShaders(program_id, shaders_max, &count, shaders.get());
+
+	for (int i = 0; i < count; ++i)
+		glDetachShader(program_id, shaders.get()[i]);
 
 	for (GLuint id : shader_ids)
 		glDeleteShader(id);
