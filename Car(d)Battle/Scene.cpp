@@ -55,7 +55,7 @@ void Scene::load()
 	};
 
 	GLuint indices[] = {
-		0, 1, 3,   // first triangle
+		0, 1, 2,   // first triangle
 		1, 2, 3    // second triangle
 	};
 
