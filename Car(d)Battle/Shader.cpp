@@ -13,8 +13,12 @@ Shader::~Shader()
 	glDeleteProgram(program_id);
 }
 
-void Shader::load(const std::string & source, GLenum type)
+void Shader::load(const std::string & path, GLenum type)
 {
+	std::ifstream file(path);
+	std::string source((std::istreambuf_iterator<char>(file)), // Extra parentheses due to "The Most Vexing Parse Problem"
+		std::istreambuf_iterator<char>()); // In short, C++ would interpret this line as a function pointer
+
 	shader_ids.push_back(glCreateShader(type));
 	const char* p_source = source.c_str();
 
