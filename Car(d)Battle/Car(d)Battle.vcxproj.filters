@@ -22,6 +22,9 @@
     <Filter Include="Resource Files\textures\cars">
       <UniqueIdentifier>{5c1ad2ef-c921-4821-b1d3-16d5e16d49cf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\shaders">
+      <UniqueIdentifier>{e90a77d2-faff-4ee2-8841-517c7cd2f315}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Car(d)Battle.cpp">
@@ -308,6 +311,12 @@
   <ItemGroup>
     <None Include="carlist.xls">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\scene_bg_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\scene_bg_vert.glsl">
+      <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -58,6 +58,20 @@ void Shader::link()
 	shader_ids.clear();
 }
 
+void Shader::set(const std::string & name, GLboolean value)
+{
+	glUniform1i(glGetUniformLocation(program_id, name.c_str()), static_cast<GLint>(value));
+}
+
+void Shader::set(const std::string & name, GLint value)
+{
+	glUniform1i(glGetUniformLocation(program_id, name.c_str()), value);
+}
+
+void Shader::set(const std::string & name, GLfloat value)
+{
+	glUniform1f(glGetUniformLocation(program_id, name.c_str()), value);
+}
 
 void Shader::enable()
 {

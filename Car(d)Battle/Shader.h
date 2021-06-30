@@ -11,6 +11,9 @@ public:
 	~Shader();
 	void load(const std::string &, GLenum);
 	void link();
+	void set(const std::string&, GLboolean);
+	void set(const std::string&, GLint);
+	void set(const std::string&, GLfloat);
 	void enable();
 	void disable();
 };
