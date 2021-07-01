@@ -7,32 +7,24 @@ Scene::Scene()
 	vao_background = 0;
 	ebo_background = 0;
 
-	std::string shader_source =
-		"#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"}";
-	shader_bg.load(shader_source, GL_VERTEX_SHADER);
-
-	shader_source =
-		"#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"void main()\n"
-		"{\n"
-		"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-		"}";
-	shader_bg.load(shader_source, GL_FRAGMENT_SHADER);
+	shader_bg.load("shaders\\scene_bg_vert.glsl", GL_VERTEX_SHADER);
+	shader_bg.load("shaders\\scene_bg_frag.glsl", GL_FRAGMENT_SHADER);
 	shader_bg.link();
 }
 
 Scene::~Scene()
 {
-	if(vbo_background != -1)
+	if (background != nullptr)
 		delete background;
-	glDeleteVertexArrays(1, &vao_background);
-	glDeleteBuffers(1, &vbo_background);
+
+	if (vao_background != 0)
+		glDeleteVertexArrays(1, &vao_background);
+
+	if (vbo_background != 0)
+		glDeleteBuffers(1, &vbo_background);
+
+	if (ebo_background != 0)
+		glDeleteBuffers(1, &vbo_background);
 }
 
 void Scene::draw()
@@ -47,7 +39,7 @@ void Scene::draw()
 
 void Scene::load()
 {
-	GLfloat vertices_data[] = {//pos.x, pos.y, pos.z, tex.x, tex.y
+	GLfloat vertices_data[] = { //pos.x, pos.y, pos.z, tex.x, tex.y
 		-3.2f, -0.005f, -1.8f, 0.0f, 1.0f
 		-3.2f, -0.005f, 1.8f, 0.0f, 0.0f,
 		3.2f, -0.005f, 1.8f, 1.0f, 0.0f,
