@@ -29,9 +29,11 @@ Scene::~Scene()
 
 void Scene::draw()
 {
-	shader_bg.enable();
 	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, background->GetId());
+	shader_bg.enable();
+	shader_bg.set("TexID", 0);
 	glBindVertexArray(vao_background);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
 	glDisable(GL_TEXTURE_2D);
