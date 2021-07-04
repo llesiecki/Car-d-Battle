@@ -12,6 +12,7 @@
 #include "Client.h"
 #include "UI.h"
 #include "Cards.h"
+#include "Singleton.h"
 
 enum class Game_state
 {
@@ -70,13 +71,15 @@ class Game
 	void tiebreak();
 	void cards_to_winner();
 	void clean();
-
 	void move_cards(const Card_translation[]);
 	void flip_cards(const bool[]);
-public:
+
+
 	Game();
-	Game(Game&) = delete;
+	Game(const Game&);
 	~Game();
+public:
+	friend Game& Singleton<Game>();
 	void set_cursor_pos(int, int);
 	void set_screen_size(int, int);
 	void load();

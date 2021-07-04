@@ -30,11 +30,11 @@ int main(int argc, char* argv[])
     glFrontFace(GL_CCW);
     glLineWidth(1.5);
 
-    static Game game;//See Note 1
+    static Game * game = pSingleton<Game>();//See Note 1
     
     glfwSetFramebufferSizeCallback(window,
         [](GLFWwindow* window, int w, int h)
-        {return game.set_screen_size(w, h);
+        {return game->set_screen_size(w, h);
         });
 
     while (!glfwWindowShouldClose(window))
