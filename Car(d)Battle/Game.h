@@ -74,9 +74,9 @@ class Game
 	void move_cards(const Card_translation[]);
 	void flip_cards(const bool[]);
 
-
 	Game();
-	Game(const Game&);
+	Game(const Game&) = delete;
+	Game(Game&&) = delete;
 	~Game();
 public:
 	friend Game& Singleton<Game>();
