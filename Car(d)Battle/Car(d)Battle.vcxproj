@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Glad\include;$(ProjectDir)\GLFW\include;$(ProjectDir)\libxl\include_cpp;$(ProjectDir)\freetype</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\GLM;$(ProjectDir)\Glad\include;$(ProjectDir)\GLFW\include;$(ProjectDir)\libxl\include_cpp;$(ProjectDir)\freetype</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
