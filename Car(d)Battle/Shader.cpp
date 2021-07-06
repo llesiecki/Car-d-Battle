@@ -60,7 +60,9 @@ void Shader::link()
 
 void Shader::set(const std::string & name, GLboolean value)
 {
-	glUniform1i(glGetUniformLocation(program_id, name.c_str()), static_cast<GLint>(value));
+	glUniform1i(glGetUniformLocation(program_id, name.c_str()),
+		static_cast<GLint>(value)
+	);
 }
 
 void Shader::set(const std::string & name, GLint value)
@@ -71,6 +73,16 @@ void Shader::set(const std::string & name, GLint value)
 void Shader::set(const std::string & name, GLfloat value)
 {
 	glUniform1f(glGetUniformLocation(program_id, name.c_str()), value);
+}
+
+void Shader::set(const std::string& name, glm::mat4 & value)
+{
+	glUniformMatrix4fv(
+		glGetUniformLocation(program_id, name.c_str()),
+		1,
+		GL_FALSE,
+		glm::value_ptr(value)
+	);
 }
 
 void Shader::enable()
