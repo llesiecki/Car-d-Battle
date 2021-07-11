@@ -64,9 +64,9 @@ bool Game::thread_sleep_ms(unsigned int delay)
 	return false;
 }
 
-void Game::set_cursor_pos(int x, int y)
+void Game::set_cursor_pos(double x, double y)
 {
-	cursor_pos = { x, y };
+	cursor_pos = { static_cast<float>(x), static_cast<float>(y) };
 }
 
 void Game::set_screen_size(int width, int height)
@@ -308,10 +308,10 @@ void Game::choose_category()
 			for (int i = 0; i < 6; i++)//6 categories
 			{
 				if (
-					(cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
-					&& (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
-					&& cursor_pos.y * 1.0f / screen_size.y > categories[i].first.second
-					&& cursor_pos.y * 1.0f / screen_size.y < categories[i].second.second)
+					(cursor_pos.first * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
+					&& (cursor_pos.first * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
+					&& cursor_pos.second * 1.0f / screen_size.y > categories[i].first.second
+					&& cursor_pos.second * 1.0f / screen_size.y < categories[i].second.second)
 				{
 					player_card[0].back().highlight_row(i);
 					if (GetAsyncKeyState(1) & (1 << 15))//1 is virtual key-code of LMB, 15 is shift to the highest bit of short

@@ -53,7 +53,7 @@ class Game
 	bool* loser;
 	bool pause;
 	std::vector<Text3D> texts;
-	POINT cursor_pos;
+	std::pair<float, float> cursor_pos;
 	POINT screen_size;
 	Client* network_client;
 	std::vector<thread> threads;
@@ -80,7 +80,7 @@ class Game
 	~Game();
 public:
 	friend Game& Singleton<Game>();
-	void set_cursor_pos(int, int);
+	void set_cursor_pos(double, double);
 	void set_screen_size(int, int);
 	void load();
 	void draw();
