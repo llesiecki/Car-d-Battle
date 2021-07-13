@@ -797,12 +797,14 @@ void Game::draw()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60.0f, static_cast<float>(screen_size.x) / screen_size.y, 0.01f, 10.0f);
+	glm::mat4 projection =
+		glm::perspective(
+			glm::radians(60.0f),// FOV
+			static_cast<float>(screen_size.x) / screen_size.y,// aspect ratio
+			0.01f,// near clipping plane
+			10.0f// far clipping plane
+			);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
