@@ -41,8 +41,8 @@ Card Card::operator=(const Card& card)
 
 void Card::reset_coords()
 {
-    pos = Vec3();
-    rot = Vec3();
+    pos = glm::vec3();
+    rot = glm::vec3();
     angle = 0.0f;
 }
 

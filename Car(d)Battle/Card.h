@@ -19,7 +19,7 @@ class Card
 	CTexture* car_tex;
 	CommonCardValues& common_values;
 public:
-	Vec3 pos, rot;
+	glm::vec3 pos, rot;
 	float angle;
 	bool invert;
 	std::string car_name;

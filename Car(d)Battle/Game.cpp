@@ -114,7 +114,7 @@ void Game::move_cards(const Card_translation transltion_type[])
 		if (transltion_type[player_num] == Card_translation::without_flip)
 			continue;
 
-		player_stack[player_num].back().rot = Vec3(0.0f, 0.0f, 1.0f);
+		player_stack[player_num].back().rot = glm::vec3(0.0f, 0.0f, 1.0f);
 	}
 
 	const int iterations_max = 60;
@@ -166,7 +166,7 @@ void Game::flip_cards(const bool flip[])
 {
 	for (int player_num = 0; player_num < players_num; player_num++)
 		if (flip[player_num])
-			player_card[player_num].back().rot = Vec3(0.0f, 0.0f, 1.0f);
+			player_card[player_num].back().rot = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	const int iterations_max = 60;
 
@@ -216,7 +216,7 @@ void Game::distribute_cards()
 				card.pos.z += 1.5f / iterations_max;
 				break;
 			case 1:
-				card.rot = Vec3(0.0f, 1.0f, 0.0f);
+				card.rot = glm::vec3(0.0f, 1.0f, 0.0f);
 				card.pos.x += -1.9f / iterations_max;
 				card.pos.z += 1.3f / iterations_max;
 				card.angle += 90.0f / iterations_max;
@@ -226,7 +226,7 @@ void Game::distribute_cards()
 				card.pos.z += -1.2f / iterations_max;
 				break;
 			case 3:
-				card.rot = Vec3(0.0f, 1.0f, 0.0f);
+				card.rot = glm::vec3(0.0f, 1.0f, 0.0f);
 				card.pos.x += 1.9f / iterations_max;
 				card.pos.z += -0.7f / iterations_max;
 				card.angle += 90.0f / iterations_max;
@@ -277,9 +277,9 @@ void Game::cards_to_players()
 void Game::choose_category()
 {
 	Text3D text;
-	text.pos = Vec3(-0.6f, 0.01f, 0.2f);
+	text.pos = glm::vec3(-0.6f, 0.01f, 0.2f);
 	text.angle = -60.0f;
-	text.rot = Vec3(1.0f, 0.0f, 0.0f);
+	text.rot = glm::vec3(1.0f, 0.0f, 0.0f);
 	text.scale = 0.001f;
 	text.text = current_player == 0 ? "Choose a category..." : "Waiting for opponent...";
 	text.line_width = 7.5f;
@@ -604,68 +604,68 @@ void Game::cards_to_winner()
 			if (thread_sleep_ms(17))
 				return;
 
-			Vec3 move;
+			glm::vec3 move;
 			float angle = 0.0f;
 			if (current_player == player_num)
-				move = Vec3(1.0f, 0.0f, 0.5f);
+				move = glm::vec3(1.0f, 0.0f, 0.5f);
 			else if (current_player == 0 && player_num == 3)
 			{
-				move = Vec3(-1.2f, 0.0f, -0.4f);
+				move = glm::vec3(-1.2f, 0.0f, -0.4f);
 				angle = -90.0f;
 			}
 			else if (current_player == 0 && player_num == 2)
 			{
-				move = Vec3(-1.0f, 0.0f, -2.2f);
+				move = glm::vec3(-1.0f, 0.0f, -2.2f);
 				angle = 180.0f;
 			}
 			else if (current_player == 0 && player_num == 1)
 			{
-				move = Vec3(1.2f, 0.0f, -2.4f);
+				move = glm::vec3(1.2f, 0.0f, -2.4f);
 				angle = 90.0f;
 			}
 			else if (current_player == 1 && player_num == 3)
 			{
-				move = Vec3(-1.0f, 0.0f, -3.3f);
+				move = glm::vec3(-1.0f, 0.0f, -3.3f);
 				angle = 180.0f;
 			}
 			else if (current_player == 1 && player_num == 2)
 			{
-				move = Vec3(1.9f, 0.0f, -2.0f);
+				move = glm::vec3(1.9f, 0.0f, -2.0f);
 				angle = 90.0f;
 			}
 			else if (current_player == 1 && player_num == 0)
 			{
-				move = Vec3(-1.9f, 0.0f, 0.3f);
+				move = glm::vec3(-1.9f, 0.0f, 0.3f);
 				angle = -90.0f;
 			}
 			else if (current_player == 2 && player_num == 3)
 			{
-				move = Vec3(1.5, 0.0f, -2.4f);
+				move = glm::vec3(1.5, 0.0f, -2.4f);
 				angle = 90.0f;
 			}
 			else if (current_player == 2 && player_num == 1)
 			{
-				move = Vec3(-1.5f, 0.0f, -0.4f);
+				move = glm::vec3(-1.5f, 0.0f, -0.4f);
 				angle = -90.0f;
 			}
 			else if (current_player == 2 && player_num == 0)
 			{
-				move = Vec3(-1.0f, 0.0f, -2.2f);
+				move = glm::vec3(-1.0f, 0.0f, -2.2f);
 				angle = 180.0f;
 			}
 			else if (current_player == 3 && player_num == 2)
 			{
-				move = Vec3(-1.9f, 0.0f, 0.0f);
+				move = glm::vec3(-1.9f, 0.0f, 0.0f);
 				angle = -90.0f;
 			}
 			else if (current_player == 3 && player_num == 1)
 			{
-				move = Vec3(-1.0f, 0.0f, -3.3f);
+				move = glm::vec3(-1.0f, 0.0f, -3.3f);
 				angle = 180.0f;
 			}
 			else if (current_player == 3 && player_num == 0)
 			{
-				move = Vec3(1.9f, 0.0f, -1.7f);
+				move = glm::vec3(1.9f, 0.0f, -1.7f);
 				angle = 90.0f;
 			}
 
@@ -682,7 +682,7 @@ void Game::cards_to_winner()
 					card.pos.z += move.z / (iterations_max * 3 / 4);
 					if (angle != 0.0f)
 					{
-						card.rot = Vec3(0.0f, 1.0f, 0.0f);
+						card.rot = glm::vec3(0.0f, 1.0f, 0.0f);
 						card.angle += angle / (iterations_max * 3 / 4);
 					}
 				}

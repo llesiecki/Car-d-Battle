@@ -5,7 +5,7 @@
 struct Text3D
 {
 	std::string text;
-	Vec3 pos, rot;
+	glm::vec3 pos, rot;
 	float angle, scale, line_width;
 
 	inline void render()
