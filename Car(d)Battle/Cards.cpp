@@ -99,6 +99,13 @@ void Cards::create_buffers()
 		13, 14, 15,
 	};
 
+	/// <tech dept>
+	/// How to bind multiple textures to one VAO?
+	/// If the above is not possible, consider
+	/// merging textures into one file and change
+	/// the tex cords respectively.
+	/// </tech dept>
+
 	glGenVertexArrays(1, &card_values.common_vao);
 	glGenBuffers(1, &card_values.common_vbo);
 	glGenBuffers(1, &card_values.common_ebo);
