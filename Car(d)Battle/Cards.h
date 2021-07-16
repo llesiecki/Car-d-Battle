@@ -14,7 +14,7 @@ public:
 	Cards(const wchar_t* filename);
 	~Cards();
 	bool load_textures();
-	void create_lists();
+	void create_buffers();
 	std::vector<Card> get_cards_vec();
 	void print();
 	std::string get_category_name(int num);
