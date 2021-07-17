@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "utilities\Texture.h"
+#include "Shader.h"
 
 class  Cards;
 
@@ -8,7 +9,8 @@ struct CommonCardValues
 {
 	std::vector< std::string > field_names;
 	CTexture* back_tex, * fields_tex;
-	GLuint list_front, list_back, list_fields;
+	GLuint common_vbo, common_vao, common_ebo;
+	Shader* shader;
 	std::string img_path;
 };
 

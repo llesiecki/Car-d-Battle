@@ -78,21 +78,23 @@ float calc_text_width(std::string str)
 
 void Card::draw()
 {
-    glPushMatrix();
-    glTranslatef(pos.x, pos.y, pos.z);
-    glRotatef(angle, rot.x, rot.y, rot.z);
+    glm::mat4 trans(1.0f);
+    trans = glm::translate(trans, pos);
+    trans = glm::rotate(trans, glm::radians(angle), rot);
     if (invert)
-        glRotatef(180.0f, 0.0f, 0.0f, 1.0f);
-    glRotatef(90, -1, 0, 0);
-    glTranslatef(CARD_WIDTH / 2, -CARD_HEIGHT / 2, 0);
+        trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
-    glCallList(common_values.list_back);
-    glBindTexture(GL_TEXTURE_2D, car_tex->GetId());
-    glCallList(common_values.list_front);
-    glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->GetId());
-    glCallList(common_values.list_fields);
+    common_values.shader->enable();
+    common_values.shader->set("TexID", 0);
+    common_values.shader->set("transform", trans);
+    glBindVertexArray(common_values.common_vao);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
     glDisable(GL_TEXTURE_2D);
+
+    glPushMatrix();
+    
     glColor3f(0.0f, 0.0f, 0.0f);
     glTranslatef(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f);
     renderStrokeString(0, 0, car_name);
