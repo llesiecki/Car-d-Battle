@@ -14,7 +14,7 @@ public:
 	void set(const std::string&, GLboolean);
 	void set(const std::string&, GLint);
 	void set(const std::string&, GLfloat);
-	void set(const std::string&, glm::mat4&);
+	void set(const std::string&, const glm::mat4&);
 	void enable();
 	void disable();
 };
