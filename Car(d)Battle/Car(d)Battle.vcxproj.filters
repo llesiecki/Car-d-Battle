@@ -318,10 +318,10 @@
     <None Include="shaders\scene_bg_vert.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="card_vert.glsl">
+    <None Include="shaders\card_frag.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
-    <None Include="card_frag.glsl">
+    <None Include="shaders\card_vert.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

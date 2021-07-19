@@ -254,9 +254,9 @@
     <Image Include="textures\tlo3.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="card_frag.glsl" />
-    <None Include="card_vert.glsl" />
     <None Include="carlist.xls" />
+    <None Include="shaders\card_frag.glsl" />
+    <None Include="shaders\card_vert.glsl" />
     <None Include="shaders\scene_bg_frag.glsl" />
     <None Include="shaders\scene_bg_vert.glsl" />
   </ItemGroup>
