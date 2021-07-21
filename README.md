@@ -43,4 +43,4 @@ The game also uses a native C++ code for **.PNG** pictures decompression to bitm
 * OpenGL Loader-Generator: [Glad](https://glad.dav1d.de/)
 * Platform: [Windows](https://www.microsoft.com/en-us/windows) 7 SP1 and newer
 * Library for M$ Excel sheets reading: [LibXL](https://www.libxl.com/)
-* .PNG decoding: [LodePNG](https://github.com/lvandeve/lodepng))
+* .PNG decoding: [LodePNG](https://github.com/lvandeve/lodepng)
