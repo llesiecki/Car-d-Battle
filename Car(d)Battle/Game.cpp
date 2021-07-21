@@ -15,6 +15,13 @@ Game::Game()
 	loser = nullptr;
 	network_client = nullptr;
 	pause = false;
+	projection =
+		glm::perspective(
+			glm::radians(60.0f),// FOV
+			static_cast<float>(1280) / 720,// aspect ratio
+			0.01f,// near clipping plane
+			10.0f// far clipping plane
+		);
 }
 
 void Game::clean()
@@ -71,31 +78,41 @@ void Game::set_cursor_pos(double x, double y)
 
 void Game::set_screen_size(int width, int height)
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
 	glViewport(0, 0, width, height);
 	screen_size = { width, height };
-	gluPerspective(60.0f, static_cast<float>(width) / height, 0.01f, 10.0f);
+	projection =
+		glm::perspective(
+			glm::radians(60.0f),// FOV
+			static_cast<float>(screen_size.x) / screen_size.y,// aspect ratio
+			0.01f,// near clipping plane
+			10.0f// far clipping plane
+		);
 }
 
 void Game::load()
 {
-	cards.create_lists();
+	cards.create_buffers();
 	cards.load_textures();
 	scene.load();
 }
 
 void Game::draw_cards_stack(std::vector<Card>& cards_vec)
 {
-	glPushMatrix();
+	glm::mat4 trans(1.0f);
 	lock.lock();//other threads may attempt to modify cards_vec during execution of this member function
 	for (unsigned int i = 0; i < cards_vec.size(); i++)
 	{
-		glTranslatef(random_translation_vec[i].first, 0.005f, random_translation_vec[i].second);
+		trans = glm::translate(
+			trans,
+			glm::vec3(
+				random_translation_vec[i].first,
+				0.005f,
+				random_translation_vec[i].second
+			)
+		);
 		cards_vec[i].draw();
 	}
 	lock.unlock();
-	glPopMatrix();
 }
 
 void Game::move_cards(const Card_translation transltion_type[])
@@ -796,14 +813,6 @@ void Game::draw()
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glm::mat4 projection =
-		glm::perspective(
-			glm::radians(60.0f),// FOV
-			static_cast<float>(screen_size.x) / screen_size.y,// aspect ratio
-			0.01f,// near clipping plane
-			10.0f// far clipping plane
-			);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);

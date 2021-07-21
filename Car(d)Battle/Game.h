@@ -58,6 +58,7 @@ class Game
 	Client* network_client;
 	std::vector<thread> threads;
 	bool kill_threads;
+	glm::mat4 projection;
 
 	bool thread_sleep_ms(unsigned int);
 	void draw_cards_stack(std::vector<Card>& cards_vec);

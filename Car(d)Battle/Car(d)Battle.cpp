@@ -42,6 +42,8 @@ int main(int argc, char* argv[])
 		});
 	glfwSwapInterval(1);//V-SYNC
 
+	game.set_screen_size(1280, 720);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
