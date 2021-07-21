@@ -818,11 +818,7 @@ void Game::draw()
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
 	glPushMatrix();
-		gluLookAt(
-			0.0f, 2.3f, 1.15f,//camera position
-			0.0f, 0.0f, 0.44f,// camera look-at point
-			0.0f, 1.0f, 0.0f //vertical vector
-		);
+
 
 		//if (!pause)
 		{
