@@ -1,7 +1,7 @@
 #include "Game.h"
 
 Game::Game()
-	:cards(L"carlist.xls"), ui(*this)
+	:cards(L"carlist.xls"), ui(*this), view(1.0f)
 {
 	srand(static_cast<unsigned int>(time(NULL)));
 	state = Game_state::no_action;
@@ -110,7 +110,7 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec)
 				random_translation_vec[i].second
 			)
 		);
-		cards_vec[i].draw();
+		cards_vec[i].draw(projection, view);
 	}
 	lock.unlock();
 }
@@ -820,9 +820,9 @@ void Game::draw()
 	glPushMatrix();
 
 
-		//if (!pause)
+		if (!pause)
 		{
-			scene.draw();
+			scene.draw(projection, view);
 			draw_cards_stack(central_stack);
 			draw_players_stacks();
 			draw_players_cards();

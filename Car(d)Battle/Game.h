@@ -59,6 +59,7 @@ class Game
 	std::vector<thread> threads;
 	bool kill_threads;
 	glm::mat4 projection;
+	glm::mat4 view;
 
 	bool thread_sleep_ms(unsigned int);
 	void draw_cards_stack(std::vector<Card>& cards_vec);

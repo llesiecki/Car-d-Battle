@@ -27,14 +27,14 @@ Scene::~Scene()
 		glDeleteBuffers(1, &vbo_background);
 }
 
-void Scene::draw()
+void Scene::draw(const glm::mat4 & proj, const glm::mat4 & view)
 {
 	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, background->GetId());
 	shader_bg.enable();
 	shader_bg.set("TexID", 0);
-	shader_bg.set("transform", glm::mat4(1.0f));
+	shader_bg.set("transform", proj * view);
 	glBindVertexArray(vao_background);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
 	glDisable(GL_TEXTURE_2D);

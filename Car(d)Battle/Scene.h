@@ -11,7 +11,7 @@ class Scene
 public:
 	Scene();
 	~Scene();
-	void draw();
+	void draw(const glm::mat4&, const glm::mat4&);
 	void load();
 };
 
