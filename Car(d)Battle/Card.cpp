@@ -76,7 +76,7 @@ float calc_text_width(std::string str)
     return width;
 }
 
-void Card::draw()
+void Card::draw(const glm::mat4& proj, const glm::mat4& view)
 {
     glm::mat4 trans(1.0f);
     trans = glm::translate(trans, pos);
@@ -88,7 +88,7 @@ void Card::draw()
     glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
     common_values.shader->enable();
     common_values.shader->set("TexID", 0);
-    common_values.shader->set("transform", trans);
+    common_values.shader->set("transform", proj * view * trans);
     glBindVertexArray(common_values.common_vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
     glDisable(GL_TEXTURE_2D);

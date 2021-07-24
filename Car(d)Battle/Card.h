@@ -34,7 +34,7 @@ public:
 	void reset_coords();
 	void highlight_row(int);
 	std::string get_category_value(int num);
-	void draw();
+	void draw(const glm::mat4&, const glm::mat4&);
 	void delete_tex();
 	void load_tex();
 };
