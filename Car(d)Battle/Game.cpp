@@ -1,7 +1,7 @@
 #include "Game.h"
 
 Game::Game()
-	:cards(L"carlist.xls"), ui(*this), view(1.0f)
+	:cards(L"carlist.xls"), ui(*this)
 {
 	srand(static_cast<unsigned int>(time(NULL)));
 	state = Game_state::no_action;
@@ -15,12 +15,20 @@ Game::Game()
 	loser = nullptr;
 	network_client = nullptr;
 	pause = false;
+
 	projection =
 		glm::perspective(
 			glm::radians(60.0f),// FOV
 			static_cast<float>(1280) / 720,// aspect ratio
 			0.01f,// near clipping plane
 			10.0f// far clipping plane
+		);
+
+	view =
+		glm::lookAt(
+			glm::vec3(0.0f, 2.3f, 1.15f),// camera position
+			glm::vec3(0.0f, 0.0f, 0.44f),// camera look-at point
+			glm::vec3(0.0f, 1.0f, 0.0f)// vertical vector
 		);
 }
 
