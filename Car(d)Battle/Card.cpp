@@ -93,12 +93,9 @@ void Card::draw(const glm::mat4& proj, const glm::mat4& view)
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
     glDisable(GL_TEXTURE_2D);
 
-    glPushMatrix();
-    
-    glColor3f(0.0f, 0.0f, 0.0f);
-    glTranslatef(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f);
+    trans = glm::translate(trans, glm::vec3(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f));
     renderStrokeString(0, 0, car_name);
-    glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there are 7 fields
+    trans = glm::translate(trans, glm::vec3(0, -CARD_HEIGHT / 2 / 7, 0));//half of height devided by 7 because there are 7 fields
     for (unsigned int i = 0; i < common_values.field_names.size(); i++)
     {
         if (highlight == i)
@@ -131,7 +128,7 @@ void Card::draw(const glm::mat4& proj, const glm::mat4& view)
         glTranslatef(CARD_WIDTH - 0.04f - width, 0, 0);
         renderStrokeString(0, 0, values[i]);
         glPopMatrix();
-        glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there is 7 fields
+        glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there are 7 fields
     }
     glPopMatrix();
 }
