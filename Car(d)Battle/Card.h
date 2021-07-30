@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "utilities\Texture.h"
 #include "Shader.h"
+#include <array>
 
 class  Cards;
 
@@ -12,6 +13,7 @@ struct CommonCardValues
 	GLuint common_vbo, common_vao, common_ebo;
 	Shader* shader;
 	std::string img_path;
+	std::array<GLfloat, 4 * 3> frame_vertices; // 4 corners, 3 dimensions each
 };
 
 class Card
