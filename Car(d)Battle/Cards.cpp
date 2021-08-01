@@ -36,7 +36,17 @@ Cards::Cards(const wchar_t* filename)
 	img_paths.pop_back();
 	card_values.fields_tex = new CTexture("textures\\" + img_paths.back());
 	img_paths.pop_back();
+
 	card_values.common_vao = card_values.common_vbo = card_values.common_ebo = 0;
+
+	std::array<GLfloat, 12> vertices_data = {//pos.x, pos.y, pos.z
+		0.0f, 0.0f, 0.0f,
+		0.0f, CARD_HEIGHT / 2 / 7, 0.0f,
+		CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f,
+		CARD_WIDTH, 0.0f, 0.0f
+	};
+
+	card_values.frame_vertices = std::move(vertices_data);
 }
 
 Cards::~Cards()
@@ -99,12 +109,12 @@ void Cards::create_buffers()
 		13, 14, 15,
 	};
 
-	/// <tech dept>
+	/// <tech debt>
 	/// How to bind multiple textures to one VAO?
 	/// If the above is not possible, consider
 	/// merging textures into one file and change
 	/// the tex cords respectively.
-	/// </tech dept>
+	/// </tech debt>
 
 	glGenVertexArrays(1, &card_values.common_vao);
 	glGenBuffers(1, &card_values.common_vbo);
