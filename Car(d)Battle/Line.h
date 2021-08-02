@@ -10,10 +10,13 @@ class Line
     std::vector<float> vertices;
     glm::mat4 mvp;
     glm::vec3 color;
+    glm::vec3 start;
+    glm::vec3 end;
 
 public:
     Line();
     Line(glm::vec3, glm::vec3);
+    Line(glm::vec3, glm::vec3, glm::vec3);
     ~Line();
     void set_MVP(glm::mat4);
     void set_color(glm::vec3);
