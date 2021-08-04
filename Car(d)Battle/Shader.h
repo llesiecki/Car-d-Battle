@@ -15,6 +15,7 @@ public:
 	void set(const std::string&, GLint);
 	void set(const std::string&, GLfloat);
 	void set(const std::string&, const glm::mat4&);
+	void set(const std::string&, const glm::vec3&);
 	void enable();
 	void disable();
 };

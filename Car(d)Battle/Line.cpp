@@ -38,3 +38,25 @@ Line::Line(glm::vec3 start, glm::vec3 end, glm::vec3 color)
     this->Line::Line(start, end);
     this->color = color;
 }
+
+Line::~Line()
+{
+    if (vao != 0)
+        glDeleteVertexArrays(1, &vao);
+
+    if (vbo != 0)
+        glDeleteVertexArrays(1, &vbo);
+}
+
+void Line::draw()
+{
+    shader.enable();
+    shader.set("MVP", mvp);
+    shader.set("color", color);
+
+    glBindVertexArray(vao);
+    glDrawArrays(GL_LINES, 0, 2);
+
+    glBindVertexArray(0);
+    shader.disable();
+}
