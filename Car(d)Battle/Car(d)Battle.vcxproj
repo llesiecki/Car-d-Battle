@@ -163,6 +163,7 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Glad\src\glad.c" />
     <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Line.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="Line.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Singleton.h" />
@@ -257,6 +259,8 @@
     <None Include="carlist.xls" />
     <None Include="shaders\card_frag.glsl" />
     <None Include="shaders\card_vert.glsl" />
+    <None Include="shaders\line_frag.glsl" />
+    <None Include="shaders\line_vert.glsl" />
     <None Include="shaders\scene_bg_frag.glsl" />
     <None Include="shaders\scene_bg_vert.glsl" />
   </ItemGroup>
