@@ -11,7 +11,7 @@ Line::Line()
     glGenBuffers(1, &vbo);
 }
 
-Line::Line(glm::vec3 start, glm::vec3 end)
+Line::Line(const glm::vec3& start, const glm::vec3& end)
 {
     this->Line::Line();
     this->start = start;
@@ -33,7 +33,7 @@ Line::Line(glm::vec3 start, glm::vec3 end)
     glBindVertexArray(0);
 }
 
-Line::Line(glm::vec3 start, glm::vec3 end, glm::vec3 color)
+Line::Line(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color)
 {
     this->Line::Line(start, end);
     this->color = color;
@@ -46,6 +46,32 @@ Line::~Line()
 
     if (vbo != 0)
         glDeleteVertexArrays(1, &vbo);
+}
+
+void Line::set_MVP(const glm::mat4& mvp)
+{
+    this->mvp = mvp;
+}
+
+void Line::set_color(const glm::vec3& color)
+{
+    this->color = color;
+}
+
+void Line::set_pos(const glm::vec3& start, const glm::vec3& end)
+{
+    this->start = start;
+    this->end = end;
+}
+
+void Line::set_start(const glm::vec3& start)
+{
+    this->start = start;
+}
+
+void Line::set_end(const glm::vec3& end)
+{
+    this->end = end;
 }
 
 void Line::draw()

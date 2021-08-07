@@ -14,14 +14,14 @@ class Line
 
 public:
     Line();
-    Line(glm::vec3, glm::vec3);
-    Line(glm::vec3, glm::vec3, glm::vec3);
+    Line(const glm::vec3&, const glm::vec3&);
+    Line(const glm::vec3&, const glm::vec3&, const glm::vec3&);
     ~Line();
-    void set_MVP(glm::mat4);
-    void set_color(glm::vec3);
-    void set_pos(glm::vec3, glm::vec3);
-    void set_start(glm::vec3, glm::vec3);
-    void set_end(glm::vec3, glm::vec3);
+    void set_MVP(const glm::mat4&);
+    void set_color(const glm::vec3&);
+    void set_pos(const glm::vec3&, const glm::vec3&);
+    void set_start(const glm::vec3&);
+    void set_end(const glm::vec3&);
     void draw();
 
 };
