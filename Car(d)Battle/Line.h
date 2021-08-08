@@ -12,6 +12,8 @@ class Line
     glm::vec3 start;
     glm::vec3 end;
 
+    void clean_buffers();
+
 public:
     Line();
     Line(const glm::vec3&, const glm::vec3&);

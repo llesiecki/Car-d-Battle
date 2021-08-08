@@ -19,7 +19,7 @@ Line::Line(const glm::vec3& start, const glm::vec3& end)
 
     float vertices[] = {
          start.x, start.y, start.z,
-         end.x, end.y, end.z,
+         end.x, end.y, end.z
     };
 
     glBindVertexArray(vao);
@@ -39,13 +39,18 @@ Line::Line(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color)
     this->color = color;
 }
 
-Line::~Line()
+void Line::clean_buffers()
 {
     if (vao != 0)
         glDeleteVertexArrays(1, &vao);
 
     if (vbo != 0)
         glDeleteVertexArrays(1, &vbo);
+}
+
+Line::~Line()
+{
+    clean_buffers();
 }
 
 void Line::set_MVP(const glm::mat4& mvp)
@@ -60,18 +65,18 @@ void Line::set_color(const glm::vec3& color)
 
 void Line::set_pos(const glm::vec3& start, const glm::vec3& end)
 {
-    this->start = start;
-    this->end = end;
+    clean_buffers();
+    this->Line::Line(start, end);
 }
 
 void Line::set_start(const glm::vec3& start)
 {
-    this->start = start;
+    set_pos(start, end);
 }
 
 void Line::set_end(const glm::vec3& end)
 {
-    this->end = end;
+    set_pos(start, end);
 }
 
 void Line::draw()
