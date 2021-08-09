@@ -100,27 +100,28 @@ void Card::draw(const glm::mat4& proj, const glm::mat4& view)
     {
         if (highlight == i)
         {
-            glPushMatrix();
-            glTranslatef(-0.02f, -0.02f, 0.0035f);
-            glColor3f(1.0f, 0.0f, 0.0f);
-            glBegin(GL_LINES);
 
-            glVertex3f(0.0f, 0.0f, 0.0f);
-            glVertex3f(0.0f, CARD_HEIGHT / 2 / 7, 0.0f);
-
-            glVertex3f(0.0f, CARD_HEIGHT / 2 / 7, 0.0f);
-            glVertex3f(CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f);
-
-            glVertex3f(CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f);
-            glVertex3f(CARD_WIDTH, 0.0f, 0.0f);
-
-            glVertex3f(CARD_WIDTH, 0.0f, 0.0f);
-            glVertex3f(0.0f, 0.0f, 0.0f);
-
-            glEnd();
-            glColor3f(0, 0, 0);
             glLineWidth(1.5f);
-            glPopMatrix();
+            glm::vec3 line_corners[] = {
+                {0.0f, 0.0f, 0.0f},
+                {0.0f, CARD_HEIGHT / 2 / 7, 0.0f},
+                {CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f},
+                {CARD_WIDTH, 0.0f, 0.0f}
+            };
+
+            for (glm::vec3& corner : line_corners)//tanslate the highlight
+                corner += glm::vec3(-0.02f, -0.02f, 0.0035f);
+
+            highlight_line.set_color({ 1, 0, 0 });
+            highlight_line.set_MVP(trans);
+            highlight_line.set_pos(line_corners[0], line_corners[1]);
+            highlight_line.draw();
+            highlight_line.set_pos(line_corners[1], line_corners[2]);
+            highlight_line.draw();
+            highlight_line.set_pos(line_corners[2], line_corners[3]);
+            highlight_line.draw();
+            highlight_line.set_pos(line_corners[3], line_corners[0]);
+            highlight_line.draw();
         }
         renderStrokeString(0, 0, common_values.field_names[i] + ":");
         float width = calc_text_width(values[i]);

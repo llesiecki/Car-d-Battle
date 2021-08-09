@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "utilities\Texture.h"
 #include "Shader.h"
+#include "Line.h"
 #include <array>
 
 class  Cards;
@@ -22,6 +23,7 @@ class Card
 	int highlight;
 	CTexture* car_tex;
 	CommonCardValues& common_values;
+	Line highlight_line;
 public:
 	glm::vec3 pos, rot;
 	float angle;
