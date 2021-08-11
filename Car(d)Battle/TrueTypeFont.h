@@ -27,4 +27,5 @@ class TrueTypeFont
 
 public:
     void load_font(const std::string&, const std::string&);
+    void draw(const std::string&, const std::string&);
 };
