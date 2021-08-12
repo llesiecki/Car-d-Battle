@@ -336,5 +336,8 @@
     <None Include="shaders\line_vert.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
+    <None Include="shaders\ttf_vert.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
