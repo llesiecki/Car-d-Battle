@@ -263,6 +263,7 @@
     <None Include="shaders\line_vert.glsl" />
     <None Include="shaders\scene_bg_frag.glsl" />
     <None Include="shaders\scene_bg_vert.glsl" />
+    <None Include="shaders\ttf_frag.glsl" />
     <None Include="shaders\ttf_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
