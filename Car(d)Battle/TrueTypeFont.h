@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Singleton.h"
+#include "Shader.h"
 #include <map>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -19,6 +20,7 @@ class TrueTypeFont
 
     FT_Library ft;
     std::map<std::string, std::map<char, Character>> fonts;
+    Shader shader;
 
     TrueTypeFont();
     ~TrueTypeFont();
@@ -27,5 +29,5 @@ class TrueTypeFont
 
 public:
     void load_font(const std::string&, const std::string&);
-    void draw(const std::string&, const std::string&);
+    void draw(const std::string&, const std::string&, const glm::vec3&);
 };
