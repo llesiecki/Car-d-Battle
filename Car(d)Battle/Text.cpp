@@ -1,6 +1,7 @@
 #include "Text.h"
 
 Text::Text()
+	:ttf(Singleton<TrueTypeFont>())
 {
 	set_color(glm::vec4(255, 255, 255, 255));
 	VAO = 0;
@@ -8,14 +9,14 @@ Text::Text()
 }
 
 Text::Text(const std::string& text)
+	: Text::Text()
 {
-	this->Text::Text();
 	set_text(text);
 }
 
 Text::Text(const std::string& text, glm::vec4 color)
+	: Text::Text(text)
 {
-	this->Text::Text(text);
 	set_color(color);
 }
 
