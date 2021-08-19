@@ -68,7 +68,9 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 			texture,
 			std::pair<int, int>(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			std::pair<int, int>(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
+			face->glyph->advance.x,
+			0,
+			0
 		};
 
 		fonts[name][c] = character;
@@ -87,40 +89,73 @@ void TrueTypeFont::draw(const std::string& text, const std::string& font, const 
 
 	for (const char c : text)
 	{
-		float xpos = x + fonts[font][c].Bearing.first;
-		float ypos = y - fonts[font][c].Size.second - fonts[font][c].Bearing.second;
-
-		float w = fonts[font][c].Size.first;
-		float h = fonts[font][c].Size.second;
-		float vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0f, 0.0f },
-			{ xpos,     ypos,       0.0f, 1.0f },
-			{ xpos + w, ypos,       1.0f, 1.0f },
-
-			{ xpos,     ypos + h,   0.0f, 0.0f },
-			{ xpos + w, ypos,       1.0f, 1.0f },
-			{ xpos + w, ypos + h,   1.0f, 0.0f }
-		};
 		// render glyph texture over quad
-		glBindTexture(GL_TEXTURE_2D, fonts[font][c].TextureID);
+		glBindTexture(GL_TEXTURE_2D, get_tex_id(font, c));
+		glBindVertexArray(get_VAO(font, c));
 
-		unsigned int VBO;
-		glGenBuffers(1, &VBO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_STREAM_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		glBindTexture(GL_TEXTURE_2D, fonts[font][c].TextureID);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &VBO);
-
-		x += fonts[font][c].Advance >> 6; // bitshift by 6 to get value in pixels (2^6 = 64)
+		x += get_char_width(font, c);
+		//TODO: Add trnswormations for shifting the characters
 	}
+}
+
+GLuint TrueTypeFont::get_VAO(const std::string& font, char c)
+{
+	if (fonts.find(font) == fonts.end())
+		return 0; //font not present
+
+	if(fonts[font][c].VAO)
+		return fonts[font][c].VAO;
+
+	glGenVertexArrays(1, &fonts[font][c].VAO);
+	glGenBuffers(1, &fonts[font][c].VBO);
+	glBindVertexArray(fonts[font][c].VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, fonts[font][c].VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+
+	glBindTexture(GL_TEXTURE_2D, fonts[font][c].TextureID);
+	// update content of VBO memory
+
+	float xpos = fonts[font][c].Bearing.first;
+	float ypos = fonts[font][c].Size.second - fonts[font][c].Bearing.second;
+
+	float w = get_char_width(font, c);
+	float h = fonts[font][c].Size.second;
+	float vertices[6][4] = {
+		{ xpos,     ypos + h,   0.0f, 0.0f },
+		{ xpos,     ypos,       0.0f, 1.0f },
+		{ xpos + w, ypos,       1.0f, 1.0f },
+
+		{ xpos,     ypos + h,   0.0f, 0.0f },
+		{ xpos + w, ypos,       1.0f, 1.0f },
+		{ xpos + w, ypos + h,   1.0f, 0.0f }
+	};
+
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	return fonts[font][c].VAO;
+}
+
+GLuint TrueTypeFont::get_tex_id(const std::string& font, char c)
+{
+	if (fonts.find(font) == fonts.end())
+		return 0; //font not present
+
+	return fonts[font][c].TextureID;
+}
+
+int TrueTypeFont::get_char_width(const std::string& font, char c)
+{
+	if (fonts.find(font) == fonts.end())
+		return 0; //font not present
+
+	return fonts[font][c].Advance >> 6; // bitshift by 6 to get value in pixels (2^6 = 64);
 }

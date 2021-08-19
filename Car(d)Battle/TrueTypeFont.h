@@ -16,6 +16,8 @@ class TrueTypeFont
         std::pair<int, int>     Size;       // Size of glyph
         std::pair<int, int>     Bearing;    // Offset from baseline to left/top of glyph
         FT_Pos                  Advance;    // Offset to advance to next glyph
+        GLuint                  VBO;
+        GLuint                  VAO;
     };
 
     FT_Library ft;
@@ -30,4 +32,7 @@ class TrueTypeFont
 public:
     void load_font(const std::string&, const std::string&);
     void draw(const std::string&, const std::string&, const glm::vec3&);
+    GLuint get_VAO(const std::string&, char);
+    GLuint get_tex_id(const std::string&, char);
+    int get_char_width(const std::string&, char);
 };
