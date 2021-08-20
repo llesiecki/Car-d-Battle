@@ -11,11 +11,11 @@ public:
 	~Shader();
 	void load(const std::string &, GLenum);
 	void link();
-	void set(const std::string&, GLboolean);
-	void set(const std::string&, GLint);
-	void set(const std::string&, GLfloat);
-	void set(const std::string&, const glm::mat4&);
-	void set(const std::string&, const glm::vec3&);
-	void enable();
-	void disable();
+	void set(const std::string&, GLboolean) const;
+	void set(const std::string&, GLint) const;
+	void set(const std::string&, GLfloat) const;
+	void set(const std::string&, const glm::mat4&) const;
+	void set(const std::string&, const glm::vec3&) const;
+	void enable() const;
+	void disable() const;
 };

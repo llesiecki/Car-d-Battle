@@ -58,24 +58,24 @@ void Shader::link()
 	shader_ids.clear();
 }
 
-void Shader::set(const std::string & name, GLboolean value)
+void Shader::set(const std::string & name, GLboolean value) const
 {
 	glUniform1i(glGetUniformLocation(program_id, name.c_str()),
 		static_cast<GLint>(value)
 	);
 }
 
-void Shader::set(const std::string & name, GLint value)
+void Shader::set(const std::string & name, GLint value) const
 {
 	glUniform1i(glGetUniformLocation(program_id, name.c_str()), value);
 }
 
-void Shader::set(const std::string & name, GLfloat value)
+void Shader::set(const std::string & name, GLfloat value) const
 {
 	glUniform1f(glGetUniformLocation(program_id, name.c_str()), value);
 }
 
-void Shader::set(const std::string& name, const glm::mat4 & value)
+void Shader::set(const std::string& name, const glm::mat4 & value) const
 {
 	glUniformMatrix4fv(
 		glGetUniformLocation(program_id, name.c_str()),
@@ -85,7 +85,7 @@ void Shader::set(const std::string& name, const glm::mat4 & value)
 	);
 }
 
-void Shader::set(const std::string& name, const glm::vec3& value)
+void Shader::set(const std::string& name, const glm::vec3& value) const
 {
 	glUniform3fv(
 		glGetUniformLocation(program_id, name.c_str()),
@@ -94,12 +94,12 @@ void Shader::set(const std::string& name, const glm::vec3& value)
 	);
 }
 
-void Shader::enable()
+void Shader::enable() const
 {
 	glUseProgram(program_id);
 }
 
-void Shader::disable()
+void Shader::disable() const
 {
 	GLint id;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
