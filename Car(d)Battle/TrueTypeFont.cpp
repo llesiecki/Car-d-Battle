@@ -79,28 +79,6 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 	FT_Done_Face(face);
 }
 
-void TrueTypeFont::draw(const std::string& text, const std::string& font, const glm::vec3& color)
-{
-	shader.enable();
-	shader.set("textColor", color);
-	glActiveTexture(GL_TEXTURE0);
-
-	float x = 0, y = 0;
-
-	for (const char c : text)
-	{
-		// render glyph texture over quad
-		glBindTexture(GL_TEXTURE_2D, get_tex_id(font, c));
-		glBindVertexArray(get_VAO(font, c));
-
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		x += get_char_width(font, c);
-		//TODO: Add trnswormations for shifting the characters
-	}
-}
-
 GLuint TrueTypeFont::get_VAO(const std::string& font, char c)
 {
 	if (fonts.find(font) == fonts.end())
@@ -113,7 +91,7 @@ GLuint TrueTypeFont::get_VAO(const std::string& font, char c)
 	glGenBuffers(1, &fonts[font][c].VBO);
 	glBindVertexArray(fonts[font][c].VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, fonts[font][c].VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 
@@ -158,4 +136,9 @@ int TrueTypeFont::get_char_width(const std::string& font, char c)
 		return 0; //font not present
 
 	return fonts[font][c].Advance >> 6; // bitshift by 6 to get value in pixels (2^6 = 64);
+}
+
+const Shader& TrueTypeFont::get_shader()
+{
+	return shader;
 }

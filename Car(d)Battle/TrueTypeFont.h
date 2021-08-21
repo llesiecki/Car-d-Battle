@@ -31,8 +31,8 @@ class TrueTypeFont
 
 public:
     void load_font(const std::string&, const std::string&);
-    void draw(const std::string&, const std::string&, const glm::vec3&);
     GLuint get_VAO(const std::string&, char);
     GLuint get_tex_id(const std::string&, char);
     int get_char_width(const std::string&, char);
+    const Shader& get_shader();
 };
