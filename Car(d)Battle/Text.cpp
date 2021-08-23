@@ -31,6 +31,28 @@ Text::~Text()
 
 void Text::draw()
 {
+	const Shader& shader = ttf.get_shader();
+	shader.enable();
+	shader.set("textColor", color);
+	//TODO: Add a possibility to set/pass the transformation matrix
+	shader.set("projection", glm::mat4());
+	
+	glActiveTexture(GL_TEXTURE0);
+
+	float x = 0, y = 0;
+
+	for (const char c : text)
+	{
+		// render glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, ttf.get_tex_id(font, c));
+		glBindVertexArray(ttf.get_VAO(font, c));
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		x += ttf.get_char_width(font, c);
+		//TODO: Add trnsformations for shifting the characters
+	}
 }
 
 void Text::set_text(const std::string& text)
@@ -56,4 +78,15 @@ void Text::set_color(glm::vec3 color, GLfloat opacity)
 void Text::set_opacity(GLfloat opacity)
 {
 	this->color.w = opacity;
+}
+
+void Text::set_font(const std::string& path, const std::string& font)
+{
+	this->font = font;
+	ttf.load_font(path, font);
+}
+
+void Text::set_font(const std::string& font)
+{
+	this->set_font("%systemroot%/Fonts", font);
 }

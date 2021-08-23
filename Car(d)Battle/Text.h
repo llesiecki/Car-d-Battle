@@ -24,4 +24,6 @@ public:
 	void set_color(glm::vec3);
 	void set_color(glm::vec3, GLfloat);
 	void set_opacity(GLfloat);
+	void set_font(const std::string&);
+	void set_font(const std::string&, const std::string&);
 };
