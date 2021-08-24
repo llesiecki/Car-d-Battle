@@ -18,7 +18,7 @@ public:
 	Text(const std::string&, glm::vec4);
 	~Text();
 
-	void draw();
+	void draw(const glm::mat4&);
 	void set_text(const std::string&);
 	void set_color(glm::vec4);
 	void set_color(glm::vec3);

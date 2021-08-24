@@ -29,29 +29,25 @@ Text::~Text()
 		glDeleteBuffers(1, &VBO);
 }
 
-void Text::draw()
+void Text::draw(const glm::mat4 & mvp)
 {
 	const Shader& shader = ttf.get_shader();
 	shader.enable();
 	shader.set("textColor", color);
-	//TODO: Add a possibility to set/pass the transformation matrix
-	shader.set("projection", glm::mat4());
-	
 	glActiveTexture(GL_TEXTURE0);
-
-	float x = 0, y = 0;
+	glm::mat4 shift(1.0f);
 
 	for (const char c : text)
 	{
 		// render glyph texture over quad
 		glBindTexture(GL_TEXTURE_2D, ttf.get_tex_id(font, c));
 		glBindVertexArray(ttf.get_VAO(font, c));
+		shader.set("mvp", mvp * shift);
+		shift = glm::translate(shift, glm::vec3(ttf.get_char_width(font, c), 0.0f, 0.0f));
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		x += ttf.get_char_width(font, c);
-		//TODO: Add trnsformations for shifting the characters
 	}
 }
 
