@@ -59,23 +59,6 @@ std::string Card::get_category_value(int num)
     return values[num];
 }
 
-void renderStrokeString(float x, float y, const std::string &text)
-{
-    glPushMatrix();
-    glScalef(0.0004f, 0.0004f, 0.0004f);//text size
-    for (char ch : text)
-        glutStrokeCharacter(GLUT_STROKE_ROMAN, ch);//GLUT_STROKE_MONO_ROMAN
-    glPopMatrix();
-}
-
-float calc_text_width(std::string str)
-{
-    float width = 0.0f;
-    for (char ch : str)
-        width += glutStrokeWidth(GLUT_STROKE_ROMAN, ch)/2500.0f;//(text size)^-1
-    return width;
-}
-
 void Card::draw(const glm::mat4& proj, const glm::mat4& view)
 {
     glm::mat4 trans(1.0f);
