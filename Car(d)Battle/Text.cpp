@@ -4,8 +4,6 @@ Text::Text()
 	:ttf(Singleton<TrueTypeFont>())
 {
 	set_color(glm::vec4(255, 255, 255, 255));
-	VAO = 0;
-	VBO = 0;
 }
 
 Text::Text(const std::string& text)
@@ -22,11 +20,6 @@ Text::Text(const std::string& text, glm::vec4 color)
 
 Text::~Text()
 {
-	if (VAO)
-		glDeleteVertexArrays(1, &VAO);
-
-	if (VBO)
-		glDeleteBuffers(1, &VBO);
 }
 
 void Text::draw(const glm::mat4 & mvp)

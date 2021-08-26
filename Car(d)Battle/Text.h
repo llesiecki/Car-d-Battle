@@ -8,7 +8,6 @@ class Text
 {
 	std::string text;
 	std::string font;
-	GLuint VBO, VAO;
 	glm::vec4 color;
 	TrueTypeFont& ttf;
 
