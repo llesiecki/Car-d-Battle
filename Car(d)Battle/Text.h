@@ -25,4 +25,5 @@ public:
 	void set_opacity(GLfloat);
 	void set_font(const std::string&);
 	void set_font(const std::string&, const std::string&);
+	int get_width();
 };

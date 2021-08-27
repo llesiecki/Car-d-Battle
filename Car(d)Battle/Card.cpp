@@ -77,7 +77,12 @@ void Card::draw(const glm::mat4& proj, const glm::mat4& view)
     glDisable(GL_TEXTURE_2D);
 
     trans = glm::translate(trans, glm::vec3(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f));
-    renderStrokeString(0, 0, car_name);
+
+    Text text("", glm::vec4(0, 0, 0, 1));
+    text.set_font("Arial.ttf");
+    text.set_text(car_name);
+    text.draw(proj * view * trans);
+
     trans = glm::translate(trans, glm::vec3(0, -CARD_HEIGHT / 2 / 7, 0));//half of height devided by 7 because there are 7 fields
     for (unsigned int i = 0; i < common_values.field_names.size(); i++)
     {
@@ -106,15 +111,18 @@ void Card::draw(const glm::mat4& proj, const glm::mat4& view)
             highlight_line.set_pos(line_corners[3], line_corners[0]);
             highlight_line.draw();
         }
-        renderStrokeString(0, 0, common_values.field_names[i] + ":");
-        float width = calc_text_width(values[i]);
-        glPushMatrix();
-        glTranslatef(CARD_WIDTH - 0.04f - width, 0, 0);
-        renderStrokeString(0, 0, values[i]);
-        glPopMatrix();
-        glTranslatef(0, -CARD_HEIGHT / 2 / 7, 0);//half of height devided by 7 because there are 7 fields
+
+        text.set_text(common_values.field_names[i] + ":");
+        text.draw(proj * view * trans);
+
+        float width = static_cast<float>(text.get_width());
+        glm::mat4 shift = glm::translate(trans, glm::vec3(CARD_WIDTH - 0.04f - width, 0, 0));
+
+        text.set_text(values[i]);
+        text.draw(proj * view * shift);
+
+        trans = glm::translate(trans, glm::vec3(0, -CARD_HEIGHT / 2 / 7, 0));//half of height devided by 7 because there are 7 fields
     }
-    glPopMatrix();
 }
 
 void Card::delete_tex()

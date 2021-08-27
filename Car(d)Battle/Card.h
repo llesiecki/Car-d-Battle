@@ -3,6 +3,7 @@
 #include "utilities\Texture.h"
 #include "Shader.h"
 #include "Line.h"
+#include "Text.h"
 #include <array>
 
 class  Cards;

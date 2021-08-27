@@ -75,6 +75,14 @@ void Text::set_font(const std::string& path, const std::string& font)
 	ttf.load_font(path, font);
 }
 
+int Text::get_width()
+{
+	int width = 0;
+	for (const char c : text)
+		width += ttf.get_char_width(font, c);
+	return width;
+}
+
 void Text::set_font(const std::string& font)
 {
 	this->set_font("%systemroot%/Fonts", font);
