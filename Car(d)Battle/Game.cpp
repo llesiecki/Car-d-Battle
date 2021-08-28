@@ -300,13 +300,20 @@ void Game::cards_to_players()
 
 void Game::choose_category()
 {
-	Text3D text;
-	text.pos = glm::vec3(-0.6f, 0.01f, 0.2f);
-	text.angle = -60.0f;
-	text.rot = glm::vec3(1.0f, 0.0f, 0.0f);
-	text.scale = 0.001f;
-	text.text = current_player == 0 ? "Choose a category..." : "Waiting for opponent...";
-	text.line_width = 7.5f;
+	Text text;
+
+	glm::mat4 ortho_projection =
+		glm::ortho(
+			0.0f, static_cast<float>(screen_size.x),
+			0.0f, static_cast<float>(screen_size.y)
+		);
+	glm::mat4 text_trans = glm::translate(ortho_projection * view, glm::vec3(-0.6f, 0.01f, 0.2f));
+
+	text.set_mvp(projection * view * text_trans);
+	text.set_text(current_player == 0 ? "Choose a category..." : "Waiting for opponent...");
+	text.set_color(glm::vec4(0, 0, 0, 1));
+	text.set_font("Arial.ttf");
+
 	lock.lock();
 	unsigned int text_id = texts.size();
 	texts.push_back(text);
@@ -822,8 +829,8 @@ void Game::draw()
 		draw_players_stacks();
 		draw_players_cards();
 		lock.lock();
-		for (Text3D& text : texts)
-			text.render();
+		for (Text& text : texts)
+			text.draw();
 		lock.unlock();
 	}
 
