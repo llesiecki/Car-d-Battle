@@ -104,21 +104,20 @@ void Game::load()
 	scene.load();
 }
 
-void Game::draw_cards_stack(std::vector<Card>& cards_vec)
+void Game::draw_cards_stack(std::vector<Card>& cards_vec, glm::mat4 mvp)
 {
-	glm::mat4 trans(1.0f);
 	lock.lock();//other threads may attempt to modify cards_vec during execution of this member function
 	for (unsigned int i = 0; i < cards_vec.size(); i++)
 	{
-		trans = glm::translate(
-			trans,
+		mvp = glm::translate(
+			mvp,
 			glm::vec3(
 				random_translation_vec[i].first,
 				0.005f,
 				random_translation_vec[i].second
 			)
 		);
-		cards_vec[i].draw(projection, view);
+		cards_vec[i].draw(projection);
 	}
 	lock.unlock();
 }
@@ -758,59 +757,51 @@ void Game::draw_players_stacks()
 	//stacks:
 	if (players_num < 2)
 		return;
+
+	const glm::mat4 vp = projection * view;
 	//player 0:
-	glPushMatrix();
-	glTranslatef(1.0f, 0.0f, 1.5f);
-	draw_cards_stack(player_stack[0]);
-	glPopMatrix();
+	glm::mat4 trans = glm::translate(vp, glm::vec3(1.0f, 0.0f, 1.5f));
+	draw_cards_stack(player_stack[0], trans);
 	//player 1:
-	glPushMatrix();
-	glTranslatef(-1.9f, 0.0f, 1.3f);
-	glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_stack[1]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(-1.9f, 0.0f, 1.3f));
+	trans = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_stack[1], trans);
+
 	if (players_num < 3)
 		return;
 	//player 2:
-	glPushMatrix();
-	glTranslatef(-1.0f, 0.0f, -1.2f);
-	glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_stack[2]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(-1.0f, 0.0f, -1.2f));
+	trans = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_stack[2], trans);
+
 	if (players_num < 4)
 		return;
 	//player 3:
-	glPushMatrix();
-	glTranslatef(1.9f, 0.0f, -0.7f);
-	glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_stack[3]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(1.9f, 0.0f, -0.7f));
+	trans = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_stack[3], trans);
 }
 
 void Game::draw_players_cards()
 {
-	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, 1.0f);
-	draw_cards_stack(player_card[0]);
-	glPopMatrix();
+	const glm::mat4 vp = projection * view;
 
-	glPushMatrix();
-	glTranslatef(-1.4f, 0.0f, 0.3f);
-	glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_card[1]);
-	glPopMatrix();
+	// TODO: Consider to skip drawing stacks that are empty
 
-	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, -0.7f);
-	glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_card[2]);
-	glPopMatrix();
+	glm::mat4 trans = glm::translate(vp, glm::vec3(0.0f, 0.0f, 1.0f));
+	draw_cards_stack(player_card[0], trans);
 
-	glPushMatrix();
-	glTranslatef(1.4f, 0.0f, 0.3f);
-	glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_card[3]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(-1.4f, 0.0f, 0.3f));
+	trans = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_card[1], trans);
+
+	trans = glm::translate(vp, glm::vec3(0.0f, 0.0f, -0.7f));
+	trans = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_card[2], trans);
+
+	trans = glm::translate(vp, glm::vec3(1.4f, 0.0f, 0.3f));
+	trans = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_card[3], trans);
 }
 
 void Game::set_pause(bool pause)
@@ -823,23 +814,18 @@ void Game::draw()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
-	glPushMatrix();
-
-
-		if (!pause)
-		{
-			scene.draw(projection, view);
-			draw_cards_stack(central_stack);
-			draw_players_stacks();
-			draw_players_cards();
-			lock.lock();
-			for (Text3D& text : texts)
-				text.render();
-			lock.unlock();
-		}
-	glPopMatrix();
+	if (!pause)
+	{
+		scene.draw(projection, view);
+		draw_cards_stack(central_stack, projection * view);
+		draw_players_stacks();
+		draw_players_cards();
+		lock.lock();
+		for (Text3D& text : texts)
+			text.render();
+		lock.unlock();
+	}
 
 	ui.render();
 
@@ -901,5 +887,4 @@ void Game::draw()
 	}
 
 	glFlush();
-	glutSwapBuffers();
 }
