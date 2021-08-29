@@ -6,6 +6,8 @@ class Shader
 	std::vector<GLuint> shader_ids;
 	GLuint program_id;
 	const GLsizei shaders_max;
+
+	std::string get_compilation_output(GLuint, unsigned int);
 public:
 	Shader();
 	~Shader();

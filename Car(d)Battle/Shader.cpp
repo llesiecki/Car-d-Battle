@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include <Windows.h>
 
 Shader::Shader()
 	: program_id(glCreateProgram()), shaders_max(64)
@@ -25,16 +26,13 @@ void Shader::load(const std::string & path, GLenum type)
 	glShaderSource(shader_ids.back(), 1, &p_source, NULL);
 	glCompileShader(shader_ids.back());
 
-	int success;
-	char info_log[512];
-	glGetShaderiv(shader_ids.back(), GL_COMPILE_STATUS, &success);
+	std::string output = std::move(get_compilation_output(program_id, 1024));
 
-	if (!success)
+	if (!output.empty())
 	{
-		glGetShaderInfoLog(shader_ids.back(), sizeof(info_log), NULL, info_log);
-		std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n" << info_log << std::endl;
 		glDeleteShader(shader_ids.back());
 		shader_ids.pop_back();
+		throw output;
 	}
 }
 
@@ -45,16 +43,24 @@ void Shader::link()
 
 	glLinkProgram(program_id);
 
+	std::string output = std::move(get_compilation_output(program_id, 1024));
+
+	if (!output.empty())
+		throw output;
+
 	GLsizei count;
-	std::shared_ptr<GLuint> shaders = std::make_shared<GLuint>(shaders_max);
+	GLuint* shaders = new GLuint[shaders_max];
 
-	glGetAttachedShaders(program_id, shaders_max, &count, shaders.get());
+	glGetAttachedShaders(program_id, shaders_max, &count, shaders);
 
-	for (int i = 0; i < count; ++i)
-		glDetachShader(program_id, shaders.get()[i]);
+	for (int i = 0; i < count && i < shaders_max; ++i)
+		glDetachShader(program_id, shaders[i]);
+
+	delete[] shaders;
 
 	for (GLuint id : shader_ids)
 		glDeleteShader(id);
+	
 	shader_ids.clear();
 }
 
@@ -105,4 +111,22 @@ void Shader::disable() const
 	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
 	if(id == program_id)
 		glUseProgram(0);
+}
+
+std::string Shader::get_compilation_output(GLuint id, unsigned int buffer_size)
+{
+	int success;
+	std::string output;
+
+	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{
+		std::vector<char> info_log(buffer_size);
+		glGetShaderInfoLog(id, buffer_size, NULL, info_log.data());
+		output = "ERROR::SHADER::COMPILATION_FAILED:\n" +
+			std::string(info_log.begin(), info_log.end());
+	}
+
+	return output;
 }
