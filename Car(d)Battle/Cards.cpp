@@ -47,6 +47,10 @@ Cards::Cards(const wchar_t* filename)
 	};
 
 	card_values.frame_vertices = std::move(vertices_data);
+	card_values.shader = new Shader();
+	card_values.shader->load("shaders\\card_vert.glsl", GL_VERTEX_SHADER);
+	card_values.shader->load("shaders\\card_frag.glsl", GL_FRAGMENT_SHADER);
+	card_values.shader->link();
 }
 
 Cards::~Cards()
@@ -63,6 +67,7 @@ Cards::~Cards()
 	delete card_values.fields_tex;
 	for (Card& card : cards)
 		card.delete_tex();
+	delete card_values.shader;
 }
 
 bool Cards::load_textures()
@@ -78,42 +83,40 @@ bool Cards::load_textures()
 
 void Cards::create_buffers()
 {
-	GLfloat vertices_data[] = {	//pos.x, pos.y, pos.z, tex.x, tex.y
-		0.0f, 0.0f, 0.0f,					1.0f, 0.0f	//rectangle 1:
-		-CARD_WIDTH, 0.0f, 0.0f,			0.0f, 0.0f,
-		-CARD_WIDTH, CARD_HEIGHT, 0.0f,		0.0f, 1.0f,
-		0.0, CARD_HEIGHT, 0.0f,				1.0f, 1.0f,
+	GLfloat vertices_data[] = {	//pos.x, pos.y, tex.x, tex.y
+		//rectangle 1:(back)
+		-CARD_WIDTH, 0.0f,			0.0f, 1.0f,//upper left
+		-CARD_WIDTH, CARD_HEIGHT,	0.0f, 0.0f,//lower left
+		0.0f, CARD_HEIGHT,			1.0f, 0.0f,//lower right
+		0.0f, 0.0f,					1.0f, 1.0f,//upper right
 
-		0.0f, 0.0f, 0.0f,					1.0f, 0.0f,	//rectangle 2:
-		0.0f, CARD_HEIGHT / 2, 0.0f,		1.0f, 1.0f,
-		-CARD_WIDTH, CARD_HEIGHT / 2, 0.0f,	0.0f, 1.0f,
-		-CARD_WIDTH, 0.0f, 0.0f,			0.0f, 0.0f,
+		//rectangle 2:(car)
+		0.0f, 0.0f,						0.0f, 1.0f,//upper left
+		0.0f, CARD_HEIGHT / 2,			0.0f, 0.0f,//lower left
+		-CARD_WIDTH, CARD_HEIGHT / 2,	1.0f, 0.0f,//lower right
+		-CARD_WIDTH, 0.0f,				1.0f, 1.0f,//upper right
 
-		0.0f, CARD_HEIGHT / 2, 0.0f,		1.0f, 0.0f,	//rectangle 3:
-		0.0f, CARD_HEIGHT, 0.0f,			1.0f, 1.0f,
-		-CARD_WIDTH, CARD_HEIGHT, 0.0f,		0.0f, 1.0f,
-		-CARD_WIDTH, CARD_HEIGHT / 2, 0.0f,	0.0f, 0.0f
+		//rectangle 3:(fields)
+		0.0f, CARD_HEIGHT / 2,			0.0f, 1.0f,//upper left
+		0.0f, CARD_HEIGHT,				0.0f, 0.0f,//lower left
+		-CARD_WIDTH, CARD_HEIGHT,		1.0f, 0.0f,//lower right
+		-CARD_WIDTH, CARD_HEIGHT / 2,	1.0f, 1.0f,//upper right
 	};
 
 	GLuint indices[] = {
 		0, 1, 2,	// first triangle (drawing first rectangle)
-		1, 2, 3,	// second triangle (drawing first rectangle)
+		2, 3, 0,	// second triangle (drawing first rectangle)
 
 		4, 5, 6,	// and so on... (drawing second rectangle)
-		5, 6, 7,
+		6, 7, 4,
 
 		8, 9, 10,
-		9, 10, 11,
-
-		12, 13, 14,
-		13, 14, 15,
+		10, 11, 8
 	};
 
 	/// <tech debt>
-	/// How to bind multiple textures to one VAO?
-	/// If the above is not possible, consider
-	/// merging textures into one file and change
-	/// the tex cords respectively.
+	/// Consider merging textures into one file 
+	/// and change the tex cords respectively.
 	/// </tech debt>
 
 	glGenVertexArrays(1, &card_values.common_vao);
@@ -130,16 +133,16 @@ void Cards::create_buffers()
 
 	//attrib 0 - vertex coords
 	//attrib num, qty of buffer items, type, normalize?, size of a single vertex, offset
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), static_cast<void*>(0));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), static_cast<void*>(0));
 	glEnableVertexAttribArray(0);
 
 	//attrib 1 - tex coords
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), reinterpret_cast<void*>(2 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
+	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 }
 
 std::vector<Card> Cards::get_cards_vec()

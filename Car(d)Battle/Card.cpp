@@ -74,12 +74,16 @@ void Card::draw(const glm::mat4& mvp)
     common_values.shader->set("transform", mvp * trans);
     glBindVertexArray(common_values.common_vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
+    glBindTexture(GL_TEXTURE_2D, car_tex->GetId());
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, reinterpret_cast<void*>(2 * 3 * sizeof(GLuint)));
+    glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->GetId());
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, reinterpret_cast<void*>(2 * 2 * 3 * sizeof(GLuint)));
     glDisable(GL_TEXTURE_2D);
 
     trans = glm::translate(trans, glm::vec3(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f));
 
     Text text("", glm::vec4(0, 0, 0, 1));
-    text.set_font("Arial.ttf");
+    text.set_font("arial.ttf");
     text.set_text(car_name);
     text.draw(mvp * trans);
 
