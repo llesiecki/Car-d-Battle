@@ -1,8 +1,4 @@
-#include "stdafx.h"
 #include "WorkBook.h"
-#include <locale>
-#include <codecvt>
-#include <algorithm>
 
 WorkBook::WorkBook(const wchar_t* filename)
     :book(nullptr), sheet(nullptr)
@@ -17,8 +13,12 @@ WorkBook::WorkBook(const wchar_t* filename)
     }
     if (!good)
     {
-        std::wstring wstr(filename);
-        throw std::runtime_error("Couldn't open file: " + std::string(wstr.begin(), wstr.end()) + "for reading.\n");
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        throw std::runtime_error(
+            "Couldn't open file: " +
+            converter.to_bytes(filename) +
+            " for reading.\n"
+        );
     }
 }
 
