@@ -63,9 +63,21 @@ void Card::draw(const glm::mat4& mvp)
 {
     glm::mat4 trans(1.0f);
     trans = glm::translate(trans, pos);
-    trans = glm::rotate(trans, glm::radians(angle), rot);
+    trans *= glm::toMat4(glm::quat(
+        glm::vec3(
+            -glm::pi<GLfloat>() / 2,
+            glm::pi<GLfloat>(),
+            0.0f
+        )
+    ));
+
+    if((angle > 0.1 || angle < -0.1) && rot.length() > 0.1)
+        trans = glm::rotate(trans, glm::radians(angle), rot);
+
     if (invert)
-        trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    trans = glm::translate(trans, glm::vec3(CARD_WIDTH / 2, -CARD_HEIGHT / 2, 0.0035f));
+    
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
