@@ -1,13 +1,8 @@
 #include "TrueTypeFont.h"
 
 TrueTypeFont::TrueTypeFont()
+	:ft()
 {
-	if (FT_Init_FreeType(&ft))
-	{
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-		throw std::string("ERROR::FREETYPE: Could not init FreeType Library");
-	}
-
 	shader.load("shaders/ttf_vert.glsl", GL_VERTEX_SHADER);
 	shader.load("shaders/ttf_frag.glsl", GL_FRAGMENT_SHADER);
 	shader.link();
@@ -23,9 +18,15 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 	if (fonts.find(name) != fonts.end())
 		return; //font already present
 
+	if (FT_Init_FreeType(&ft))
+	{
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		throw std::string("ERROR::FREETYPE: Could not init FreeType Library");
+	}
+	
 	FT_Face face;
-
-	if (FT_New_Face(ft, path.c_str(), 0, &face))
+	
+	if (FT_New_Face(ft, (path + "\\" + name).c_str(), 0, &face))
 	{
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 		throw std::string("ERROR::FREETYPE: Failed to load font");
@@ -66,8 +67,8 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 		// now store character for later use
 		Character character = {
 			texture,
-			std::pair<int, int>(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			std::pair<int, int>(face->glyph->bitmap_left, face->glyph->bitmap_top),
+			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 			face->glyph->advance.x,
 			0,
 			0
@@ -77,6 +78,7 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 	}
 
 	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
 }
 
 GLuint TrueTypeFont::get_VAO(const std::string& font, char c)
@@ -87,23 +89,16 @@ GLuint TrueTypeFont::get_VAO(const std::string& font, char c)
 	if(fonts[font][c].VAO)
 		return fonts[font][c].VAO;
 
-	glGenVertexArrays(1, &fonts[font][c].VAO);
-	glGenBuffers(1, &fonts[font][c].VBO);
-	glBindVertexArray(fonts[font][c].VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, fonts[font][c].VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	float xpos = static_cast<float>(
+		fonts[font][c].Bearing.x);
+	float ypos = static_cast<float>(
+		fonts[font][c].Bearing.y - fonts[font][c].Size.y);
 
+	float w = static_cast<float>(
+		get_char_width(font, c));
+	float h = static_cast<float>(
+		fonts[font][c].Size.y);
 
-	glBindTexture(GL_TEXTURE_2D, fonts[font][c].TextureID);
-	// update content of VBO memory
-
-	float xpos = fonts[font][c].Bearing.first;
-	float ypos = fonts[font][c].Size.second - fonts[font][c].Bearing.second;
-
-	float w = get_char_width(font, c);
-	float h = fonts[font][c].Size.second;
 	float vertices[6][4] = {
 		{ xpos,     ypos + h,   0.0f, 0.0f },
 		{ xpos,     ypos,       0.0f, 1.0f },
@@ -114,10 +109,18 @@ GLuint TrueTypeFont::get_VAO(const std::string& font, char c)
 		{ xpos + w, ypos + h,   1.0f, 0.0f }
 	};
 
+
+
+	// update content of VBO memory
+
+	glGenVertexArrays(1, &fonts[font][c].VAO);
+	glGenBuffers(1, &fonts[font][c].VBO);
+	glBindVertexArray(fonts[font][c].VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, fonts[font][c].VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 
 	return fonts[font][c].VAO;
 }
