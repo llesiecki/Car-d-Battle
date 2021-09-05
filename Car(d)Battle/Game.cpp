@@ -117,7 +117,7 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec, glm::mat4 mvp)
 				random_translation_vec[i].second
 			)
 		);
-		cards_vec[i].draw(projection);
+		cards_vec[i].draw(mvp);
 	}
 	lock.unlock();
 }
@@ -138,7 +138,7 @@ void Game::move_cards(const Card_translation transltion_type[])
 		if (transltion_type[player_num] == Card_translation::without_flip)
 			continue;
 
-		player_stack[player_num].back().rot = glm::vec3(0.0f, 0.0f, 1.0f);
+		player_stack[player_num].back().rot = glm::vec3(0.0f, 1.0f, 0.0f);
 	}
 
 	const int iterations_max = 60;
@@ -190,7 +190,7 @@ void Game::flip_cards(const bool flip[])
 {
 	for (int player_num = 0; player_num < players_num; player_num++)
 		if (flip[player_num])
-			player_card[player_num].back().rot = glm::vec3(0.0f, 0.0f, 1.0f);
+			player_card[player_num].back().rot = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	const int iterations_max = 60;
 
@@ -240,7 +240,7 @@ void Game::distribute_cards()
 				card.pos.z += 1.5f / iterations_max;
 				break;
 			case 1:
-				card.rot = glm::vec3(0.0f, 1.0f, 0.0f);
+				card.rot = glm::vec3(0.0f, 0.0f, 1.0f);
 				card.pos.x += -1.9f / iterations_max;
 				card.pos.z += 1.3f / iterations_max;
 				card.angle += 90.0f / iterations_max;
@@ -250,7 +250,7 @@ void Game::distribute_cards()
 				card.pos.z += -1.2f / iterations_max;
 				break;
 			case 3:
-				card.rot = glm::vec3(0.0f, 1.0f, 0.0f);
+				card.rot = glm::vec3(0.0f, 0.0f, 1.0f);
 				card.pos.x += 1.9f / iterations_max;
 				card.pos.z += -0.7f / iterations_max;
 				card.angle += 90.0f / iterations_max;
@@ -713,7 +713,7 @@ void Game::cards_to_winner()
 					card.pos.z += move.z / (iterations_max * 3 / 4);
 					if (angle != 0.0f)
 					{
-						card.rot = glm::vec3(0.0f, 1.0f, 0.0f);
+						card.rot = glm::vec3(0.0f, 0.0f, 1.0f);
 						card.angle += angle / (iterations_max * 3 / 4);
 					}
 				}
@@ -771,21 +771,21 @@ void Game::draw_players_stacks()
 	draw_cards_stack(player_stack[0], trans);
 	//player 1:
 	trans = glm::translate(vp, glm::vec3(-1.9f, 0.0f, 1.3f));
-	trans = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	trans = glm::rotate(trans, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	draw_cards_stack(player_stack[1], trans);
 
 	if (players_num < 3)
 		return;
 	//player 2:
 	trans = glm::translate(vp, glm::vec3(-1.0f, 0.0f, -1.2f));
-	trans = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	draw_cards_stack(player_stack[2], trans);
 
 	if (players_num < 4)
 		return;
 	//player 3:
 	trans = glm::translate(vp, glm::vec3(1.9f, 0.0f, -0.7f));
-	trans = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	draw_cards_stack(player_stack[3], trans);
 }
 
@@ -799,15 +799,15 @@ void Game::draw_players_cards()
 	draw_cards_stack(player_card[0], trans);
 
 	trans = glm::translate(vp, glm::vec3(-1.4f, 0.0f, 0.3f));
-	trans = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	trans = glm::rotate(trans, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	draw_cards_stack(player_card[1], trans);
 
 	trans = glm::translate(vp, glm::vec3(0.0f, 0.0f, -0.7f));
-	trans = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	draw_cards_stack(player_card[2], trans);
 
 	trans = glm::translate(vp, glm::vec3(1.4f, 0.0f, 0.3f));
-	trans = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	draw_cards_stack(player_card[3], trans);
 }
 
