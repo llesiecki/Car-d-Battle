@@ -1,11 +1,10 @@
 #pragma once
 
-#define GL_CLAMP_TO_EDGE 0x812F 
-
 #include "stdafx.h"
 #include "Singleton.h"
 #include "Shader.h"
 #include <map>
+#include <array>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -21,7 +20,7 @@ class TrueTypeFont
 	};
 
 	FT_Library ft;
-	std::map<std::string, std::map<char, Character>> fonts;
+	std::map<std::string, std::array<Character, 128>> fonts;
 	Shader shader;
 
 	TrueTypeFont();
