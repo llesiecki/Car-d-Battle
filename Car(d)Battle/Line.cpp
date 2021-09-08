@@ -1,26 +1,29 @@
 #include "Line.h"
 
 Line::Line()
-	:mvp(), color(), start(), end()
+	:mvp(), color()
 {
 	shader.load("shaders/line_vert.glsl", GL_VERTEX_SHADER);
 	shader.load("shaders/line_frag.glsl", GL_FRAGMENT_SHADER);
 
 	shader.link();
 
+	indices_num = 0;
+
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
 }
 
-Line::Line(const glm::vec3& start, const glm::vec3& end)
+Line::Line(const std::vector<glm::vec3>& vertices)
 {
 	this->Line::Line();
-	set_pos(start, end);
+	set_vertices(vertices);
 }
 
-Line::Line(const glm::vec3& start, const glm::vec3& end, const glm::vec3& color)
+Line::Line(const std::vector<glm::vec3>& vertices, const glm::vec3& color)
 {
-	this->Line::Line(start, end);
+	this->Line::Line(vertices);
 	this->color = color;
 }
 
@@ -28,6 +31,9 @@ void Line::clean_buffers()
 {
 	if (vbo != 0)
 		glDeleteBuffers(1, &vbo);
+
+	if (ebo != 0)
+		glDeleteBuffers(1, &ebo);
 
 	if (vao != 0)
 		glDeleteVertexArrays(1, &vao);
@@ -48,31 +54,37 @@ void Line::set_color(const glm::vec3& color)
 	this->color = color;
 }
 
-void Line::set_pos(const glm::vec3& start, const glm::vec3& end)
+void Line::set_vertices(const std::vector<glm::vec3>& vertices, bool cycle)
 {
-	this->start = start;
-	this->end = end;
+	//generate indices for a series of vertexes
+	std::vector<unsigned int> indices;
 
-	float vertices[] = {
-		 start.x, start.y, start.z,
-		 end.x, end.y, end.z
-	};
+	indices.push_back(0);//first
+	for (unsigned int i = 1; i < vertices.size() - 1; i++)//each next has to be duplicated
+	{
+		indices.push_back(i);
+		indices.push_back(i);
+	}
+	indices.push_back(vertices.size() - 1);//last
 
+	if (cycle)//closing cycle
+	{
+		indices.push_back(vertices.size() - 1);//last
+		indices.push_back(0);//first
+	}
+
+	indices_num = indices.size();
+	
 	glBindVertexArray(vao);
+
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), static_cast<void *>(0));
 	glEnableVertexAttribArray(0);
-}
-
-void Line::set_start(const glm::vec3& start)
-{
-	set_pos(start, end);
-}
-
-void Line::set_end(const glm::vec3& end)
-{
-	set_pos(start, end);
 }
 
 void Line::draw()
@@ -82,5 +94,5 @@ void Line::draw()
 	shader.set("color", color);
 
 	glBindVertexArray(vao);
-	glDrawArrays(GL_LINES, 0, 2);
+	glDrawElements(GL_LINES, indices_num, GL_UNSIGNED_INT, static_cast<void*>(0));
 }
