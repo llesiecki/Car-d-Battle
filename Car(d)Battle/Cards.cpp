@@ -39,14 +39,6 @@ Cards::Cards(const wchar_t* filename)
 
 	card_values.common_vao = card_values.common_vbo = card_values.common_ebo = 0;
 
-	std::array<GLfloat, 12> vertices_data = {//pos.x, pos.y, pos.z
-		0.0f, 0.0f, 0.0f,
-		0.0f, CARD_HEIGHT / 2 / 7, 0.0f,
-		CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f,
-		CARD_WIDTH, 0.0f, 0.0f
-	};
-
-	card_values.frame_vertices = std::move(vertices_data);
 	card_values.shader = new Shader();
 	card_values.shader->load("shaders\\card_vert.glsl", GL_VERTEX_SHADER);
 	card_values.shader->load("shaders\\card_frag.glsl", GL_FRAGMENT_SHADER);
@@ -85,27 +77,28 @@ void Cards::create_buffers()
 {
 	GLfloat vertices_data[] = {	//pos.x, pos.y, tex.x, tex.y
 		//rectangle 1:(back)
-		-CARD_WIDTH, 0.0f,			0.0f, 1.0f,//upper left
-		-CARD_WIDTH, CARD_HEIGHT,	0.0f, 0.0f,//lower left
-		0.0f, CARD_HEIGHT,			1.0f, 0.0f,//lower right
-		0.0f, 0.0f,					1.0f, 1.0f,//upper right
+		0.0f, CARD_HEIGHT,			0.0f, 1.0f,//upper left
+		0.0f, 0.0f,					0.0f, 0.0f,//lower left
+		CARD_WIDTH, 0.0f,			1.0f, 0.0f,//lower right
+		CARD_WIDTH, CARD_HEIGHT,	1.0f, 1.0f,//upper right
 
 		//rectangle 2:(car)
-		0.0f, 0.0f,						0.0f, 1.0f,//upper left
+		0.0f, CARD_HEIGHT,				0.0f, 1.0f,//upper left
 		0.0f, CARD_HEIGHT / 2,			0.0f, 0.0f,//lower left
-		-CARD_WIDTH, CARD_HEIGHT / 2,	1.0f, 0.0f,//lower right
-		-CARD_WIDTH, 0.0f,				1.0f, 1.0f,//upper right
+		CARD_WIDTH, CARD_HEIGHT / 2,	1.0f, 0.0f,//lower right
+		CARD_WIDTH, CARD_HEIGHT,		1.0f, 1.0f,//upper right
 
 		//rectangle 3:(fields)
 		0.0f, CARD_HEIGHT / 2,			0.0f, 1.0f,//upper left
-		0.0f, CARD_HEIGHT,				0.0f, 0.0f,//lower left
-		-CARD_WIDTH, CARD_HEIGHT,		1.0f, 0.0f,//lower right
-		-CARD_WIDTH, CARD_HEIGHT / 2,	1.0f, 1.0f,//upper right
+		0.0f, 0.0f,						0.0f, 0.0f,//lower left
+		CARD_WIDTH, 0.0f,				1.0f, 0.0f,//lower right
+		CARD_WIDTH, CARD_HEIGHT / 2,	1.0f, 1.0f,//upper right
 	};
 
-	GLuint indices[] = {
-		0, 1, 2,	// first triangle (drawing first rectangle)
-		2, 3, 0,	// second triangle (drawing first rectangle)
+	GLubyte indices[] = {
+		//indices of first rectangle are reversed, because it's card's back
+		2, 1, 0,	// first triangle (drawing first rectangle)
+		0, 3, 2,	// second triangle (drawing first rectangle)
 
 		4, 5, 6,	// and so on... (drawing second rectangle)
 		6, 7, 4,
@@ -140,9 +133,15 @@ void Cards::create_buffers()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), reinterpret_cast<void*>(2 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	std::vector<glm::vec3> line_corners = {
+				{0.0f, 0.0f, 0.0f},
+				{CARD_WIDTH, 0.0f, 0.0f},
+				{CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f},
+				{0.0f, CARD_HEIGHT / 2 / 7, 0.0f},
+	};
+
+	card_values.highlight_line.set_color({ 1, 0, 0 });
+	card_values.highlight_line.set_vertices(line_corners, true);
 }
 
 std::vector<Card> Cards::get_cards_vec()

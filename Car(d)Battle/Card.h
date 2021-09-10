@@ -14,8 +14,7 @@ struct CommonCardValues
 	CTexture* back_tex, * fields_tex;
 	GLuint common_vbo, common_vao, common_ebo;
 	Shader* shader;
-	std::string img_path;
-	std::array<GLfloat, 4 * 3> frame_vertices; // 4 corners, 3 dimensions each
+	Line highlight_line;
 };
 
 class Card
@@ -24,7 +23,6 @@ class Card
 	int highlight;
 	CTexture* car_tex;
 	CommonCardValues& common_values;
-	Line highlight_line;
 public:
 	glm::vec3 pos, rot;
 	float angle;
