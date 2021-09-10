@@ -1,152 +1,177 @@
 #include "Card.h"
 
 Card::Card(unsigned int id, CTexture* car_tex, CommonCardValues& common_values)
-    :common_values(common_values)
+	:common_values(common_values)
 {
-    this->id = id;
-    this->car_tex = car_tex;
-    angle = 0.0f;
-    highlight = -1;
-    invert = true;
+	this->id = id;
+	this->car_tex = car_tex;
+	angle = 0.0f;
+	highlight = -1;
+	invert = true;
 }
 
 Card::Card(const Card& card)
-    :common_values(card.common_values)
+	:common_values(card.common_values)
 {
-    id = card.id;
-    highlight = card.highlight;
-    car_tex = card.car_tex;
-    car_name = card.car_name;
-    pos = card.pos;
-    rot = card.rot;
-    angle = card.angle;
-    invert = card.invert;
-    values = card.values;
+	id = card.id;
+	highlight = card.highlight;
+	car_tex = card.car_tex;
+	car_name = card.car_name;
+	pos = card.pos;
+	rot = card.rot;
+	angle = card.angle;
+	invert = card.invert;
+	values = card.values;
 }
 
 Card Card::operator=(const Card& card)
 {
-    id = card.id;
-    highlight = card.highlight;
-    car_tex = card.car_tex;
-    common_values = card.common_values;
-    car_name = card.car_name;
-    pos = card.pos;
-    rot = card.rot;
-    angle = card.angle;
-    invert = card.invert;
-    values = card.values;
+	id = card.id;
+	highlight = card.highlight;
+	car_tex = card.car_tex;
+	car_name = card.car_name;
+	pos = card.pos;
+	rot = card.rot;
+	angle = card.angle;
+	invert = card.invert;
+	values = card.values;
 	return Card(*this);
 }
 
 void Card::reset_coords()
 {
-    pos = glm::vec3();
-    rot = glm::vec3();
-    angle = 0.0f;
+	pos = glm::vec3();
+	rot = glm::vec3();
+	angle = 0.0f;
 }
 
 void Card::highlight_row(int row)
 {
-    highlight = row;
+	highlight = row;
 }
 
 std::string Card::get_category_value(int num)
 {
-    if (static_cast<unsigned int>(num) >= values.size() || num < 0)
-        return std::string();
+	if (static_cast<unsigned int>(num) >= values.size() || num < 0)
+		return std::string();
 
-    return values[num];
+	return values[num];
 }
 
 void Card::draw(const glm::mat4& mvp)
 {
-    glm::mat4 trans(1.0f);
-    trans = glm::translate(trans, pos);
-    trans *= glm::toMat4(glm::quat(
-        glm::vec3(
-            -glm::pi<GLfloat>() / 2,
-            glm::pi<GLfloat>(),
-            0.0f
-        )
-    ));
+	glm::mat4 trans = glm::translate(glm::mat4(1.0f), pos);
 
-    if((angle > 0.1 || angle < -0.1) && rot.length() > 0.1)
-        trans = glm::rotate(trans, glm::radians(angle), rot);
+	trans *= glm::toMat4(glm::quat(
+		glm::vec3(
+			-glm::pi<GLfloat>() / 2,
+			0.0f,
+			0.0f
+		)
+	));
 
-    if (invert)
-        trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    trans = glm::translate(trans, glm::vec3(CARD_WIDTH / 2, -CARD_HEIGHT / 2, 0.0035f));
-    
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
-    common_values.shader->enable();
-    common_values.shader->set("TexID", 0);
-    common_values.shader->set("transform", mvp * trans);
-    glBindVertexArray(common_values.common_vao);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
-    glBindTexture(GL_TEXTURE_2D, car_tex->GetId());
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, reinterpret_cast<void*>(2 * 3 * sizeof(GLuint)));
-    glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->GetId());
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, reinterpret_cast<void*>(2 * 2 * 3 * sizeof(GLuint)));
-    glDisable(GL_TEXTURE_2D);
+	if((angle > 0.1 || angle < -0.1) && rot.length() > 0.1)
+		trans = glm::rotate(trans, glm::radians(angle), rot);
 
-    trans = glm::translate(trans, glm::vec3(-CARD_WIDTH + 0.02f, 0.525f, 0.0035f));
+	if (invert)
+		trans = glm::rotate(trans, glm::pi<GLfloat>(),
+			glm::vec3(0.0f, 1.0f, 0.0f));
 
-    Text text("", glm::vec4(0, 0, 0, 1));
-    text.set_font("arial.ttf");
-    text.set_text(car_name);
-    text.draw(mvp * trans);
+	trans = glm::translate(trans, glm::vec3(
+		-CARD_WIDTH / 2,
+		-CARD_HEIGHT / 2,
+		0.0035f
+	));
+	
+	glEnable(GL_TEXTURE_2D);
+	glActiveTexture(GL_TEXTURE0);
+	common_values.shader->enable();
+	common_values.shader->set("TexID", 0);
+	common_values.shader->set("transform", mvp * trans);
 
-    trans = glm::translate(trans, glm::vec3(0, -CARD_HEIGHT / 2 / 7, 0));//half of height devided by 7 because there are 7 fields
-    for (unsigned int i = 0; i < common_values.field_names.size(); i++)
-    {
-        if (highlight == i)
-        {
+	glBindVertexArray(common_values.common_vao);
+	glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
+	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
+		static_cast<void*>(0));
 
-            glLineWidth(1.5f);
-            glm::vec3 line_corners[] = {
-                {0.0f, 0.0f, 0.0f},
-                {0.0f, CARD_HEIGHT / 2 / 7, 0.0f},
-                {CARD_WIDTH, CARD_HEIGHT / 2 / 7, 0.0f},
-                {CARD_WIDTH, 0.0f, 0.0f}
-            };
+	glBindTexture(GL_TEXTURE_2D, car_tex->GetId());
+	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
+		reinterpret_cast<void*>(1 * 2 * 3 * sizeof(GLubyte)));
 
-            for (glm::vec3& corner : line_corners)//tanslate the highlight
-                corner += glm::vec3(-0.02f, -0.02f, 0.0035f);
+	glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->GetId());
+	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
+		reinterpret_cast<void*>(2 * 2 * 3 * sizeof(GLubyte)));
 
-            highlight_line.set_color({ 1, 0, 0 });
-            highlight_line.set_MVP(trans);
-            highlight_line.set_pos(line_corners[0], line_corners[1]);
-            highlight_line.draw();
-            highlight_line.set_pos(line_corners[1], line_corners[2]);
-            highlight_line.draw();
-            highlight_line.set_pos(line_corners[2], line_corners[3]);
-            highlight_line.draw();
-            highlight_line.set_pos(line_corners[3], line_corners[0]);
-            highlight_line.draw();
-        }
+	glDisable(GL_TEXTURE_2D);
 
-        text.set_text(common_values.field_names[i] + ":");
-        text.draw(mvp * trans);
+	float text_scale = 0.001f;
+	float margin_horizontal = CARD_WIDTH / 40.0f;
+	//48 - font size
+	float margin_vertical = ((CARD_HEIGHT / 2 / 7) - 48 * text_scale)/1.5f;
 
-        float width = static_cast<float>(text.get_width());
-        glm::mat4 shift = glm::translate(trans, glm::vec3(CARD_WIDTH - 0.04f - width, 0, 0));
+	glm::mat4 fields_trans = glm::translate(trans, glm::vec3(
+		//left<>right
+		0.0f,
+		//set height to the first field
+		CARD_HEIGHT / 2.0f * 6.0f / 7.0f,
+		//height above the card
+		0.001f)
+	);
 
-        text.set_text(values[i]);
-        text.draw(mvp * shift);
+	Text text("", glm::vec4(0, 0, 0, 1));
+	text.set_font("arial.ttf");
+	text.set_text(car_name);
+	text.draw(glm::scale(mvp * glm::translate(fields_trans,
+		glm::vec3(
+			margin_horizontal,
+			margin_vertical,
+			0.0f
+		)),
+		glm::vec3(text_scale))
+	);
 
-        trans = glm::translate(trans, glm::vec3(0, -CARD_HEIGHT / 2 / 7, 0));//half of height devided by 7 because there are 7 fields
-    }
+	for (unsigned int i = 0; i < common_values.field_names.size(); i++)
+	{
+		//translate to the next field
+		//half of height devided by 7 because there are 7 fields
+		fields_trans = glm::translate(fields_trans,
+			glm::vec3(0.0f,
+				-CARD_HEIGHT / 2 / 7,//go one filed downwards
+				0.0f
+			));
+
+		//highlight the field if selected
+		if (highlight == i)
+		{
+			glLineWidth(1.5f);
+			common_values.highlight_line.set_MVP(mvp * fields_trans);
+			common_values.highlight_line.draw();
+		}
+
+		//draw field name
+		text.set_text(common_values.field_names[i] + ":");
+		text.draw(glm::scale(mvp * glm::translate(fields_trans,
+			glm::vec3(margin_horizontal, margin_vertical, 0.0f)),
+			glm::vec3(0.001f)));
+
+		//draw field value
+		text.set_text(values[i]);
+		float width = static_cast<float>(text.get_width());
+		glm::mat4 shift = glm::translate(fields_trans, glm::vec3(
+			CARD_WIDTH - margin_horizontal - width * text_scale,
+			margin_vertical,
+			0.0f
+		));
+		text.draw(glm::scale(mvp * shift, glm::vec3(0.001f)));
+	}
 }
 
 void Card::delete_tex()
 {
-    delete car_tex;
+	delete car_tex;
 }
 
 void Card::load_tex()
 {
-    car_tex->Load();
+	car_tex->Load();
 }
