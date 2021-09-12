@@ -15,11 +15,11 @@ Keyboard::Keyboard(HWND h)
 
 Keyboard::~Keyboard()
 {
-	delete[] current_key_state;
-	delete[] previous_key_state;
-
 	keep_updateing = false;
 	timer_thread.wait_for(std::chrono::milliseconds(100));
+
+	delete[] current_key_state;
+	delete[] previous_key_state;
 
 	handlers_lock.lock();
 	for (auto h : handlers)

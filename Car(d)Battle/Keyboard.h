@@ -1,8 +1,8 @@
+#pragma once
 #include "stdafx.h"
 #include <mutex>
 #include <future>
 
-#pragma once
 
 enum class Key_action
 {
