@@ -16,6 +16,10 @@ Game::Game()
 	network_client = nullptr;
 	pause = false;
 
+	window = glfwGetCurrentContext();
+	dc = wglGetCurrentDC();
+	glrc = glfwGetWGLContext(window);
+
 	projection =
 		glm::perspective(
 			glm::radians(60.0f),// FOV
@@ -86,7 +90,6 @@ void Game::set_cursor_pos(double x, double y)
 
 void Game::set_screen_size(int width, int height)
 {
-	glViewport(0, 0, width, height);
 	screen_size = { width, height };
 	projection =
 		glm::perspective(
@@ -94,6 +97,11 @@ void Game::set_screen_size(int width, int height)
 			static_cast<float>(screen_size.x) / screen_size.y,// aspect ratio
 			0.01f,// near clipping plane
 			10.0f// far clipping plane
+		);
+	ortho =
+		glm::ortho(
+			0.0f, static_cast<float>(screen_size.x),
+			0.0f, static_cast<float>(screen_size.y)
 		);
 }
 
@@ -106,7 +114,7 @@ void Game::load()
 
 void Game::draw_cards_stack(std::vector<Card>& cards_vec, glm::mat4 mvp)
 {
-	lock.lock();//other threads may attempt to modify cards_vec during execution of this member function
+	animations_lock.lock();//other threads may attempt to modify cards_vec during execution of this member function
 	for (unsigned int i = 0; i < cards_vec.size(); i++)
 	{
 		mvp = glm::translate(
@@ -119,7 +127,7 @@ void Game::draw_cards_stack(std::vector<Card>& cards_vec, glm::mat4 mvp)
 		);
 		cards_vec[i].draw(mvp);
 	}
-	lock.unlock();
+	animations_lock.unlock();
 }
 
 void Game::move_cards(const Card_translation transltion_type[])
@@ -165,12 +173,12 @@ void Game::move_cards(const Card_translation transltion_type[])
 			if (transltion_type[player_num] == Card_translation::without_flip)
 				continue;
 
-			card.angle += 180.0f / iterations_max;
+			card.angle -= 180.0f / iterations_max;
 			card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
 		}
 	}
 
-	lock.lock();
+	animations_lock.lock();
 	for (int player_num = 0; player_num < players_num; player_num++)
 	{
 		if (transltion_type[player_num] == Card_translation::no_translation)
@@ -180,9 +188,9 @@ void Game::move_cards(const Card_translation transltion_type[])
 		player_stack[player_num].pop_back();
 		if (transltion_type[player_num] == Card_translation::without_flip)
 			continue;
-		player_card[player_num].back().invert = !player_card[player_num].back().invert;
+		player_card[player_num].back().invert ^= true;
 	}
-	lock.unlock();
+	animations_lock.unlock();
 	delete[] height_diff;
 }
 
@@ -203,8 +211,11 @@ void Game::flip_cards(const bool flip[])
 			if (!flip[player_num])
 				continue;
 			Card& card = player_card[player_num].back();
-			card.angle += 180.0f / iterations_max;
-			card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+			card.angle -= 180.0f / iterations_max;
+			card.pos.y = sqrtf(
+				-static_cast<float>(i * 2) / iterations_max *
+				(static_cast<float>(i * 2) / iterations_max - 2))
+				* CARD_WIDTH / 2;//rotate around left edge of the card
 		}
 	}
 
@@ -263,11 +274,11 @@ void Game::distribute_cards()
 			if (height_difference < 0 && i > iterations_max * 3 / 4)//can descend here
 				card.pos.y += height_difference / 0.25f / iterations_max;
 		}
-		lock.lock();
+		animations_lock.lock();
 		card.reset_coords();
 		player_stack[card_num % players_num].push_back(card);
 		central_stack.pop_back();
-		lock.unlock();
+		animations_lock.unlock();
 		card_num++;
 	}
 	current_player = rand() % players_num;
@@ -300,28 +311,34 @@ void Game::cards_to_players()
 
 void Game::choose_category()
 {
+	wglMakeCurrent(NULL, NULL);// release the OpenGL context
+	gl_lock.lock();//wait for the OpenGL context to be released
+	wglMakeCurrent(dc, glrc);//assign the OpenGL context to the current thread
 	Text text;
 
-	glm::mat4 ortho_projection =
-		glm::ortho(
-			0.0f, static_cast<float>(screen_size.x),
-			0.0f, static_cast<float>(screen_size.y)
-		);
-	glm::mat4 text_trans = glm::translate(ortho_projection * view, glm::vec3(-0.6f, 0.01f, 0.2f));
+	text.set_text(current_player == 0 ?
+		"Choose a category..." :
+		"Waiting for opponent...");
 
-	text.set_mvp(projection * view * text_trans);
-	text.set_text(current_player == 0 ? "Choose a category..." : "Waiting for opponent...");
 	text.set_color(glm::vec4(0, 0, 0, 1));
-	text.set_font("Arial.ttf");
+	text.set_font("arial.ttf");
 
-	lock.lock();
+	glm::mat4 text_trans = glm::translate(ortho, glm::vec3(
+		screen_size.x / 2 - text.get_width() / 2,
+		screen_size.y / 2, 0.2f)
+	);
+	text.set_mvp(text_trans);
+
 	unsigned int text_id = texts.size();
 	texts.push_back(text);
-	lock.unlock();
+	wglMakeCurrent(NULL, NULL);// release the OpenGL context
+	gl_lock.unlock();// allow other threads to take the OpenGL context
+
 	choosen_category = -1;
 	if (current_player == 0)
 	{
-		std::pair<std::pair<float, float>, std::pair<float, float>> categories[6] =//pair of upper left and lower right corners of each category
+		//pair of upper left and lower right corners of each category
+		std::pair<std::pair<float, float>, std::pair<float, float>> categories[6] =
 		{
 			{{-0.1377f, 0.7395f}, {0.1387f, 0.7734f}},//Cylinders
 			{{-0.1397f, 0.77345f}, {0.1407f, 0.8084f}},//Capacity
@@ -367,9 +384,9 @@ void Game::choose_category()
 		}
 	}
 
-	lock.lock();
+	gl_lock.lock();
 	texts.erase(texts.begin() + text_id);
-	lock.unlock();
+	gl_lock.unlock();
 	state = Game_state::show_players_cards;
 }
 
@@ -524,11 +541,11 @@ void Game::tiebreak()
 						}
 					}
 						
-					lock.lock();
+					animations_lock.lock();
 					player_stack[player_num] = player_card[player_num];
 					player_card[player_num].clear();
 					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
-					lock.unlock();
+					animations_lock.unlock();
 
 					//it is possible, that all the winners left have the same value in the selected category.
 					//in this case the category should be randomized
@@ -719,12 +736,12 @@ void Game::cards_to_winner()
 				}
 			}
 		}
-		lock.lock();
+		animations_lock.lock();
 		for (Card& card : player_card[player_num])
 			card.reset_coords();
 		player_stack[current_player].insert(player_stack[current_player].begin(), player_card[player_num].begin(), player_card[player_num].end());
 		player_card[player_num].clear();
-		lock.unlock();
+		animations_lock.unlock();
 	}
 	if(player_stack[current_player].size() == 24)
 		state = Game_state::finish;
@@ -817,21 +834,21 @@ void Game::set_pause(bool pause)
 }
 void Game::draw()
 {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	gl_lock.lock();//wait for the OpenGL context to be released
+	wglMakeCurrent(dc, glrc);//assign the OpenGL context to the current thread
 
+	glViewport(0, 0, screen_size.x, screen_size.y);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	
 	if (!pause)
 	{
 		scene.draw(projection, view);
 		draw_cards_stack(central_stack, projection * view);
 		draw_players_stacks();
 		draw_players_cards();
-		lock.lock();
+		
 		for (Text& text : texts)
 			text.draw();
-		lock.unlock();
 	}
 
 	ui.render();
@@ -894,4 +911,7 @@ void Game::draw()
 	}
 
 	glFlush();
+
+	wglMakeCurrent(NULL, NULL);// release the OpenGL context
+	gl_lock.unlock();// allow other threads to take the OpenGL context
 }
