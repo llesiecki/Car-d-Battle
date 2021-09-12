@@ -13,7 +13,6 @@ Game::Game()
 	choosen_category = -1;
 	winner = nullptr;
 	loser = nullptr;
-	network_client = nullptr;
 	pause = false;
 
 	window = glfwGetCurrentContext();
@@ -44,9 +43,6 @@ void Game::clean()
 		card.highlight_row(-1);
 	}
 
-	central_stack.clear();
-	player_card.clear();
-	player_stack.clear();
 	kill_threads = true;
 	std::this_thread::sleep_for(400ms);
 	for (auto& th : threads)
@@ -55,14 +51,15 @@ void Game::clean()
 			th.join();
 	}
 	threads.clear();
+
+	central_stack.clear();
+	player_card.clear();
+	player_stack.clear();
 	kill_threads = false;
 	if (winner)
 		delete[] winner;
 	if (loser)
 		delete[] loser;
-	if (network_client)
-		delete network_client;
-
 }
 
 Game::~Game()
@@ -72,11 +69,11 @@ Game::~Game()
 
 bool Game::thread_sleep_ms(unsigned int delay)
 {
-	while (delay >= 200)
+	if (kill_threads)
+		return true;
+	while (delay > 200)
 	{
-		if (kill_threads)
-			return true;
-		std::this_thread::sleep_for(200ms);
+		thread_sleep_ms(200);
 		delay -= 200;
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(delay));

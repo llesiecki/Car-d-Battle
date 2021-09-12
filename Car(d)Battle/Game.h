@@ -7,7 +7,6 @@
 #include <thread>
 #include <mutex>
 #include "Scene.h"
-#include "Client.h"
 #include "UI.h"
 #include "Cards.h"
 #include "Singleton.h"
@@ -54,7 +53,6 @@ class Game
 	bool pause;
 	std::pair<float, float> cursor_pos;
 	POINT screen_size;
-	Client* network_client;
 	std::vector<thread> threads;
 	std::vector<Text> texts;
 	bool kill_threads;
