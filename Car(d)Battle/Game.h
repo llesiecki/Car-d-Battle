@@ -11,6 +11,7 @@
 #include "Cards.h"
 #include "Singleton.h"
 #include "Text.h"
+#include "utilities/th_sleep.h"
 
 enum class Game_state
 {
@@ -63,7 +64,6 @@ class Game
 	glm::mat4 view;
 	glm::mat4 ortho;
 
-	bool thread_sleep_ms(unsigned int);
 	void draw_cards_stack(std::vector<Card>& cards_vec, glm::mat4);
 	void draw_players_cards();
 	void draw_players_stacks();

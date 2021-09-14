@@ -67,19 +67,6 @@ Game::~Game()
 	clean();
 }
 
-bool Game::thread_sleep_ms(unsigned int delay)
-{
-	if (kill_threads)
-		return true;
-	while (delay > 200)
-	{
-		thread_sleep_ms(200);
-		delay -= 200;
-	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-	return false;
-}
-
 void Game::set_cursor_pos(double x, double y)
 {
 	cursor_pos = { static_cast<float>(x), static_cast<float>(y) };
@@ -149,7 +136,7 @@ void Game::move_cards(const Card_translation transltion_type[])
 	const int iterations_max = 60;
 	for (int i = 0; i < iterations_max; i++)
 	{
-		if(thread_sleep_ms(17))
+		if(thread_sleep(kill_threads, 17ms))
 			return;
 		for (int player_num = 0; player_num < players_num; player_num++)
 		{
@@ -201,7 +188,7 @@ void Game::flip_cards(const bool flip[])
 
 	for (int i = 0; i < iterations_max; i++)
 	{
-		if (thread_sleep_ms(17))
+		if (thread_sleep(kill_threads, 17ms))
 			return;
 		for (int player_num = 0; player_num < players_num; player_num++)
 		{
@@ -239,7 +226,7 @@ void Game::distribute_cards()
 
 		for (int i = 0; i < iterations_max; i++)
 		{
-			if (thread_sleep_ms(17))
+			if (thread_sleep(kill_threads, 17ms))
 				return;
 			switch (card_num%players_num)
 			{
@@ -347,7 +334,7 @@ void Game::choose_category()
 
 		while (choosen_category == -1)
 		{
-			if (thread_sleep_ms(17))
+			if (thread_sleep(kill_threads, 17ms))
 				return;
 
 			for (int i = 0; i < 6; i++)//6 categories
@@ -375,7 +362,7 @@ void Game::choose_category()
 			choosen_category = ui.get_current_category();
 			if (choosen_category != -1)
 			{
-				if (thread_sleep_ms(500))
+				if (thread_sleep(kill_threads, 500ms))
 					return;
 			}
 		}
@@ -413,7 +400,7 @@ void Game::compare_by_choosen_category()
 		player_card[player_num].back().highlight_row(choosen_category);
 	}
 
-	if (thread_sleep_ms(3000))
+	if (thread_sleep(kill_threads, 3s))
 		return;
 
 	bool* flip = new bool[players_num]();
@@ -506,7 +493,7 @@ void Game::tiebreak()
 				const int iterations_max = 60;
 				for (int i = 0; i < iterations_max; i++)
 				{
-					if (thread_sleep_ms(17))
+					if (thread_sleep(kill_threads, 17ms))
 						return;
 					for (int player_num = 0; player_num < players_num; player_num++)
 					{
@@ -590,7 +577,7 @@ void Game::tiebreak()
 				if (winner[player_num])
 					player_card[player_num].back().highlight_row(choosen_category);
 
-			if (thread_sleep_ms(3000))
+			if (thread_sleep(kill_threads, 3s))
 				return;
 
 			winners_num = 0;
@@ -646,7 +633,7 @@ void Game::cards_to_winner()
 		const int iterations_max = 60;
 		for (int i = 0; i < iterations_max; i++)
 		{
-			if (thread_sleep_ms(17))
+			if (thread_sleep(kill_threads, 17ms))
 				return;
 
 			glm::vec3 move;
