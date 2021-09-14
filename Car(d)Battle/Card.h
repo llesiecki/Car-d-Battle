@@ -4,25 +4,24 @@
 #include "Shader.h"
 #include "Line.h"
 #include "Text.h"
-#include <array>
-
-class  Cards;
-
-struct CommonCardValues
-{
-	std::vector< std::string > field_names;
-	CTexture* back_tex, * fields_tex;
-	GLuint common_vbo, common_vao, common_ebo;
-	Shader* shader;
-	Line highlight_line;
-};
 
 class Card
 {
+public:
+	struct CommonValues
+	{
+		std::vector< std::string > field_names;
+		CTexture* back_tex, * fields_tex;
+		GLuint vbo, vao, ebo;
+		Shader* shader;
+		Line highlight_line;
+	};
+
+private:
 	unsigned int id;
 	int highlight;
 	CTexture* car_tex;
-	CommonCardValues& common_values;
+	CommonValues& common_values;
 public:
 	glm::vec3 pos, rot;
 	float angle;
@@ -31,8 +30,8 @@ public:
 	std::vector<std::string> values;
 
 	Card() = delete;
-	Card(unsigned int, CTexture*, CommonCardValues&);
-	Card(const Card&);//copy constructor
+	Card(unsigned int, CTexture*, CommonValues&);
+	Card(const Card&);
 	Card operator=(const Card&);
 	void reset_coords();
 	void highlight_row(int);

@@ -1,6 +1,6 @@
 #include "Card.h"
 
-Card::Card(unsigned int id, CTexture* car_tex, CommonCardValues& common_values)
+Card::Card(unsigned int id, CTexture* car_tex, CommonValues& common_values)
 	:common_values(common_values)
 {
 	this->id = id;
@@ -89,7 +89,7 @@ void Card::draw(const glm::mat4& mvp)
 	common_values.shader->set("TexID", 0);
 	common_values.shader->set("transform", mvp * trans);
 
-	glBindVertexArray(common_values.common_vao);
+	glBindVertexArray(common_values.vao);
 	glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
 		static_cast<void*>(0));

@@ -8,7 +8,7 @@
 class Cards
 {
 	std::vector<Card> cards;
-	CommonCardValues card_values;
+	Card::CommonValues card_values;
 
 public:
 	Cards(const wchar_t* filename);

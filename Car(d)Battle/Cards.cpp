@@ -37,7 +37,7 @@ Cards::Cards(const wchar_t* filename)
 	card_values.fields_tex = new CTexture("textures\\" + img_paths.back());
 	img_paths.pop_back();
 
-	card_values.common_vao = card_values.common_vbo = card_values.common_ebo = 0;
+	card_values.vao = card_values.vbo = card_values.ebo = 0;
 
 	card_values.shader = new Shader();
 	card_values.shader->load("shaders\\card_vert.glsl", GL_VERTEX_SHADER);
@@ -47,19 +47,21 @@ Cards::Cards(const wchar_t* filename)
 
 Cards::~Cards()
 {
-	if (card_values.common_vao != 0)
-		glDeleteVertexArrays(1, &card_values.common_vao);
+	if (card_values.vao != 0)
+		glDeleteVertexArrays(1, &card_values.vao);
 
-	if (card_values.common_vbo != 0)
-		glDeleteBuffers(1, &card_values.common_vbo);
+	if (card_values.vbo != 0)
+		glDeleteBuffers(1, &card_values.vbo);
 
-	if (card_values.common_ebo != 0)
-		glDeleteBuffers(1, &card_values.common_ebo);
+	if (card_values.ebo != 0)
+		glDeleteBuffers(1, &card_values.ebo);
+
+
+	delete card_values.shader;
 	delete card_values.back_tex;
 	delete card_values.fields_tex;
 	for (Card& card : cards)
 		card.delete_tex();
-	delete card_values.shader;
 }
 
 bool Cards::load_textures()
@@ -112,25 +114,38 @@ void Cards::create_buffers()
 	/// and change the tex cords respectively.
 	/// </tech debt>
 
-	glGenVertexArrays(1, &card_values.common_vao);
-	glGenBuffers(1, &card_values.common_vbo);
-	glGenBuffers(1, &card_values.common_ebo);
+	glGenVertexArrays(1, &card_values.vao);
+	glGenBuffers(1, &card_values.vbo);
+	glGenBuffers(1, &card_values.ebo);
 
-	glBindVertexArray(card_values.common_vao);
+	glBindVertexArray(card_values.vao);
 
-	glBindBuffer(GL_ARRAY_BUFFER, card_values.common_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, card_values.vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_data), vertices_data, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, card_values.common_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, card_values.ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	//attrib 0 - vertex coords
-	//attrib num, qty of buffer items, type, normalize?, size of a single vertex, offset
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), static_cast<void*>(0));
+	glVertexAttribPointer(
+		0, // attrib num
+		2, // qty of buffer items
+		GL_FLOAT, // type
+		GL_FALSE, // normalize?
+		4 * sizeof(GLfloat), // stride
+		static_cast<void*>(0) // offset
+	);
 	glEnableVertexAttribArray(0);
 
 	//attrib 1 - tex coords
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), reinterpret_cast<void*>(2 * sizeof(float)));
+	glVertexAttribPointer(
+		1, // attrib num
+		2, // qty of buffer items
+		GL_FLOAT, // type
+		GL_FALSE, // normalize?
+		4 * sizeof(GLfloat), // stride
+		reinterpret_cast<void*>(2 * sizeof(float)) // offset
+	);
 	glEnableVertexAttribArray(1);
 
 	std::vector<glm::vec3> line_corners = {
@@ -166,7 +181,8 @@ void Cards::print()
 
 std::string Cards::get_category_name(int num)
 {
-	if (static_cast<unsigned int>(num) >= card_values.field_names.size() || num < 0)
+	if (static_cast<unsigned int>(num) >=
+		card_values.field_names.size() || num < 0)
 		return std::string();
 	return card_values.field_names[num];
 }
