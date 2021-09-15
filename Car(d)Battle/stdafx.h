@@ -6,6 +6,8 @@
 #pragma once
 
 #define GLFW_INCLUDE_NONE
+#define GLFW_EXPOSE_NATIVE_WGL
+#define _WINSOCKAPI_
 
 constexpr char SERVER_ADDRESS[] = "localhost";
 constexpr float CARD_HEIGHT = 1.178f;
@@ -19,10 +21,14 @@ constexpr char GAME_NAME[] = "Car(d)Battle";
 #include <iostream>
 #include <functional>
 #include <vector>
+#include <map>
+#include <Windows.h>
 #include "utilities\Bitmap.h"
 #include "GLFW/glfw3.h"
+#include "GLFW/glfw3native.h"
 #include "Glad/glad.h"
 #include "libxl.h"
 #include "GLM/glm.hpp"
 #include "GLM/gtc/matrix_transform.hpp"
 #include "GLM/gtc/type_ptr.hpp"
+#include "GLM/gtx/quaternion.hpp"
