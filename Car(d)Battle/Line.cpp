@@ -57,19 +57,20 @@ void Line::set_color(const glm::vec3& color)
 void Line::set_vertices(const std::vector<glm::vec3>& vertices, bool cycle)
 {
 	//generate indices for a series of vertexes
-	std::vector<unsigned int> indices;
+	std::vector<GLubyte> indices;
 
 	indices.push_back(0);//first
-	for (unsigned int i = 1; i < vertices.size() - 1; i++)//each next has to be duplicated
+	//each next has to be duplicated
+	for (unsigned int i = 1; i < vertices.size() - 1; i++)
 	{
 		indices.push_back(i);
 		indices.push_back(i);
 	}
-	indices.push_back(vertices.size() - 1);//last
+	indices.push_back(static_cast<GLubyte>(vertices.size()) - 1);//last
 
 	if (cycle)//closing cycle
 	{
-		indices.push_back(vertices.size() - 1);//last
+		indices.push_back(static_cast<GLubyte>(vertices.size()) - 1);//last
 		indices.push_back(0);//first
 	}
 
@@ -78,10 +79,10 @@ void Line::set_vertices(const std::vector<glm::vec3>& vertices, bool cycle)
 	glBindVertexArray(vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLubyte), indices.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), static_cast<void *>(0));
 	glEnableVertexAttribArray(0);
@@ -94,5 +95,5 @@ void Line::draw()
 	shader.set("color", color);
 
 	glBindVertexArray(vao);
-	glDrawElements(GL_LINES, indices_num, GL_UNSIGNED_INT, static_cast<void*>(0));
+	glDrawElements(GL_LINES, indices_num, GL_UNSIGNED_BYTE, static_cast<void*>(0));
 }

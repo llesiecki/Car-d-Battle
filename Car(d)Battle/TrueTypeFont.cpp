@@ -1,7 +1,6 @@
 #include "TrueTypeFont.h"
 
 TrueTypeFont::TrueTypeFont()
-	:ft()
 {
 	shader.load("shaders/ttf_vert.glsl", GL_VERTEX_SHADER);
 	shader.load("shaders/ttf_frag.glsl", GL_FRAGMENT_SHADER);
@@ -10,7 +9,6 @@ TrueTypeFont::TrueTypeFont()
 
 TrueTypeFont::~TrueTypeFont()
 {
-	FT_Done_FreeType(ft);
 }
 
 void TrueTypeFont::load_font(const std::string& path, const std::string& name)
@@ -18,9 +16,13 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 	if (fonts.find(name) != fonts.end())
 		return; //font already present
 
+	FT_Library ft;
+
 	if (FT_Init_FreeType(&ft))
 	{
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		std::cout <<
+			"ERROR::FREETYPE: Could not init FreeType Library"
+			<< std::endl;
 		throw std::string("ERROR::FREETYPE: Could not init FreeType Library");
 	}
 	
@@ -41,7 +43,9 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 		// load character glyph 
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
 		{
-			std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+			std::cout
+				<< "ERROR::FREETYTPE: Failed to load Glyph"
+				<< std::endl;
 			continue;
 		}
 		// generate texture
@@ -67,11 +71,12 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 		// store character
 		fonts[name][c] = {
 			texture,
+			0,
+			0,
 			glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 			glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x,
-			0,
-			0
+			// bitshift by 6 to get value in pixels (2^6 = 64)
+			face->glyph->advance.x >> 6
 		};
 	}
 
@@ -142,7 +147,7 @@ int TrueTypeFont::get_char_width(const std::string& font, char c)
 	if (fonts.find(font) == fonts.end())
 		return 0; //font not present
 
-	return fonts[font][c].Advance >> 6; // bitshift by 6 to get value in pixels (2^6 = 64);
+	return fonts[font][c].Advance;
 }
 
 const Shader& TrueTypeFont::get_shader()
