@@ -14,6 +14,7 @@ constexpr float CARD_HEIGHT = 1.178f;
 constexpr float CARD_WIDTH = 0.707f;
 constexpr wchar_t LGAME_NAME[] = L"Car(d)Battle";
 constexpr char GAME_NAME[] = "Car(d)Battle";
+constexpr unsigned int KEYS_NUM = 256;
 
 #include "targetver.h"
 #include <string>

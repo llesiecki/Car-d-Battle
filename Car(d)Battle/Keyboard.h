@@ -3,29 +3,29 @@
 #include <mutex>
 #include <future>
 
-
-enum class Key_action
-{
-	pressed,
-	on_press,
-	on_release
-};
-
 class Keyboard
 {
-	struct handler
+public:
+	enum class Key_action
 	{
-		std::function<void(BYTE)> function;
-		BYTE key;
-		unsigned int id;
-		Key_action act;
+		pressed,
+		on_press,
+		on_release
 	};
 
-	BYTE key[256];
+private:
+	struct handler
+	{
+		std::function<void(BYTE, Key_action)> function;
+		BYTE key;
+		unsigned int id;
+	};
+
+	BYTE key[KEYS_NUM];
 	bool keep_updateing;
-	bool* current_key_state;
-	bool* previous_key_state;
-	signed char* time_pressed;
+	bool current_key_state[KEYS_NUM];
+	bool previous_key_state[KEYS_NUM];
+	signed char time_pressed[KEYS_NUM];
 	HWND HgameWindow;
 	std::mutex handlers_lock;
 	std::vector<handler*> handlers;
@@ -39,7 +39,7 @@ public:
 	~Keyboard();
 	bool getKeyState(char);
 	bool justPressed(char);
-	unsigned int observe_key(BYTE, std::function<void(BYTE)>, Key_action);
+	unsigned int observe_key(BYTE, std::function<void(BYTE, Key_action)>);
 	void unobserve_key(unsigned int);
 };
 

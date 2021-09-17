@@ -1,13 +1,12 @@
 #include "Keyboard.h"
 
 Keyboard::Keyboard(HWND h)
-	:current_key_state(nullptr), previous_key_state(nullptr), time_pressed(nullptr)
 {
 	ZeroMemory(key, sizeof(key));
+	ZeroMemory(key, sizeof(current_key_state));
+	ZeroMemory(key, sizeof(previous_key_state));
+	ZeroMemory(key, sizeof(time_pressed));
 	HgameWindow = h;
-	current_key_state = new bool[256]{ false };
-	previous_key_state = new bool[256]{ false };
-	time_pressed = new signed char[256]{};
 	//start a new thread for updating the keyboard state
 	keep_updateing = true;
 	timer_thread = std::async(std::launch::async, &Keyboard::update_timer, this);
@@ -17,9 +16,6 @@ Keyboard::~Keyboard()
 {
 	keep_updateing = false;
 	timer_thread.wait_for(std::chrono::milliseconds(100));
-
-	delete[] current_key_state;
-	delete[] previous_key_state;
 
 	handlers_lock.lock();
 	for (auto h : handlers)
@@ -60,13 +56,13 @@ unsigned int Keyboard::update()
 			handlers_lock.lock();
 			for (auto& h : handlers)
 			{
-				//if handler observes this action, and this key
+				//if handler observes this key
 				if (h->key == i)
 				{
-					if (h->act == Key_action::on_press && current_key_state[i])
-						h->function(i);
-					else if (h->act == Key_action::on_release && !current_key_state[i])
-						h->function(i);
+					if (current_key_state[i])
+						h->function(i, Key_action::on_press);
+					else
+						h->function(i, Key_action::on_release);
 				}
 			}
 			handlers_lock.unlock();
@@ -84,9 +80,9 @@ unsigned int Keyboard::update()
 			handlers_lock.lock();
 			for (auto& h : handlers)
 			{
-				//if handler observes this action, and this key
-				if (h->key == i && h->act == Key_action::pressed && current_key_state[i])
-					h->function(i);
+				//if handler observes this key
+				if (h->key == i && current_key_state[i])
+					h->function(i, Key_action::pressed);
 			}
 			handlers_lock.unlock();
 		}
@@ -113,10 +109,10 @@ bool Keyboard::justPressed(char key)
 	return time_pressed[key] > 0 && time_pressed[key] <= 15;//true, when it's pressed, but only since 15 scans or less
 }
 
-unsigned int Keyboard::observe_key(BYTE key, std::function<void(BYTE)> func, Key_action act)
+unsigned int Keyboard::observe_key(BYTE key, std::function<void(BYTE, Key_action)> func)
 {
 	handlers_lock.lock();
-	handler* h = new handler{func, key, static_cast<unsigned int>(handlers.size()), act};
+	handler* h = new handler{func, key, handlers.size()};
 	handlers.push_back(h);
 	handlers_lock.unlock();
 	return h->id;
