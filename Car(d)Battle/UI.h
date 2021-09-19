@@ -1,26 +1,36 @@
 #pragma once
+#include <regex>
+#include <thread>
 #include "stdafx.h"
 #include "Client.h"
-#include "Text2D.h"
 #include "Keyboard.h"
-#include <map>
-
-class Game;
+#include "Game.h"
+#include "UI_Interface.h"
+#include "Singleton.h"
 
 class UI
+	:public UI_Interface
 {
 	int battle_id;
 	std::string user_token;
 	std::string nickname;
 	std::vector<std::string> players;
 	Client network_client;
-	Game& game;
+
+	Game* game;
+
 	bool pause;
 	Keyboard kb;
 	std::vector<unsigned int> handlers;
+	bool kill_threads;
+	POINT screen_size;
+	std::pair<float, float> cursor_pos;
 
-	void on_press_handler(BYTE);
-	std::map<std::string, std::string> get_server_response(const std::string &, const std::map<std::string, std::string> &);
+	void key_handler(BYTE, Keyboard::Key_action);
+	std::map<std::string, std::string> get_server_response(
+		const std::string &,
+		const std::map<std::string, std::string> &
+	);
 	int create_battle();
 	int join_battle(int, const std::string &);
 	int start_battle();
@@ -28,9 +38,16 @@ class UI
 	std::string login_user(const std::string &, const std::string &);
 	void render_pause_menu();
 
+	UI();
 public:
-	UI(Game &);
-	int get_current_category();
-	void render();
+	friend UI& Singleton<UI>();
 	~UI();
+
+	void get_current_category();
+	void set_screen_size(int, int);
+	void set_cursor_pos(float, float);
+	void render();
+	void start();
+	//interface implementation:
+	void request_category();
 };

@@ -1,11 +1,15 @@
 #include "UI.h"
-#include <regex>
-#include <thread>
-#include "Game.h"
 
-UI::UI(Game & game)
-	:network_client(80, 512), game(game), battle_id(0), kb(FindWindowW(NULL, LGAME_NAME))
+UI::UI()
+	:network_client(80, 512),
+	game(game),
+	battle_id(0),
+	kb(FindWindowW(NULL, LGAME_NAME)),
+	screen_size()
 {
+	game = new Game();
+	game->set_UI(this);
+	kill_threads = false;
 	pause = false;
 	network_client.start();
 	std::string keys_to_observe = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
@@ -15,52 +19,81 @@ UI::UI(Game & game)
 	keys_to_observe.push_back(VK_SHIFT);
 	keys_to_observe.push_back(VK_ESCAPE);
 	keys_to_observe.push_back(VK_DELETE);
+	keys_to_observe.push_back(VK_UP);
+	keys_to_observe.push_back(VK_DOWN);
+	keys_to_observe.push_back(VK_LEFT);
+	keys_to_observe.push_back(VK_RIGHT);
 	for (char vk_code : keys_to_observe)
 	{
-		std::function<void(BYTE)> fp = std::bind(&UI::on_press_handler, this, std::_Ph<1>());
-		int handler_id = kb.observe_key(vk_code, fp, Key_action::on_press);
+		std::function<void(BYTE, Keyboard::Key_action)> fp =
+			std::bind(&UI::key_handler, this, std::_Ph<1>(), std::_Ph<2>());
+		int handler_id = kb.observe_key(vk_code, fp);
 		handlers.push_back(handler_id);
 	}
 }
 
 UI::~UI()
 {
+	kill_threads = true;
+	delete game;
 }
 
-void UI::on_press_handler(BYTE key)
+void UI::key_handler(BYTE key, Keyboard::Key_action action)
 {
-	if (key == VK_ESCAPE)
+	if (key == VK_ESCAPE && action == Keyboard::Key_action::on_press)
 	{
 		pause ^= true;
-		game.set_pause(pause);
+		game->set_pause(pause);
+	}
+
+	if (!pause)
+	{
+		game->key_handler(key, action);
 	}
 }
 
-std::map<std::string, std::string> UI::get_server_response(const std::string& script, const std::map<std::string, std::string>& query = {})
+std::map<std::string, std::string> UI::get_server_response(
+	const std::string& script,
+	const std::map<std::string, std::string>& query = {}
+)
 {
 	std::map<std::string, std::string> data;
 	std::string request = "/" + script + ".php?";
 	for (auto element : query)
 		request.append(element.first + "=" + element.second + "&");
-	request.pop_back();//remove last, unnecessary "&" from the request or "?", when no variables provided
-	unsigned int timeout = GetTickCount() + 10 * 1000;
+	// remove last, unnecessary "&" from the request or "?"
+	// when no variables provided
+	request.pop_back();
+
+	std::chrono::time_point<std::chrono::system_clock> timeout =
+		std::chrono::system_clock::now() + 10s;
 	while (!network_client.http_get(std::string(SERVER_ADDRESS), request))
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-		if (GetTickCount() > timeout)
+		if (std::chrono::system_clock::now() > timeout)
 		{
 			throw std::runtime_error("Connection with the serwer was lost.\n");
 			break;
 		}
+
+		if(thread_sleep(kill_threads, 500ms))
+			throw std::string("Thread killed");
 	}
+
 	std::string& response = network_client.get_response();
 	std::regex response_capture("([A-Za-z0-9_]+):([A-Za-z0-9_]*)");
-	std::sregex_iterator it(response.begin(), response.end(), response_capture);
+	std::sregex_iterator it(
+		response.begin(),
+		response.end(),
+		response_capture
+	);
 	std::sregex_iterator end;
+
 	while (it != end)
 	{
 		if (it->size() != 3)
 			continue;
+		// map key = 1st capture group match
+		// map val = 2nd capture group match
 		data[(*it)[1]] = (*it)[2];
 		++it;
 	}
@@ -97,7 +130,10 @@ int UI::start_battle()
 	return std::stoi(response["battle_id"]);
 }
 
-std::string UI::register_user(const std::string & username, const std::string & passwd)
+std::string UI::register_user(
+	const std::string & username,
+	const std::string & passwd
+)
 {
 	std::map<std::string, std::string> query;
 	query["username"] = username;
@@ -106,7 +142,10 @@ std::string UI::register_user(const std::string & username, const std::string & 
 	return response["user_token"];
 }
 
-std::string UI::login_user(const std::string & username, const std::string & passwd)
+std::string UI::login_user(
+	const std::string & username,
+	const std::string & passwd
+)
 {
 	std::map<std::string, std::string> query;
 	query["username"] = username;
@@ -115,43 +154,60 @@ std::string UI::login_user(const std::string & username, const std::string & pas
 	return response["user_token"];
 }
 
-int UI::get_current_category()
+void UI::get_current_category()
 {
 	std::map<std::string, std::string> query;
 	query["battle_id"] = std::to_string(battle_id);
 	query["user_token"] = user_token;
-	auto response = get_server_response("get_current_category", query);
-	return std::stoi(response["current_category"]);
+
+	std::map<std::string, std::string> response;
+
+	try
+	{
+		response = get_server_response("get_current_category", query);
+	}
+	catch(std::string s)
+	{
+		if (s == "Thread killed")
+			return;
+	}
+
+	if (game)
+		game->set_category(std::stoi(response["current_category"]));
+}
+
+void UI::set_screen_size(int x, int y)
+{
+	glViewport(0, 0, x, y);
+	screen_size = { x, y };
+	game->set_screen_size(x, y);
+}
+
+void UI::set_cursor_pos(float x, float y)
+{
+	cursor_pos = { x, y };
+	game->set_cursor_pos(x, y);
 }
 
 void UI::render()
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0.0, 100.0, 100.0, 0.0, -1.0, 1.0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
 	if (pause)
 		render_pause_menu();
+	game->draw();
+}
+
+void UI::start()
+{
+	game->load();
+	game->start(4);
+}
+
+void UI::request_category()
+{
+	std::thread(&UI::get_current_category, this).detach();
 }
 
 void UI::render_pause_menu()
 {
-	glPushMatrix();
-	{
-		glColor4f(1.0f, 1.0f, 0.0f, 0.5f);
-		glBegin(GL_QUADS);
-		glVertex2f(0.0f, 0.0f);
-		glVertex2f(0.0f, 10.f);
-		glVertex2f(10.0f, 10.0f);
-		glVertex2f(10.0f, 0.0f);
-		glEnd();
-
-		glColor3f(1.0f, 0.0f, 1.0f);
-		Text2D menu_title = { 0.0f, 10.0f, "Pause Menu", GLUT_BITMAP_TIMES_ROMAN_24 };
-		menu_title.render();
-	}
-	glPopMatrix();
+	
 }
