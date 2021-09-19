@@ -40,7 +40,7 @@ bool CTexture::Load(void)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _magFilter);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _minFilter);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->width, tex->height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex->data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex->data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		delete tex;
@@ -74,7 +74,7 @@ bool CTexture::Load(void)
 			for (unsigned int j = 0; j < width*4; j++)
 				swap(image[i*width*4 + j], image[(height - i-1) * width * 4 + j]);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		IsLoaded = true;

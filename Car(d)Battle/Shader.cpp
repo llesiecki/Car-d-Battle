@@ -1,5 +1,4 @@
 #include "Shader.h"
-#include <Windows.h>
 
 Shader::Shader()
 	: program_id(glCreateProgram()), shaders_max(64)
@@ -26,7 +25,9 @@ void Shader::load(const std::string & path, GLenum type)
 	glShaderSource(shader_ids.back(), 1, &p_source, NULL);
 	glCompileShader(shader_ids.back());
 
-	std::string output = std::move(get_compilation_output(program_id, 1024));
+	std::string output = std::move(
+		get_compilation_output(program_id, 1024, glGetShaderInfoLog)
+	);
 
 	if (!output.empty())
 	{
@@ -43,8 +44,10 @@ void Shader::link()
 
 	glLinkProgram(program_id);
 
-	std::string output = std::move(get_compilation_output(program_id, 1024));
-
+	std::string output = std::move(
+		get_compilation_output(program_id, 1024, glGetProgramInfoLog)
+	);
+	
 	if (!output.empty())
 		throw output;
 
@@ -113,20 +116,26 @@ void Shader::disable() const
 		glUseProgram(0);
 }
 
-std::string Shader::get_compilation_output(GLuint id, unsigned int buffer_size)
+std::string Shader::get_compilation_output(
+	GLuint id,
+	GLsizei buffer_size,
+	std::function<void(GLuint, GLsizei, GLsizei*, GLchar*)> GLgetInfoLog
+)
 {
-	int success;
+	GLint success;
 	std::string output;
 
 	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 
-	if (!success)
+	if (success == GL_FALSE)
 	{
-		std::vector<char> info_log(buffer_size);
-		glGetShaderInfoLog(id, buffer_size, NULL, info_log.data());
-		output = "ERROR::SHADER::COMPILATION_FAILED:\n" +
-			std::string(info_log.begin(), info_log.end());
+		std::vector<GLchar> info_log(buffer_size);
+		GLsizei bytes_written;
+		GLgetInfoLog(id, buffer_size, &bytes_written, info_log.data());
+		if(bytes_written)
+			return("ERROR::SHADER::COMPILATION_FAILED:\n" +
+				std::string(info_log.begin(), info_log.end()));
 	}
 
-	return output;
+	return std::string();
 }
