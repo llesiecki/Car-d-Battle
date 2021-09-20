@@ -190,6 +190,7 @@
     <ClInclude Include="Text.h" />
     <ClInclude Include="TrueTypeFont.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="UI_Interface.h" />
     <ClInclude Include="utilities\Bitmap.h" />
     <ClInclude Include="utilities\lodepng.h" />
     <ClInclude Include="utilities\Texture.h" />

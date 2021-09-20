@@ -1,7 +1,10 @@
 #include "Game.h"
 
 Game::Game()
-	:cards(L"carlist.xls"), ui(*this)
+	:cards(L"carlist.xls"),
+	ortho(1.0f),
+	projection(1.0f),
+	screen_size()
 {
 	srand(static_cast<unsigned int>(time(NULL)));
 	state = Game_state::no_action;
@@ -9,23 +12,22 @@ Game::Game()
 		random_translation_vec.push_back({
 			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f,
 			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f });
+
+
+	kill_threads = false;
+	ui = nullptr;
+
 	players_num = -1;
 	choosen_category = -1;
+	current_player = 0;
+	pause = false;
+	LMB_state = false;
 	winner = nullptr;
 	loser = nullptr;
-	pause = false;
 
 	window = glfwGetCurrentContext();
 	dc = wglGetCurrentDC();
 	glrc = glfwGetWGLContext(window);
-
-	projection =
-		glm::perspective(
-			glm::radians(60.0f),// FOV
-			static_cast<float>(1280) / 720,// aspect ratio
-			0.01f,// near clipping plane
-			10.0f// far clipping plane
-		);
 
 	view =
 		glm::lookAt(
@@ -67,9 +69,9 @@ Game::~Game()
 	clean();
 }
 
-void Game::set_cursor_pos(double x, double y)
+void Game::set_cursor_pos(float x, float y)
 {
-	cursor_pos = { static_cast<float>(x), static_cast<float>(y) };
+	cursor_pos = { x, y };
 }
 
 void Game::set_screen_size(int width, int height)
@@ -346,7 +348,7 @@ void Game::choose_category()
 					&& cursor_pos.second * 1.0f / screen_size.y < categories[i].second.second)
 				{
 					player_card[0].back().highlight_row(i);
-					if (GetAsyncKeyState(1) & (1 << 15))//1 is virtual key-code of LMB, 15 is shift to the highest bit of short
+					if (LMB_state)
 						choosen_category = i;
 					break;
 				}
@@ -357,14 +359,11 @@ void Game::choose_category()
 	}
 	else//wait for server response
 	{
+		ui->request_category();
 		while (choosen_category == -1)
 		{
-			choosen_category = ui.get_current_category();
-			if (choosen_category != -1)
-			{
-				if (thread_sleep(kill_threads, 500ms))
-					return;
-			}
+			if (thread_sleep(kill_threads, 500ms))
+				return;
 		}
 	}
 
@@ -816,6 +815,28 @@ void Game::set_pause(bool pause)
 {
 	this->pause = pause;
 }
+
+void Game::set_UI(UI_Interface* ui)
+{
+	this->ui = ui;
+}
+
+void Game::set_category(int category)
+{
+	choosen_category = category;
+}
+
+void Game::key_handler(BYTE key, Keyboard::Key_action act)
+{
+	if (key == VK_LBUTTON)
+	{
+		if (act == Keyboard::Key_action::on_press)
+			LMB_state = true;
+		else if (act == Keyboard::Key_action::on_release)
+			LMB_state = false;
+	}
+}
+
 void Game::draw()
 {
 	gl_lock.lock();//wait for the OpenGL context to be released
@@ -834,8 +855,6 @@ void Game::draw()
 		for (Text& text : texts)
 			text.draw();
 	}
-
-	ui.render();
 
 	switch (state)
 	{
@@ -887,7 +906,7 @@ void Game::draw()
 			std::cout << "Number of opponents for the next round: ";
 			std::cin >> opp_num;
 		}
-		while (opp_num < 1 && opp_num > 3);
+		while (opp_num < 1 || opp_num > 3);
 		start(opp_num + 1);
 		break;
 	default:

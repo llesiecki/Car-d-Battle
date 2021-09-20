@@ -7,11 +7,11 @@
 #include <thread>
 #include <mutex>
 #include "Scene.h"
-#include "UI.h"
+#include "UI_Interface.h"
 #include "Cards.h"
-#include "Singleton.h"
 #include "Text.h"
 #include "utilities/th_sleep.h"
+#include "Keyboard.h"
 
 enum class Game_state
 {
@@ -38,9 +38,10 @@ class Game
 {
 	Game_state state;
 	Cards cards;
-	std::vector<std::pair<float, float>> random_translation_vec;//for non regular cards stack
+	//for non regular cards stack
+	std::vector<std::pair<float, float>> random_translation_vec;
 	Scene scene;
-	UI ui;
+	UI_Interface* ui;
 	int players_num;
 	std::vector<Card> central_stack;
 	std::map<int, std::vector<Card>> player_stack;
@@ -63,8 +64,9 @@ class Game
 	glm::mat4 projection;
 	glm::mat4 view;
 	glm::mat4 ortho;
+	bool LMB_state;
 
-	void draw_cards_stack(std::vector<Card>& cards_vec, glm::mat4);
+	void draw_cards_stack(std::vector<Card>&, glm::mat4);
 	void draw_players_cards();
 	void draw_players_stacks();
 	void distribute_cards();
@@ -78,16 +80,18 @@ class Game
 	void move_cards(const Card_translation[]);
 	void flip_cards(const bool[]);
 
-	Game();
 	Game(const Game&) = delete;
 	Game(Game&&) = delete;
-	~Game();
 public:
-	friend Game& Singleton<Game>();
-	void set_cursor_pos(double, double);
+	Game();
+	~Game();
+	void set_cursor_pos(float, float);
 	void set_screen_size(int, int);
 	void load();
 	void draw();
-	void start(int players_num);
+	void start(int);
 	void set_pause(bool);
+	void set_UI(UI_Interface*);
+	void set_category(int);
+	void key_handler(BYTE, Keyboard::Key_action);
 };
