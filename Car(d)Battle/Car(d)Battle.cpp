@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Game.h"
+#include "UI.h"
 
 int main(int argc, char* argv[])
 {
@@ -22,32 +23,36 @@ int main(int argc, char* argv[])
 	glfwMakeContextCurrent(window);
 	gladLoadGL();
 
-	glViewport(0, 0, 1280, 720);
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.53f, 0.8f, 0.98f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
-	glLineWidth(1.5);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	static Game & game = Singleton<Game>();//See Note 1
+	static UI& ui = Singleton<UI>();//See Note 1
 	
 	glfwSetFramebufferSizeCallback(window,
 		[](GLFWwindow* window, int w, int h)
-		{return game.set_screen_size(w, h);
+		{return ui.set_screen_size(w, h);
 		});
 	glfwSetCursorPosCallback(window,
 		[](GLFWwindow* window, double x, double y)
-		{return game.set_cursor_pos(x, y);
+		{return ui.set_cursor_pos(
+			static_cast<float>(x),
+			static_cast<float>(y));
 		});
+
 	glfwSwapInterval(1);//V-SYNC
 
-	game.set_screen_size(1280, 720);
-
+	ui.set_screen_size(1280, 720);
+	ui.start();
+	
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
-		game.draw();
+		ui.render();
 		glfwSwapBuffers(window);
 	}
 
