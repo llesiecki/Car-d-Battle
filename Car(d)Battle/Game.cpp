@@ -7,7 +7,8 @@ Game::Game()
 	screen_size()
 {
 	srand(static_cast<unsigned int>(time(NULL)));
-	state = Game_state::no_action;
+	old_state = Game_state::no_action;
+	new_state = old_state;
 	for (int i = 0; i < 24; i++)
 		random_translation_vec.push_back({
 			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f,
@@ -214,6 +215,12 @@ void Game::flip_cards(const bool flip[])
 		}
 }
 
+void Game::change_state(Game_state state)
+{
+	old_state = new_state;
+	new_state = state;
+}
+
 void Game::distribute_cards()
 {
 	int card_num = 0;
@@ -269,7 +276,7 @@ void Game::distribute_cards()
 	}
 	current_player = rand() % players_num;
 	current_player = 0;//TEST!
-	state = Game_state::cards_to_players;
+	change_state(Game_state::cards_to_players);
 }
 
 void Game::cards_to_players()
@@ -292,7 +299,7 @@ void Game::cards_to_players()
 
 	move_cards(translation);
 	delete[] translation;
-	state = Game_state::choose_category;
+	change_state(Game_state::choose_category);
 }
 
 void Game::choose_category()
@@ -370,7 +377,7 @@ void Game::choose_category()
 	gl_lock.lock();
 	texts.erase(texts.begin() + text_id);
 	gl_lock.unlock();
-	state = Game_state::show_players_cards;
+	change_state(Game_state::show_players_cards);
 }
 
 void Game::show_players_cards()
@@ -387,7 +394,7 @@ void Game::show_players_cards()
 
 	flip_cards(flip);
 	delete[] flip;
-	state = Game_state::compare_by_choosen_category;
+	change_state(Game_state::compare_by_choosen_category);
 }
 
 void Game::compare_by_choosen_category()
@@ -441,9 +448,9 @@ void Game::compare_by_choosen_category()
 	}
 	assert(winners_num > 0);
 	if(winners_num != 1)
-		state = Game_state::tie_break;
+		change_state(Game_state::tie_break);
 	else
-		state = Game_state::transfer_cards_to_winner;
+		change_state(Game_state::transfer_cards_to_winner);
 }
 
 void Game::tiebreak()
@@ -613,7 +620,7 @@ void Game::tiebreak()
 		assert(winners_num > 0);
 	}
 	assert(winners_num == 1);
-	state = Game_state::transfer_cards_to_winner;
+	change_state(Game_state::transfer_cards_to_winner);
 }
 
 void Game::cards_to_winner()
@@ -727,9 +734,9 @@ void Game::cards_to_winner()
 		animations_lock.unlock();
 	}
 	if(player_stack[current_player].size() == 24)
-		state = Game_state::finish;
+		change_state(Game_state::finish);
 	else
-		state = Game_state::next_round;
+		change_state(Game_state::cards_to_players);
 }
 
 void Game::start(int players_num)
@@ -756,7 +763,7 @@ void Game::start(int players_num)
 	loser = new bool[players_num]();
 	std::fill_n(loser, players_num, false);
 	this->players_num = players_num;
-	state = Game_state::cards_distribution;
+	change_state(Game_state::cards_distribution);
 }
 
 void Game::draw_players_stacks()
@@ -856,61 +863,53 @@ void Game::draw()
 			text.draw();
 	}
 
-	switch (state)
+	if (new_state != old_state)
 	{
-	case Game_state::no_action:
-		break;
-	case Game_state::cards_distribution:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::distribute_cards, this));
-		break;
-	case Game_state::cards_to_players:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::cards_to_players, this));
-		break;
-	case Game_state::choose_category:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::choose_category, this));
-		break;
-	case Game_state::show_players_cards:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::show_players_cards, this));
-		break;
-	case Game_state::compare_by_choosen_category:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::compare_by_choosen_category, this));
-		break;
-	case Game_state::tie_break:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::tiebreak, this));
-		break;
-	case Game_state::next_round:
-		state = Game_state::cards_to_players;
-		break;
-	case Game_state::transfer_cards_to_winner:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::cards_to_winner, this));
-		break;
-	case Game_state::finish:
-		state = Game_state::no_action;
-		for (int winner_num = 0; winner_num < players_num; winner_num++)
-			if (winner[winner_num])
-			{
-				std::cout << "The Winner is player number " << winner_num << std::endl;
-				break;
-			}
-		clean();
-		unsigned int opp_num;
-		do
+		old_state = new_state;
+		switch (new_state)
 		{
-			std::cout << "Number of opponents for the next round: ";
-			std::cin >> opp_num;
+		case Game_state::no_action:
+			break;
+		case Game_state::cards_distribution:
+			threads.push_back(std::thread(&Game::distribute_cards, this));
+			break;
+		case Game_state::cards_to_players:
+			threads.push_back(std::thread(&Game::cards_to_players, this));
+			break;
+		case Game_state::choose_category:
+			threads.push_back(std::thread(&Game::choose_category, this));
+			break;
+		case Game_state::show_players_cards:
+			threads.push_back(std::thread(&Game::show_players_cards, this));
+			break;
+		case Game_state::compare_by_choosen_category:
+			threads.push_back(std::thread(&Game::compare_by_choosen_category, this));
+			break;
+		case Game_state::tie_break:
+			threads.push_back(std::thread(&Game::tiebreak, this));
+			break;
+		case Game_state::transfer_cards_to_winner:
+			threads.push_back(std::thread(&Game::cards_to_winner, this));
+			break;
+		case Game_state::finish:
+			for (int winner_num = 0; winner_num < players_num; winner_num++)
+				if (winner[winner_num])
+				{
+					std::cout << "The Winner is player number " << winner_num << std::endl;
+					break;
+				}
+			clean();
+			unsigned int opp_num;
+			do
+			{
+				std::cout << "Number of opponents for the next round: ";
+				std::cin >> opp_num;
+			} 		while (opp_num < 1 || opp_num > 3);
+			start(opp_num + 1);
+			break;
+		default:
+			break;
 		}
-		while (opp_num < 1 || opp_num > 3);
-		start(opp_num + 1);
-		break;
-	default:
-		break;
 	}
 
 	glFlush();

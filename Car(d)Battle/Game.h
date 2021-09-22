@@ -22,7 +22,6 @@ enum class Game_state
 	show_players_cards,
 	compare_by_choosen_category,
 	tie_break,
-	next_round,
 	transfer_cards_to_winner,
 	finish
 };
@@ -36,7 +35,8 @@ enum class Card_translation
 
 class Game
 {
-	Game_state state;
+	Game_state old_state;
+	Game_state new_state;
 	Cards cards;
 	//for non regular cards stack
 	std::vector<std::pair<float, float>> random_translation_vec;
@@ -79,6 +79,7 @@ class Game
 	void clean();
 	void move_cards(const Card_translation[]);
 	void flip_cards(const bool[]);
+	void change_state(Game_state);
 
 	Game(const Game&) = delete;
 	Game(Game&&) = delete;
