@@ -727,9 +727,9 @@ void Game::cards_to_winner()
 			}
 		}
 		animations_lock.lock();
-		for (Card& card : player_card[player_num])
-			card.reset_coords();
 		player_stack[current_player].insert(player_stack[current_player].begin(), player_card[player_num].begin(), player_card[player_num].end());
+		for (Card& card : player_stack[current_player])
+			card.reset_coords();
 		player_card[player_num].clear();
 		animations_lock.unlock();
 	}
