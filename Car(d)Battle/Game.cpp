@@ -139,8 +139,12 @@ void Game::move_cards(const Card_translation transltion_type[])
 	const int iterations_max = 60;
 	for (int i = 0; i < iterations_max; i++)
 	{
-		if(thread_sleep(kill_threads, 17ms))
+		if (thread_sleep(kill_threads, 17ms))
+		{
+			delete[] height_diff;
 			return;
+		}
+
 		for (int player_num = 0; player_num < players_num; player_num++)
 		{
 			if (transltion_type[player_num] == Card_translation::no_translation)
@@ -386,11 +390,7 @@ void Game::show_players_cards()
 	flip[0] = false;
 
 	for (int player_num = 1; player_num < players_num; player_num++)
-		flip[player_num] = true;
-
-	for (int player_num = 0; player_num < players_num; player_num++)
-		if (loser[player_num])
-			flip[player_num] = false;
+		flip[player_num] = !loser[player_num];
 
 	flip_cards(flip);
 	delete[] flip;
@@ -500,7 +500,11 @@ void Game::tiebreak()
 				for (int i = 0; i < iterations_max; i++)
 				{
 					if (thread_sleep(kill_threads, 17ms))
+					{
+						delete[] translation;
 						return;
+					}
+
 					for (int player_num = 0; player_num < players_num; player_num++)
 					{
 						if (!winner[player_num])
