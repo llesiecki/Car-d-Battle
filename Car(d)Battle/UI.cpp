@@ -13,17 +13,12 @@ UI::UI()
 	pause = false;
 	network_client.start();
 	std::string keys_to_observe = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
-	keys_to_observe.push_back(VK_LBUTTON);
-	keys_to_observe.push_back(VK_BACK);
-	keys_to_observe.push_back(VK_RETURN);
-	keys_to_observe.push_back(VK_SHIFT);
-	keys_to_observe.push_back(VK_ESCAPE);
-	keys_to_observe.push_back(VK_DELETE);
-	keys_to_observe.push_back(VK_UP);
-	keys_to_observe.push_back(VK_DOWN);
-	keys_to_observe.push_back(VK_LEFT);
-	keys_to_observe.push_back(VK_RIGHT);
-	for (char vk_code : keys_to_observe)
+	keys_to_observe += {
+		VK_LBUTTON, VK_BACK, VK_RETURN, VK_SHIFT, VK_ESCAPE, VK_END,
+		VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME
+	};
+
+	for (const char vk_code : keys_to_observe)
 	{
 		std::function<void(BYTE, Keyboard::Key_action)> fp =
 			std::bind(&UI::key_handler, this, std::_Ph<1>(), std::_Ph<2>());
