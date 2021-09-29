@@ -34,8 +34,10 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 		throw std::string("ERROR::FREETYPE: Failed to load font");
 	}
 
-	FT_Set_Pixel_Sizes(face, 0, 48);
+	FT_Set_Pixel_Sizes(face, 0, FONT_SIZE);
 
+	GLint initial_unpack_alignment;
+	glGetIntegerv(GL_UNPACK_ALIGNMENT, &initial_unpack_alignment);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	for (unsigned char c = 0; c < 128; c++)
@@ -79,6 +81,8 @@ void TrueTypeFont::load_font(const std::string& path, const std::string& name)
 			face->glyph->advance.x >> 6
 		};
 	}
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, initial_unpack_alignment);
 
 	FT_Done_Face(face);
 	FT_Done_FreeType(ft);
