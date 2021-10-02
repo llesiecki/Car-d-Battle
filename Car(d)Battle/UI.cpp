@@ -180,6 +180,7 @@ void UI::set_screen_size(int x, int y)
 
 void UI::set_cursor_pos(float x, float y)
 {
+	y = screen_size.y - y;
 	cursor_pos = { x, y };
 	game->set_cursor_pos(x, y);
 }

@@ -337,12 +337,12 @@ void Game::choose_category()
 		//pair of upper left and lower right corners of each category
 		std::pair<std::pair<float, float>, std::pair<float, float>> categories[6] =
 		{
-			{{-0.1377f, 0.7395f}, {0.1387f, 0.7734f}},//Cylinders
-			{{-0.1397f, 0.77345f}, {0.1407f, 0.8084f}},//Capacity
-			{{-0.1407f, 0.8084f}, {0.1427f, 0.8453f}},//Power
-			{{-0.1427f, 0.8453f}, {0.1437f, 0.8832f}},//Torque
-			{{-0.1447f, 0.8832f}, {0.1457f, 0.9212f}},//Top speed
-			{{-0.1457f, 0.9212f}, {0.1467f, 0.9591f}}//Acceleration
+			{{-0.1377f, 0.2605f}, {0.1387f, 0.2266f}},//Cylinders
+			{{-0.1397f, 0.22655f}, {0.1407f, 0.1916f}},//Capacity
+			{{-0.1407f, 0.1916f}, {0.1427f, 0.1547f}},//Power
+			{{-0.1427f, 0.1547f}, {0.1437f, 0.1168f}},//Torque
+			{{-0.1447f, 0.1168f}, {0.1457f, 0.0788f}},//Top speed
+			{{-0.1457f, 0.0788f}, {0.1467f, 0.0409f}}//Acceleration
 		};
 
 		while (choosen_category == -1)
@@ -355,8 +355,8 @@ void Game::choose_category()
 				if (
 					(cursor_pos.first * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
 					&& (cursor_pos.first * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
-					&& cursor_pos.second * 1.0f / screen_size.y > categories[i].first.second
-					&& cursor_pos.second * 1.0f / screen_size.y < categories[i].second.second)
+					&& cursor_pos.second * 1.0f / screen_size.y < categories[i].first.second
+					&& cursor_pos.second * 1.0f / screen_size.y > categories[i].second.second)
 				{
 					player_card[0].back().highlight_row(i);
 					if (LMB_state)
