@@ -47,7 +47,6 @@ class Game
 	std::map<int, std::vector<Card>> player_stack;
 	std::map<int, std::vector<Card>> player_card;
 	std::mutex animations_lock;//threadsafe animations
-	std::mutex gl_lock;//using just one GL context makes work much simpler
 	int current_player;
 	int choosen_category;
 	bool* winner;
@@ -58,9 +57,6 @@ class Game
 	std::vector<thread> threads;
 	std::vector<Text> texts;
 	bool kill_threads;
-	GLFWwindow* window;
-	HDC dc;
-	HGLRC glrc;
 	glm::mat4 projection;
 	glm::mat4 view;
 	glm::mat4 ortho;

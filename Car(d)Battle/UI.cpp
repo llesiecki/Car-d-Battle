@@ -15,7 +15,7 @@ UI::UI()
 	std::string keys_to_observe = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
 	keys_to_observe += {
 		VK_LBUTTON, VK_BACK, VK_RETURN, VK_SHIFT, VK_ESCAPE, VK_END,
-		VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME
+			VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME
 	};
 
 	for (const char vk_code : keys_to_observe)
@@ -173,7 +173,12 @@ void UI::get_current_category()
 
 void UI::set_screen_size(int x, int y)
 {
+	Singleton<GL_Context>().obtain();
+
 	glViewport(0, 0, x, y);
+
+	Singleton<GL_Context>().release();
+
 	screen_size = { x, y };
 	game->set_screen_size(x, y);
 }
@@ -187,15 +192,26 @@ void UI::set_cursor_pos(float x, float y)
 
 void UI::render()
 {
+	Singleton<GL_Context>().obtain();
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	if (pause)
 		render_pause_menu();
+
 	game->draw();
+
+	glFlush();
+
+	Singleton<GL_Context>().release();
 }
 
 void UI::start()
 {
+	Singleton<GL_Context>().obtain();
 	game->load();
 	game->start(4);
+	Singleton<GL_Context>().release();
 }
 
 void UI::request_category()

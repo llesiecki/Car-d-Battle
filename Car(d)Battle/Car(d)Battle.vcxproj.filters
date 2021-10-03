@@ -81,6 +81,12 @@
     <ClCompile Include="Glad\src\glad.c">
       <Filter>utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GL_Context.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cards.h">
@@ -141,6 +147,12 @@
       <Filter>utilities</Filter>
     </ClInclude>
     <ClInclude Include="UI_Interface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GL_Context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -337,6 +349,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="shaders\ttf_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\button_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\button_vert.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

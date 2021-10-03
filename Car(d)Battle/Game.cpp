@@ -26,10 +26,6 @@ Game::Game()
 	winner = nullptr;
 	loser = nullptr;
 
-	window = glfwGetCurrentContext();
-	dc = wglGetCurrentDC();
-	glrc = glfwGetWGLContext(window);
-
 	view =
 		glm::lookAt(
 			glm::vec3(0.0f, 2.3f, 1.15f),// camera position
@@ -308,9 +304,6 @@ void Game::cards_to_players()
 
 void Game::choose_category()
 {
-	wglMakeCurrent(NULL, NULL);// release the OpenGL context
-	gl_lock.lock();//wait for the OpenGL context to be released
-	wglMakeCurrent(dc, glrc);//assign the OpenGL context to the current thread
 	Text text;
 
 	text.set_text(current_player == 0 ?
@@ -328,8 +321,6 @@ void Game::choose_category()
 
 	unsigned int text_id = texts.size();
 	texts.push_back(text);
-	wglMakeCurrent(NULL, NULL);// release the OpenGL context
-	gl_lock.unlock();// allow other threads to take the OpenGL context
 
 	choosen_category = -1;
 	if (current_player == 0)
@@ -378,9 +369,8 @@ void Game::choose_category()
 		}
 	}
 
-	gl_lock.lock();
 	texts.erase(texts.begin() + text_id);
-	gl_lock.unlock();
+
 	change_state(Game_state::show_players_cards);
 }
 
@@ -534,7 +524,7 @@ void Game::tiebreak()
 								cards_equal_in_selected_category = false;
 						}
 					}
-						
+
 					animations_lock.lock();
 					player_stack[player_num] = player_card[player_num];
 					player_card[player_num].clear();
@@ -850,19 +840,13 @@ void Game::key_handler(BYTE key, Keyboard::Key_action act)
 
 void Game::draw()
 {
-	gl_lock.lock();//wait for the OpenGL context to be released
-	wglMakeCurrent(dc, glrc);//assign the OpenGL context to the current thread
-
-	glViewport(0, 0, screen_size.x, screen_size.y);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
 	if (!pause)
 	{
 		scene.draw(projection, view);
 		draw_cards_stack(central_stack, projection * view);
 		draw_players_stacks();
 		draw_players_cards();
-		
+
 		for (Text& text : texts)
 			text.draw();
 	}
@@ -908,16 +892,11 @@ void Game::draw()
 			{
 				std::cout << "Number of opponents for the next round: ";
 				std::cin >> opp_num;
-			} 		while (opp_num < 1 || opp_num > 3);
+			} while (opp_num < 1 || opp_num > 3);
 			start(opp_num + 1);
 			break;
 		default:
 			break;
 		}
 	}
-
-	glFlush();
-
-	wglMakeCurrent(NULL, NULL);// release the OpenGL context
-	gl_lock.unlock();// allow other threads to take the OpenGL context
 }

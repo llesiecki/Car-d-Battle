@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Game.h"
 #include "UI.h"
+#include "Singleton.h"
+#include "GL_Context.h"
 
 int main(int argc, char* argv[])
 {
@@ -20,7 +22,9 @@ int main(int argc, char* argv[])
 		return 2;
 	}
 
-	glfwMakeContextCurrent(window);
+	Singleton<GL_Context>().set(window);
+	Singleton<GL_Context>().obtain();
+
 	gladLoadGL();
 
 	glClearColor(0.53f, 0.8f, 0.98f, 1.0f);
@@ -32,6 +36,8 @@ int main(int argc, char* argv[])
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	static UI& ui = Singleton<UI>();//See Note 1
+
+	Singleton<GL_Context>().release();
 	
 	glfwSetFramebufferSizeCallback(window,
 		[](GLFWwindow* window, int w, int h)

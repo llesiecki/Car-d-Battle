@@ -156,12 +156,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Car(d)Battle.cpp" />
     <ClCompile Include="Card.cpp" />
     <ClCompile Include="Cards.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Glad\src\glad.c" />
+    <ClCompile Include="GL_Context.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -176,10 +178,12 @@
     <ClCompile Include="WorkBook.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Card.h" />
     <ClInclude Include="Cards.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GL_Context.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="Scene.h" />
@@ -256,6 +260,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="carlist.xls" />
+    <None Include="shaders\button_frag.glsl" />
+    <None Include="shaders\button_vert.glsl" />
     <None Include="shaders\card_frag.glsl" />
     <None Include="shaders\card_vert.glsl" />
     <None Include="shaders\line_frag.glsl" />

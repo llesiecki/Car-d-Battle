@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "UI_Interface.h"
 #include "Singleton.h"
+#include "GL_Context.h"
 
 class UI
 	:public UI_Interface
