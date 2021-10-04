@@ -1,12 +1,17 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Scene.h"
-#include <map>
+#include <algorithm>
+#include <time.h>
+#include <assert.h>
 #include <thread>
 #include <mutex>
-#include "Text3D.h"
-#include "Client.h"
+#include "Scene.h"
+#include "UI_Interface.h"
+#include "Cards.h"
+#include "Text.h"
+#include "utilities/th_sleep.h"
+#include "Keyboard.h"
 
 enum class Game_state
 {
@@ -17,7 +22,6 @@ enum class Game_state
 	show_players_cards,
 	compare_by_choosen_category,
 	tie_break,
-	next_round,
 	transfer_cards_to_winner,
 	finish
 };
@@ -31,28 +35,34 @@ enum class Card_translation
 
 class Game
 {
-	Game_state state;
+	Game_state old_state;
+	Game_state new_state;
 	Cards cards;
-	std::vector<std::pair<float, float>> random_translation_vec;//for non regular cards stack
+	//for non regular cards stack
+	std::vector<std::pair<float, float>> random_translation_vec;
 	Scene scene;
+	UI_Interface* ui;
 	int players_num;
 	std::vector<Card> central_stack;
 	std::map<int, std::vector<Card>> player_stack;
 	std::map<int, std::vector<Card>> player_card;
-	std::mutex lock;//threadsafe animations
+	std::mutex animations_lock;//threadsafe animations
 	int current_player;
 	int choosen_category;
 	bool* winner;
 	bool* loser;
-	std::vector<Text3D> texts;
-	POINT cursor_pos;
+	bool pause;
+	std::pair<float, float> cursor_pos;
 	POINT screen_size;
-	Client* network_client;
 	std::vector<thread> threads;
+	std::vector<Text> texts;
 	bool kill_threads;
+	glm::mat4 projection;
+	glm::mat4 view;
+	glm::mat4 ortho;
+	bool LMB_state;
 
-	bool thread_sleep_ms(unsigned int);
-	void draw_cards_stack(std::vector<Card>& cards_vec);
+	void draw_cards_stack(std::vector<Card>&, glm::mat4);
 	void draw_players_cards();
 	void draw_players_stacks();
 	void distribute_cards();
@@ -62,19 +72,23 @@ class Game
 	void compare_by_choosen_category();
 	void tiebreak();
 	void cards_to_winner();
-
+	void clean();
 	void move_cards(const Card_translation[]);
 	void flip_cards(const bool[]);
-	friend void OnTimerCallback(int id);
+	void change_state(Game_state);
+
+	Game(const Game&) = delete;
+	Game(Game&&) = delete;
 public:
 	Game();
-	Game(Game&) = delete;
 	~Game();
-	void set_cursor_pos(int, int);
+	void set_cursor_pos(float, float);
 	void set_screen_size(int, int);
 	void load();
 	void draw();
-	void start(int players_num);
+	void start(int);
+	void set_pause(bool);
+	void set_UI(UI_Interface*);
+	void set_category(int);
+	void key_handler(BYTE, Keyboard::Key_action);
 };
-
-static Game game;

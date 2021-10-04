@@ -1,28 +1,47 @@
 #include "Game.h"
-#include <algorithm>
-#include <time.h>
-#include <assert.h>
 
 Game::Game()
-	:cards(L"carlist.xls")
+	:cards(L"carlist.xls"),
+	ortho(1.0f),
+	projection(1.0f),
+	screen_size()
 {
 	srand(static_cast<unsigned int>(time(NULL)));
-	state = Game_state::no_action;
+	old_state = Game_state::no_action;
+	new_state = old_state;
 	for (int i = 0; i < 24; i++)
-		random_translation_vec.push_back({ rand() / 1000000.0f - RAND_MAX / 2000000.0f, rand() / 1000000.0f - RAND_MAX / 2000000.0f });
+		random_translation_vec.push_back({
+			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f,
+			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f });
+
+
+	kill_threads = false;
+	ui = nullptr;
+
 	players_num = -1;
 	choosen_category = -1;
-	central_stack = cards.get_cards_vec();
-	std::random_shuffle(central_stack.begin(), central_stack.end(), [](int a) -> int {return rand() % a; });
+	current_player = 0;
+	pause = false;
+	LMB_state = false;
 	winner = nullptr;
 	loser = nullptr;
-	network_client = nullptr;
-	if (central_stack.size() != 24)
-		std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
+
+	view =
+		glm::lookAt(
+			glm::vec3(0.0f, 2.3f, 1.15f),// camera position
+			glm::vec3(0.0f, 0.0f, 0.44f),// camera look-at point
+			glm::vec3(0.0f, 1.0f, 0.0f)// vertical vector
+		);
 }
 
-Game::~Game()
+void Game::clean()
 {
+	for (Card& card : central_stack)
+	{
+		card.reset_coords();
+		card.highlight_row(-1);
+	}
+
 	kill_threads = true;
 	std::this_thread::sleep_for(400ms);
 	for (auto& th : threads)
@@ -30,28 +49,24 @@ Game::~Game()
 		if (th.joinable())
 			th.join();
 	}
+	threads.clear();
+
+	central_stack.clear();
+	player_card.clear();
+	player_stack.clear();
+	kill_threads = false;
 	if (winner)
 		delete[] winner;
 	if (loser)
 		delete[] loser;
-	if (network_client)
-		delete network_client;
 }
 
-bool Game::thread_sleep_ms(unsigned int delay)
+Game::~Game()
 {
-	while (delay >= 200)
-	{
-		if (kill_threads)
-			return true;
-		std::this_thread::sleep_for(200ms);
-		delay -= 200;
-	}
-	std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-	return false;
+	clean();
 }
 
-void Game::set_cursor_pos(int x, int y)
+void Game::set_cursor_pos(float x, float y)
 {
 	cursor_pos = { x, y };
 }
@@ -59,26 +74,43 @@ void Game::set_cursor_pos(int x, int y)
 void Game::set_screen_size(int width, int height)
 {
 	screen_size = { width, height };
+	projection =
+		glm::perspective(
+			glm::radians(60.0f),// FOV
+			static_cast<float>(screen_size.x) / screen_size.y,// aspect ratio
+			0.01f,// near clipping plane
+			10.0f// far clipping plane
+		);
+	ortho =
+		glm::ortho(
+			0.0f, static_cast<float>(screen_size.x),
+			0.0f, static_cast<float>(screen_size.y)
+		);
 }
 
 void Game::load()
 {
-	cards.create_lists();
+	cards.create_buffers();
 	cards.load_textures();
 	scene.load();
 }
 
-void Game::draw_cards_stack(std::vector<Card>& cards_vec)
+void Game::draw_cards_stack(std::vector<Card>& cards_vec, glm::mat4 mvp)
 {
-	glPushMatrix();
-	lock.lock();// &cards_vec may be modified by other threads during execution of this method
+	animations_lock.lock();//other threads may attempt to modify cards_vec during execution of this member function
 	for (unsigned int i = 0; i < cards_vec.size(); i++)
 	{
-		cards_vec[i].draw();
-		glTranslatef(random_translation_vec[i].first, 0.005f, random_translation_vec[i].second);
+		mvp = glm::translate(
+			mvp,
+			glm::vec3(
+				random_translation_vec[i].first,
+				0.005f,
+				random_translation_vec[i].second
+			)
+		);
+		cards_vec[i].draw(mvp);
 	}
-	lock.unlock();
-	glPopMatrix();
+	animations_lock.unlock();
 }
 
 void Game::move_cards(const Card_translation transltion_type[])
@@ -97,14 +129,18 @@ void Game::move_cards(const Card_translation transltion_type[])
 		if (transltion_type[player_num] == Card_translation::without_flip)
 			continue;
 
-		player_stack[player_num].back().rot = Vec3(0.0f, 0.0f, 1.0f);
+		player_stack[player_num].back().rot = glm::vec3(0.0f, 1.0f, 0.0f);
 	}
 
 	const int iterations_max = 60;
 	for (int i = 0; i < iterations_max; i++)
 	{
-		if(thread_sleep_ms(17))
+		if (thread_sleep(kill_threads, 17ms))
+		{
+			delete[] height_diff;
 			return;
+		}
+
 		for (int player_num = 0; player_num < players_num; player_num++)
 		{
 			if (transltion_type[player_num] == Card_translation::no_translation)
@@ -124,12 +160,12 @@ void Game::move_cards(const Card_translation transltion_type[])
 			if (transltion_type[player_num] == Card_translation::without_flip)
 				continue;
 
-			card.angle += 180.0f / iterations_max;
+			card.angle -= 180.0f / iterations_max;
 			card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
 		}
 	}
 
-	lock.lock();
+	animations_lock.lock();
 	for (int player_num = 0; player_num < players_num; player_num++)
 	{
 		if (transltion_type[player_num] == Card_translation::no_translation)
@@ -139,9 +175,9 @@ void Game::move_cards(const Card_translation transltion_type[])
 		player_stack[player_num].pop_back();
 		if (transltion_type[player_num] == Card_translation::without_flip)
 			continue;
-		player_card[player_num].back().invert = !player_card[player_num].back().invert;
+		player_card[player_num].back().invert ^= true;
 	}
-	lock.unlock();
+	animations_lock.unlock();
 	delete[] height_diff;
 }
 
@@ -149,21 +185,24 @@ void Game::flip_cards(const bool flip[])
 {
 	for (int player_num = 0; player_num < players_num; player_num++)
 		if (flip[player_num])
-			player_card[player_num].back().rot = Vec3(0.0f, 0.0f, 1.0f);
+			player_card[player_num].back().rot = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	const int iterations_max = 60;
 
 	for (int i = 0; i < iterations_max; i++)
 	{
-		if (thread_sleep_ms(17))
+		if (thread_sleep(kill_threads, 17ms))
 			return;
 		for (int player_num = 0; player_num < players_num; player_num++)
 		{
 			if (!flip[player_num])
 				continue;
 			Card& card = player_card[player_num].back();
-			card.angle += 180.0f / iterations_max;
-			card.pos.y = sqrtf(-static_cast<float>(i * 2) / iterations_max * (static_cast<float>(i * 2) / iterations_max - 2)) * CARD_WIDTH / 2;//rotate around left edge of the card
+			card.angle -= 180.0f / iterations_max;
+			card.pos.y = sqrtf(
+				-static_cast<float>(i * 2) / iterations_max *
+				(static_cast<float>(i * 2) / iterations_max - 2))
+				* CARD_WIDTH / 2;//rotate around left edge of the card
 		}
 	}
 
@@ -174,6 +213,12 @@ void Game::flip_cards(const bool flip[])
 			card.invert = !card.invert;
 			card.reset_coords();
 		}
+}
+
+void Game::change_state(Game_state state)
+{
+	old_state = new_state;
+	new_state = state;
 }
 
 void Game::distribute_cards()
@@ -190,7 +235,7 @@ void Game::distribute_cards()
 
 		for (int i = 0; i < iterations_max; i++)
 		{
-			if (thread_sleep_ms(17))
+			if (thread_sleep(kill_threads, 17ms))
 				return;
 			switch (card_num%players_num)
 			{
@@ -199,7 +244,7 @@ void Game::distribute_cards()
 				card.pos.z += 1.5f / iterations_max;
 				break;
 			case 1:
-				card.rot = Vec3(0.0f, 1.0f, 0.0f);
+				card.rot = glm::vec3(0.0f, 0.0f, 1.0f);
 				card.pos.x += -1.9f / iterations_max;
 				card.pos.z += 1.3f / iterations_max;
 				card.angle += 90.0f / iterations_max;
@@ -209,7 +254,7 @@ void Game::distribute_cards()
 				card.pos.z += -1.2f / iterations_max;
 				break;
 			case 3:
-				card.rot = Vec3(0.0f, 1.0f, 0.0f);
+				card.rot = glm::vec3(0.0f, 0.0f, 1.0f);
 				card.pos.x += 1.9f / iterations_max;
 				card.pos.z += -0.7f / iterations_max;
 				card.angle += 90.0f / iterations_max;
@@ -222,16 +267,16 @@ void Game::distribute_cards()
 			if (height_difference < 0 && i > iterations_max * 3 / 4)//can descend here
 				card.pos.y += height_difference / 0.25f / iterations_max;
 		}
-		lock.lock();
-		central_stack.pop_back();
+		animations_lock.lock();
 		card.reset_coords();
 		player_stack[card_num % players_num].push_back(card);
-		lock.unlock();
+		central_stack.pop_back();
+		animations_lock.unlock();
 		card_num++;
 	}
 	current_player = rand() % players_num;
 	current_player = 0;//TEST!
-	state = Game_state::cards_to_players;
+	change_state(Game_state::cards_to_players);
 }
 
 void Game::cards_to_players()
@@ -254,50 +299,58 @@ void Game::cards_to_players()
 
 	move_cards(translation);
 	delete[] translation;
-	state = Game_state::choose_category;
+	change_state(Game_state::choose_category);
 }
 
 void Game::choose_category()
 {
-	Text3D text;
-	text.pos = Vec3(-0.6f, 0.01f, 0.2f);
-	text.angle = -60.0f;
-	text.rot = Vec3(1.0f, 0.0f, 0.0f);
-	text.scale = 0.001f;
-	text.text = current_player == 0 ? "Choose a category..." : "Waiting for opponent...";
-	text.line_width = 7.5f;
-	lock.lock();
+	Text text;
+
+	text.set_text(current_player == 0 ?
+		"Choose a category..." :
+		"Waiting for opponent...");
+
+	text.set_color(glm::vec4(0, 0, 0, 1));
+	text.set_font("arial.ttf");
+
+	glm::mat4 text_trans = glm::translate(ortho, glm::vec3(
+		screen_size.x / 2 - text.get_width() / 2,
+		screen_size.y / 2, 0.2f)
+	);
+	text.set_mvp(text_trans);
+
 	unsigned int text_id = texts.size();
 	texts.push_back(text);
-	lock.unlock();
+
 	choosen_category = -1;
 	if (current_player == 0)
 	{
-		std::pair<std::pair<float, float>, std::pair<float, float>> categories[6] =//pair of upper left and lower right corners of each category
+		//pair of upper left and lower right corners of each category
+		std::pair<std::pair<float, float>, std::pair<float, float>> categories[6] =
 		{
-			{{-0.1377f, 0.7395f}, {0.1387f, 0.7734f}},//Cylinders
-			{{-0.1397f, 0.77345f}, {0.1407f, 0.8084f}},//Capacity
-			{{-0.1407f, 0.8084f}, {0.1427f, 0.8453f}},//Power
-			{{-0.1427f, 0.8453f}, {0.1437f, 0.8832f}},//Torque
-			{{-0.1447f, 0.8832f}, {0.1457f, 0.9212f}},//Top speed
-			{{-0.1457f, 0.9212f}, {0.1467f, 0.9591f}}//Acceleration
+			{{-0.1377f, 0.2605f}, {0.1387f, 0.2266f}},//Cylinders
+			{{-0.1397f, 0.22655f}, {0.1407f, 0.1916f}},//Capacity
+			{{-0.1407f, 0.1916f}, {0.1427f, 0.1547f}},//Power
+			{{-0.1427f, 0.1547f}, {0.1437f, 0.1168f}},//Torque
+			{{-0.1447f, 0.1168f}, {0.1457f, 0.0788f}},//Top speed
+			{{-0.1457f, 0.0788f}, {0.1467f, 0.0409f}}//Acceleration
 		};
 
 		while (choosen_category == -1)
 		{
-			if (thread_sleep_ms(17))
+			if (thread_sleep(kill_threads, 17ms))
 				return;
 
 			for (int i = 0; i < 6; i++)//6 categories
 			{
 				if (
-					(cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
-					&& (cursor_pos.x * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
-					&& cursor_pos.y * 1.0f / screen_size.y > categories[i].first.second
-					&& cursor_pos.y * 1.0f / screen_size.y < categories[i].second.second)
+					(cursor_pos.first * 1.0f - screen_size.x / 2.0f) / screen_size.y > categories[i].first.first
+					&& (cursor_pos.first * 1.0f - screen_size.x / 2.0f) / screen_size.y < categories[i].second.first
+					&& cursor_pos.second * 1.0f / screen_size.y < categories[i].first.second
+					&& cursor_pos.second * 1.0f / screen_size.y > categories[i].second.second)
 				{
 					player_card[0].back().highlight_row(i);
-					if (GetAsyncKeyState(1) & (1 << 15))//1 is virtual key-code of LMB, 15 is shift to the highest bit of short
+					if (LMB_state)
 						choosen_category = i;
 					break;
 				}
@@ -308,33 +361,17 @@ void Game::choose_category()
 	}
 	else//wait for server response
 	{
+		ui->request_category();
 		while (choosen_category == -1)
 		{
-			if (network_client == nullptr)
-			{
-				network_client = new Client(80, 128);
-				network_client->start();
-			}
-			network_client->http_get(std::string("card-battle.cba.pl"), std::string("/server.php"));
-			std::string &response = network_client->get_response();
-			size_t data_pos = response.find("Car(d) Battle data:");
-			if (data_pos != std::string::npos)
-			{
-				data_pos += strlen("Car(d) Battle data:");
-				choosen_category = std::stoi(response.substr(data_pos));
-			}
-			else
-			{
-				if (thread_sleep_ms(200))
-					return;
-			}
+			if (thread_sleep(kill_threads, 500ms))
+				return;
 		}
 	}
 
-	lock.lock();
 	texts.erase(texts.begin() + text_id);
-	lock.unlock();
-	state = Game_state::show_players_cards;
+
+	change_state(Game_state::show_players_cards);
 }
 
 void Game::show_players_cards()
@@ -343,15 +380,11 @@ void Game::show_players_cards()
 	flip[0] = false;
 
 	for (int player_num = 1; player_num < players_num; player_num++)
-		flip[player_num] = true;
-
-	for (int player_num = 0; player_num < players_num; player_num++)
-		if (loser[player_num])
-			flip[player_num] = false;
+		flip[player_num] = !loser[player_num];
 
 	flip_cards(flip);
 	delete[] flip;
-	state = Game_state::compare_by_choosen_category;
+	change_state(Game_state::compare_by_choosen_category);
 }
 
 void Game::compare_by_choosen_category()
@@ -363,7 +396,7 @@ void Game::compare_by_choosen_category()
 		player_card[player_num].back().highlight_row(choosen_category);
 	}
 
-	if (thread_sleep_ms(3000))
+	if (thread_sleep(kill_threads, 3s))
 		return;
 
 	bool* flip = new bool[players_num]();
@@ -405,9 +438,9 @@ void Game::compare_by_choosen_category()
 	}
 	assert(winners_num > 0);
 	if(winners_num != 1)
-		state = Game_state::tie_break;
+		change_state(Game_state::tie_break);
 	else
-		state = Game_state::transfer_cards_to_winner;
+		change_state(Game_state::transfer_cards_to_winner);
 }
 
 void Game::tiebreak()
@@ -418,7 +451,7 @@ void Game::tiebreak()
 
 	while (winners_num != 1)//tiebreak
 	{
-		assert(winners_num > 0);
+		assert(winners_num > 1);
 
 		for (int tiebreak_cards_num = 0; tiebreak_cards_num < 2; tiebreak_cards_num++)
 		{
@@ -456,8 +489,12 @@ void Game::tiebreak()
 				const int iterations_max = 60;
 				for (int i = 0; i < iterations_max; i++)
 				{
-					if (thread_sleep_ms(17))
+					if (thread_sleep(kill_threads, 17ms))
+					{
+						delete[] translation;
 						return;
+					}
+
 					for (int player_num = 0; player_num < players_num; player_num++)
 					{
 						if (!winner[player_num])
@@ -470,17 +507,37 @@ void Game::tiebreak()
 					}
 				}
 
+				bool cards_equal_in_selected_category = true;
+				std::string category_value;
 				for (int player_num = 0; player_num < players_num; player_num++)
 				{
 					if (!winner[player_num])
 						continue;
 					for (Card& card : player_card[player_num])
+					{
 						card.reset_coords();
-					lock.lock();
+						if(category_value.empty())
+							category_value = card.values[choosen_category];
+						else if(cards_equal_in_selected_category)
+						{
+							if (category_value != card.values[choosen_category])
+								cards_equal_in_selected_category = false;
+						}
+					}
+
+					animations_lock.lock();
 					player_stack[player_num] = player_card[player_num];
-					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
 					player_card[player_num].clear();
-					lock.unlock();
+					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
+					animations_lock.unlock();
+
+					//it is possible, that all the winners left have the same value in the selected category.
+					//in this case the category should be randomized
+					if (cards_equal_in_selected_category)
+					{
+						choosen_category = rand() % 6;
+						std::cout << "The category has been randomized because all players taking part in the tie break have the same value in the previous category." << std::endl;
+					}
 
 				}
 
@@ -520,7 +577,7 @@ void Game::tiebreak()
 				if (winner[player_num])
 					player_card[player_num].back().highlight_row(choosen_category);
 
-			if (thread_sleep_ms(3000))
+			if (thread_sleep(kill_threads, 3s))
 				return;
 
 			winners_num = 0;
@@ -557,7 +614,7 @@ void Game::tiebreak()
 		assert(winners_num > 0);
 	}
 	assert(winners_num == 1);
-	state = Game_state::transfer_cards_to_winner;
+	change_state(Game_state::transfer_cards_to_winner);
 }
 
 void Game::cards_to_winner()
@@ -576,8 +633,74 @@ void Game::cards_to_winner()
 		const int iterations_max = 60;
 		for (int i = 0; i < iterations_max; i++)
 		{
-			if (thread_sleep_ms(17))
+			if (thread_sleep(kill_threads, 17ms))
 				return;
+
+			glm::vec3 move;
+			float angle = 0.0f;
+			if (current_player == player_num)
+				move = glm::vec3(1.0f, 0.0f, 0.5f);
+			else if (current_player == 0 && player_num == 3)
+			{
+				move = glm::vec3(-1.2f, 0.0f, -0.4f);
+				angle = -90.0f;
+			}
+			else if (current_player == 0 && player_num == 2)
+			{
+				move = glm::vec3(-1.0f, 0.0f, -2.2f);
+				angle = 180.0f;
+			}
+			else if (current_player == 0 && player_num == 1)
+			{
+				move = glm::vec3(1.2f, 0.0f, -2.4f);
+				angle = 90.0f;
+			}
+			else if (current_player == 1 && player_num == 3)
+			{
+				move = glm::vec3(-1.0f, 0.0f, -3.3f);
+				angle = 180.0f;
+			}
+			else if (current_player == 1 && player_num == 2)
+			{
+				move = glm::vec3(1.9f, 0.0f, -2.0f);
+				angle = 90.0f;
+			}
+			else if (current_player == 1 && player_num == 0)
+			{
+				move = glm::vec3(-1.9f, 0.0f, 0.3f);
+				angle = -90.0f;
+			}
+			else if (current_player == 2 && player_num == 3)
+			{
+				move = glm::vec3(1.5, 0.0f, -2.4f);
+				angle = 90.0f;
+			}
+			else if (current_player == 2 && player_num == 1)
+			{
+				move = glm::vec3(-1.5f, 0.0f, -0.4f);
+				angle = -90.0f;
+			}
+			else if (current_player == 2 && player_num == 0)
+			{
+				move = glm::vec3(-1.0f, 0.0f, -2.2f);
+				angle = 180.0f;
+			}
+			else if (current_player == 3 && player_num == 2)
+			{
+				move = glm::vec3(-1.9f, 0.0f, 0.0f);
+				angle = -90.0f;
+			}
+			else if (current_player == 3 && player_num == 1)
+			{
+				move = glm::vec3(-1.0f, 0.0f, -3.3f);
+				angle = 180.0f;
+			}
+			else if (current_player == 3 && player_num == 0)
+			{
+				move = glm::vec3(1.9f, 0.0f, -1.7f);
+				angle = 90.0f;
+			}
+
 			if (i < iterations_max / 4)
 			{
 				for (Card& card : player_stack[current_player])
@@ -585,94 +708,29 @@ void Game::cards_to_winner()
 			}
 			else
 			{
-				Vec3 move;
-				float angle = 0.0f;
-				if (current_player == player_num)
-					move = Vec3(1.0f, 0.0f, 0.5f);
-				else if (current_player == 0 && player_num == 3)
-				{
-					move = Vec3(-1.2f, 0.0f, -0.4f);
-					angle = -90.0f;
-				}
-				else if (current_player == 0 && player_num == 2)
-				{
-					move = Vec3(-1.0f, 0.0f, -2.2f);
-					angle = 180.0f;
-				}
-				else if (current_player == 0 && player_num == 1)
-				{
-					move = Vec3(1.2f, 0.0f, -2.4f);
-					angle = 90.0f;
-				}
-				else if (current_player == 1 && player_num == 3)
-				{
-					move = Vec3(-1.0f, 0.0f, -3.3f);
-					angle = 180.0f;
-				}
-				else if (current_player == 1 && player_num == 2)
-				{
-					move = Vec3(1.9f, 0.0f, -2.0f);
-					angle = 90.0f;
-				}
-				else if (current_player == 1 && player_num == 0)
-				{
-					move = Vec3(-1.9f, 0.0f, 0.3f);
-					angle = -90.0f;
-				}
-				else if (current_player == 2 && player_num == 3)
-				{
-					move = Vec3(1.5, 0.0f, -2.4f);
-					angle = 90.0f;
-				}
-				else if (current_player == 2 && player_num == 1)
-				{
-					move = Vec3(-1.5f, 0.0f, -0.4f);
-					angle = -90.0f;
-				}
-				else if (current_player == 2 && player_num == 0)
-				{
-					move = Vec3(-1.0f, 0.0f, -2.2f);
-					angle = 180.0f;
-				}
-				else if (current_player == 3 && player_num == 2)
-				{
-					move = Vec3(-1.9f, 0.0f, 0.0f);
-					angle = -90.0f;
-				}
-				else if (current_player == 3 && player_num == 1)
-				{
-					move = Vec3(-1.0f, 0.0f, -3.3f);
-					angle = 180.0f;
-				}
-				else if (current_player == 3 && player_num == 0)
-				{
-					move = Vec3(1.9f, 0.0f, -1.7f);
-					angle = 90.0f;
-				}
-
 				for (Card& card : player_card[player_num])
 				{
 					card.pos.x += move.x / (iterations_max * 3 / 4);
 					card.pos.z += move.z / (iterations_max * 3 / 4);
 					if (angle != 0.0f)
 					{
-						card.rot = Vec3(0.0f, 1.0f, 0.0f);
+						card.rot = glm::vec3(0.0f, 0.0f, 1.0f);
 						card.angle += angle / (iterations_max * 3 / 4);
 					}
 				}
 			}
 		}
-		lock.lock();
-		for (Card& card : player_card[player_num])
-			card.reset_coords();
+		animations_lock.lock();
 		player_stack[current_player].insert(player_stack[current_player].begin(), player_card[player_num].begin(), player_card[player_num].end());
+		for (Card& card : player_stack[current_player])
+			card.reset_coords();
 		player_card[player_num].clear();
-		lock.unlock();
+		animations_lock.unlock();
 	}
 	if(player_stack[current_player].size() == 24)
-		state = Game_state::finish;
+		change_state(Game_state::finish);
 	else
-		state = Game_state::next_round;
+		change_state(Game_state::cards_to_players);
 }
 
 void Game::start(int players_num)
@@ -682,13 +740,24 @@ void Game::start(int players_num)
 		std::cerr << "The game is designed for 2-4 players.\n";
 		return;
 	}
+	central_stack = cards.get_cards_vec();
+	for (Card& card : central_stack)
+	{
+		card.reset_coords();
+		card.highlight_row(-1);
+	}
+
+	player_card.clear();
+	player_stack.clear();
+
+	std::random_shuffle(central_stack.begin(), central_stack.end(), [](int a) -> int {return rand() % a; });
+	if (central_stack.size() != 24)
+		std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
 	winner = new bool[players_num];
 	loser = new bool[players_num]();
-	//std::thread th = std::thread(&Game::debug, this);
-	//th.detach();
 	std::fill_n(loser, players_num, false);
 	this->players_num = players_num;
-	state = Game_state::cards_distribution;
+	change_state(Game_state::cards_distribution);
 }
 
 void Game::draw_players_stacks()
@@ -696,116 +765,138 @@ void Game::draw_players_stacks()
 	//stacks:
 	if (players_num < 2)
 		return;
+
+	const glm::mat4 vp = projection * view;
 	//player 0:
-	glPushMatrix();
-	glTranslatef(1.0f, 0.0f, 1.5f);
-	draw_cards_stack(player_stack[0]);
-	glPopMatrix();
+	glm::mat4 trans = glm::translate(vp, glm::vec3(1.0f, 0.0f, 1.5f));
+	draw_cards_stack(player_stack[0], trans);
 	//player 1:
-	glPushMatrix();
-	glTranslatef(-1.9f, 0.0f, 1.3f);
-	glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_stack[1]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(-1.9f, 0.0f, 1.3f));
+	trans = glm::rotate(trans, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_stack[1], trans);
+
 	if (players_num < 3)
 		return;
 	//player 2:
-	glPushMatrix();
-	glTranslatef(-1.0f, 0.0f, -1.2f);
-	glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_stack[2]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(-1.0f, 0.0f, -1.2f));
+	trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_stack[2], trans);
+
 	if (players_num < 4)
 		return;
 	//player 3:
-	glPushMatrix();
-	glTranslatef(1.9f, 0.0f, -0.7f);
-	glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_stack[3]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(1.9f, 0.0f, -0.7f));
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_stack[3], trans);
 }
 
 void Game::draw_players_cards()
 {
-	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, 1.0f);
-	draw_cards_stack(player_card[0]);
-	glPopMatrix();
+	const glm::mat4 vp = projection * view;
 
-	glPushMatrix();
-	glTranslatef(-1.4f, 0.0f, 0.3f);
-	glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_card[1]);
-	glPopMatrix();
+	// TODO: Consider to skip drawing stacks that are empty
 
-	glPushMatrix();
-	glTranslatef(0.0f, 0.0f, -0.7f);
-	glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_card[2]);
-	glPopMatrix();
+	glm::mat4 trans = glm::translate(vp, glm::vec3(0.0f, 0.0f, 1.0f));
+	draw_cards_stack(player_card[0], trans);
 
-	glPushMatrix();
-	glTranslatef(1.4f, 0.0f, 0.3f);
-	glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
-	draw_cards_stack(player_card[3]);
-	glPopMatrix();
+	trans = glm::translate(vp, glm::vec3(-1.4f, 0.0f, 0.3f));
+	trans = glm::rotate(trans, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_card[1], trans);
+
+	trans = glm::translate(vp, glm::vec3(0.0f, 0.0f, -0.7f));
+	trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_card[2], trans);
+
+	trans = glm::translate(vp, glm::vec3(1.4f, 0.0f, 0.3f));
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	draw_cards_stack(player_card[3], trans);
+}
+
+void Game::set_pause(bool pause)
+{
+	this->pause = pause;
+}
+
+void Game::set_UI(UI_Interface* ui)
+{
+	this->ui = ui;
+}
+
+void Game::set_category(int category)
+{
+	choosen_category = category;
+}
+
+void Game::key_handler(BYTE key, Keyboard::Key_action act)
+{
+	if (key == VK_LBUTTON)
+	{
+		if (act == Keyboard::Key_action::on_press)
+			LMB_state = true;
+		else if (act == Keyboard::Key_action::on_release)
+			LMB_state = false;
+	}
 }
 
 void Game::draw()
 {
-	scene.draw();
-	draw_cards_stack(central_stack);
-	draw_players_stacks();
-	draw_players_cards();
-	lock.lock();
-	for (Text3D& text : texts)
-		text.render();
-	lock.unlock();
-	switch (state)
+	if (!pause)
 	{
-	case Game_state::no_action:
-		break;
-	case Game_state::cards_distribution:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::distribute_cards, this));
-		break;
-	case Game_state::cards_to_players:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::cards_to_players, this));
-		break;
-	case Game_state::choose_category:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::choose_category, this));
-		break;
-	case Game_state::show_players_cards:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::show_players_cards, this));
-		break;
-	case Game_state::compare_by_choosen_category:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::compare_by_choosen_category, this));
-		break;
-	case Game_state::tie_break:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::tiebreak, this));
-		break;
-	case Game_state::next_round:
-		state = Game_state::cards_to_players;
-		break;
-	case Game_state::transfer_cards_to_winner:
-		state = Game_state::no_action;
-		threads.push_back(std::thread(&Game::cards_to_winner, this));
-		break;
-	case Game_state::finish:
-		state = Game_state::no_action;
-		for (int winner_num = 0; winner_num < players_num; winner_num++)
-			if (winner[winner_num])
+		scene.draw(projection, view);
+		draw_cards_stack(central_stack, projection * view);
+		draw_players_stacks();
+		draw_players_cards();
+
+		for (Text& text : texts)
+			text.draw();
+	}
+
+	if (new_state != old_state)
+	{
+		old_state = new_state;
+		switch (new_state)
+		{
+		case Game_state::no_action:
+			break;
+		case Game_state::cards_distribution:
+			threads.push_back(std::thread(&Game::distribute_cards, this));
+			break;
+		case Game_state::cards_to_players:
+			threads.push_back(std::thread(&Game::cards_to_players, this));
+			break;
+		case Game_state::choose_category:
+			threads.push_back(std::thread(&Game::choose_category, this));
+			break;
+		case Game_state::show_players_cards:
+			threads.push_back(std::thread(&Game::show_players_cards, this));
+			break;
+		case Game_state::compare_by_choosen_category:
+			threads.push_back(std::thread(&Game::compare_by_choosen_category, this));
+			break;
+		case Game_state::tie_break:
+			threads.push_back(std::thread(&Game::tiebreak, this));
+			break;
+		case Game_state::transfer_cards_to_winner:
+			threads.push_back(std::thread(&Game::cards_to_winner, this));
+			break;
+		case Game_state::finish:
+			for (int winner_num = 0; winner_num < players_num; winner_num++)
+				if (winner[winner_num])
+				{
+					std::cout << "The Winner is player number " << winner_num << std::endl;
+					break;
+				}
+			clean();
+			unsigned int opp_num;
+			do
 			{
-				std::cout << "The Winner is the player number " << winner_num << std::endl;
-				break;
-			}
-		break;
-	default:
-		break;
+				std::cout << "Number of opponents for the next round: ";
+				std::cin >> opp_num;
+			} while (opp_num < 1 || opp_num > 3);
+			start(opp_num + 1);
+			break;
+		default:
+			break;
+		}
 	}
 }

@@ -90,13 +90,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\freeglut\include;$(ProjectDir)\libxl\include_cpp</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\GLM;$(ProjectDir)\Glad\include;$(ProjectDir)\GLFW\include;$(ProjectDir)\libxl\include_cpp;$(ProjectDir)\freetype</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\freeglut\lib;$(ProjectDir)\libxl\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;libxl.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\GLFW\lib-vc2019;$(ProjectDir)\libxl\lib;$(ProjectDir)\freetype\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;freetype.lib;libxl.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -123,12 +123,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\GLM;$(ProjectDir)\Glad\include;$(ProjectDir)\GLFW\include;$(ProjectDir)\libxl\include_cpp;$(ProjectDir)\freetype</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)\GLFW\lib-vc2019;$(ProjectDir)\libxl\lib;$(ProjectDir)\freetype\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;freetype.lib;libxl.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,43 +144,61 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\freeglut\include;$(ProjectDir)\libxl\include_cpp</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)\freeglut\lib;$(ProjectDir)\libxl\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;libxl.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Car(d)Battle.cpp" />
     <ClCompile Include="Card.cpp" />
     <ClCompile Include="Cards.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Glad\src\glad.c" />
+    <ClCompile Include="GL_Context.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Line.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Text.cpp" />
+    <ClCompile Include="TrueTypeFont.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="utilities\Bitmap.cpp" />
     <ClCompile Include="utilities\lodepng.cpp" />
     <ClCompile Include="utilities\Texture.cpp" />
-    <ClCompile Include="utilities\Vec3.cpp" />
     <ClCompile Include="WorkBook.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Card.h" />
     <ClInclude Include="Cards.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GL_Context.h" />
+    <ClInclude Include="Keyboard.h" />
+    <ClInclude Include="Line.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Singleton.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Text3D.h" />
+    <ClInclude Include="Text.h" />
+    <ClInclude Include="TrueTypeFont.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="UI_Interface.h" />
     <ClInclude Include="utilities\Bitmap.h" />
     <ClInclude Include="utilities\lodepng.h" />
     <ClInclude Include="utilities\Texture.h" />
-    <ClInclude Include="utilities\Vec3.h" />
+    <ClInclude Include="utilities\th_sleep.h" />
     <ClInclude Include="WorkBook.h" />
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +260,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="carlist.xls" />
+    <None Include="shaders\button_frag.glsl" />
+    <None Include="shaders\button_vert.glsl" />
+    <None Include="shaders\card_frag.glsl" />
+    <None Include="shaders\card_vert.glsl" />
+    <None Include="shaders\line_frag.glsl" />
+    <None Include="shaders\line_vert.glsl" />
+    <None Include="shaders\scene_bg_frag.glsl" />
+    <None Include="shaders\scene_bg_vert.glsl" />
+    <None Include="shaders\ttf_frag.glsl" />
+    <None Include="shaders\ttf_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
