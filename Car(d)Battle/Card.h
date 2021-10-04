@@ -38,5 +38,5 @@ public:
 	std::string get_category_value(int num);
 	void draw(const glm::mat4&);
 	void delete_tex();
-	void load_tex();
+	CTexture* tex();
 };

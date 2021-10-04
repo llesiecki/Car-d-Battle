@@ -165,7 +165,7 @@ bool Bitmap::convert24(char* tempData) {
 
     diff = width * height * RGB_BYTE_SIZE;
     //allocate the buffer for the final image data
-    data = new char[diff];
+    data = new unsigned char[diff];
 
     //exit if there is not enough memory
     if (data == NULL) {
@@ -219,7 +219,7 @@ bool Bitmap::convert8(char* tempData) {
 
     diff = width * height * RGB_BYTE_SIZE;
     //allocate the buffer for the final image data
-    data = new char[diff];
+    data = new unsigned char[diff];
 
     //exit if there is not enough memory
     if (data == NULL) {

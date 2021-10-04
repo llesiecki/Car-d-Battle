@@ -1,5 +1,9 @@
 #pragma once
 
+#include <thread>
+#include <future>
+#include <list>
+#include <chrono>
 #include "stdafx.h"
 #include "utilities\Texture.h"
 #include "WorkBook.h"

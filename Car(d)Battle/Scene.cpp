@@ -27,7 +27,7 @@ Scene::~Scene()
 		glDeleteBuffers(1, &vbo_background);
 }
 
-void Scene::draw(const glm::mat4 & proj, const glm::mat4 & view)
+void Scene::draw(const glm::mat4& proj, const glm::mat4& view)
 {
 	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
@@ -74,10 +74,11 @@ void Scene::load()
 	//attrib 1 - tex coords
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), reinterpret_cast<void*>(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-	
+
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	background->Load();
+	background->Bind();
 }

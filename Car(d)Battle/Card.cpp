@@ -70,7 +70,7 @@ void Card::draw(const glm::mat4& mvp)
 		)
 	));
 
-	if((angle > 0.1 || angle < -0.1) && rot.length() > 0.1)
+	if ((angle > 0.1 || angle < -0.1) && rot.length() > 0.1)
 		trans = glm::rotate(trans, glm::radians(angle), rot);
 
 	if (invert)
@@ -82,7 +82,7 @@ void Card::draw(const glm::mat4& mvp)
 		-CARD_HEIGHT / 2,
 		0.0035f
 	));
-	
+
 	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	common_values.shader->enable();
@@ -107,7 +107,7 @@ void Card::draw(const glm::mat4& mvp)
 	float text_scale = 0.001f;
 	float margin_horizontal = CARD_WIDTH / 40.0f;
 	//48 - font size
-	float margin_vertical = ((CARD_HEIGHT / 2 / 7) - 48 * text_scale)/1.5f;
+	float margin_vertical = ((CARD_HEIGHT / 2 / 7) - 48 * text_scale) / 1.5f;
 
 	glm::mat4 fields_trans = glm::translate(trans, glm::vec3(
 		//left<>right
@@ -171,7 +171,7 @@ void Card::delete_tex()
 	delete car_tex;
 }
 
-void Card::load_tex()
+CTexture* Card::tex()
 {
-	car_tex->Load();
+	return car_tex;
 }

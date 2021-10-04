@@ -113,7 +113,7 @@ void Button::draw()
 	shader.set("transform", transform);
 	glBindVertexArray(vao);
 
-	if(pressed) // draw the box with the left part of the texture:
+	if (pressed) // draw the box with the left part of the texture:
 		// 2 * 3 -> 2 triangles, 3 vertexes each
 		glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
 			reinterpret_cast<void*>(1 * 2 * 3 * sizeof(GLubyte)));
@@ -161,7 +161,7 @@ void Button::set_pos(const glm::ivec2& pos)
 void Button::set_size(const glm::ivec2& size)
 {
 	this->size = size;
-	local = glm::scale(glm::mat4(1.0f), {size.x, size.y, 1});
+	local = glm::scale(glm::mat4(1.0f), { size.x, size.y, 1 });
 	racalculate_transform();
 }
 
@@ -183,4 +183,5 @@ void Button::set_texture(const std::string& path)
 		delete texture;
 	texture = new CTexture(path);
 	texture->Load();
+	texture->Bind();
 }

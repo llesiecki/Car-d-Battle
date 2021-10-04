@@ -67,11 +67,53 @@ Cards::~Cards()
 bool Cards::load_textures()
 {
 	bool ret = true;
-	ret &= card_values.back_tex->Load();
-	ret &= card_values.fields_tex->Load();
+
+	std::vector<CTexture*> to_load;
+	std::list<std::future<bool>> loading;
+	to_load.push_back(card_values.back_tex);
+	to_load.push_back(card_values.fields_tex);
 	for (Card& card : cards)
-		card.load_tex();
-	
+		to_load.push_back(card.tex());
+
+	unsigned int max_threads = std::thread::hardware_concurrency();
+	// leave one thread for others,
+	// when more than one thread is available in the system
+	if (max_threads > 1)
+		--max_threads;
+
+	while (!(to_load.empty() && loading.empty()))
+	{
+		loading.remove_if(
+			[&ret](std::future<bool>& fut)
+			{
+				if (fut.wait_for(std::chrono::milliseconds(0)) ==
+					std::future_status::ready)
+				{
+					ret &= fut.get();
+					return true;
+				}
+				return false;
+			}
+		);
+
+		while (loading.size() < max_threads && !to_load.empty())
+		{
+			loading.push_back(std::async(
+				std::launch::async,
+				&CTexture::Load,
+				to_load.back())
+			);
+			to_load.pop_back();
+		}
+
+		std::this_thread::sleep_for(5ms);
+	}
+
+	card_values.back_tex->Bind();
+	card_values.fields_tex->Bind();
+	for (Card& card : cards)
+		card.tex()->Bind();
+
 	return ret;
 }
 

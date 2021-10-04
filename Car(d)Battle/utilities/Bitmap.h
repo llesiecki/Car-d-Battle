@@ -55,7 +55,7 @@ class Bitmap {
 public:
     //variables
     RGBQuad* colours;
-    char* data;
+    unsigned char* data;
     bool loaded;
     int width, height;
     unsigned short bpp;
