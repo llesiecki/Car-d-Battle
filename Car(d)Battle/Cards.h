@@ -1,25 +1,25 @@
 #pragma once
 
+#include <thread>
+#include <future>
+#include <list>
+#include <chrono>
 #include "stdafx.h"
 #include "utilities\Texture.h"
-
-class Card;
+#include "WorkBook.h"
+#include "Card.h"
 
 class Cards
 {
-	std::vector< std::string > field_names, img_paths;
-	std::vector< std::vector<std::string> > cards_properties;
-	CTexture *back_tex, *fields_tex;
-	std::vector<CTexture*> cards_texture;
-	GLuint list_front, list_back, list_fields;
+	std::vector<Card> cards;
+	Card::CommonValues card_values;
+
 public:
 	Cards(const wchar_t* filename);
 	~Cards();
 	bool load_textures();
-	void create_lists();
+	void create_buffers();
 	std::vector<Card> get_cards_vec();
 	void print();
 	std::string get_category_name(int num);
-	friend class WorkBook;
-	friend class Card;
 };
