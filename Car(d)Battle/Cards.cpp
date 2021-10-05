@@ -13,7 +13,7 @@ Cards::Cards(const wchar_t* filename)
 
 	for (int row = 1; row <= workbook.get_row_num() - 3; ++row)
 	{
-		cards.push_back(Card(row - 1, new CTexture("textures\\cars\\" + img_paths[row - 1]), card_values));
+		cards.push_back(Card(row - 1, new Texture("textures\\cars\\" + img_paths[row - 1]), card_values));
 		cards.back().car_name = workbook.cell_to_string(row, 1);
 		for (int col = 2; col < workbook.get_col_num(); ++col)
 			cards.back().values.push_back(workbook.cell_to_string(row, col));
@@ -32,9 +32,9 @@ Cards::Cards(const wchar_t* filename)
 		}
 	}
 
-	card_values.back_tex = new CTexture("textures\\" + img_paths.back());
+	card_values.back_tex = new Texture("textures\\" + img_paths.back());
 	img_paths.pop_back();
-	card_values.fields_tex = new CTexture("textures\\" + img_paths.back());
+	card_values.fields_tex = new Texture("textures\\" + img_paths.back());
 	img_paths.pop_back();
 
 	card_values.vao = card_values.vbo = card_values.ebo = 0;
@@ -68,7 +68,7 @@ bool Cards::load_textures()
 {
 	bool ret = true;
 
-	std::vector<CTexture*> to_load;
+	std::vector<Texture*> to_load;
 	std::list<std::future<bool>> loading;
 	to_load.push_back(card_values.back_tex);
 	to_load.push_back(card_values.fields_tex);
@@ -80,7 +80,7 @@ bool Cards::load_textures()
 	// when more than one thread is available in the system
 	if (max_threads > 1)
 		--max_threads;
-
+	
 	while (!(to_load.empty() && loading.empty()))
 	{
 		loading.remove_if(
@@ -100,19 +100,19 @@ bool Cards::load_textures()
 		{
 			loading.push_back(std::async(
 				std::launch::async,
-				&CTexture::Load,
+				&Texture::load,
 				to_load.back())
 			);
 			to_load.pop_back();
 		}
 
-		std::this_thread::sleep_for(5ms);
+		std::this_thread::sleep_for(10ms);
 	}
 
-	card_values.back_tex->Bind();
-	card_values.fields_tex->Bind();
+	card_values.back_tex->bind();
+	card_values.fields_tex->bind();
 	for (Card& card : cards)
-		card.tex()->Bind();
+		card.tex()->bind();
 
 	return ret;
 }

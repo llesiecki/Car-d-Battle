@@ -15,7 +15,8 @@ Keyboard::Keyboard(HWND h)
 Keyboard::~Keyboard()
 {
 	keep_updateing = false;
-	timer_thread.wait_for(std::chrono::milliseconds(100));
+	using namespace std::literals::chrono_literals;
+	timer_thread.wait_for(100ms);
 
 	handlers_lock.lock();
 	for (auto h : handlers)
@@ -95,6 +96,7 @@ void Keyboard::update_timer()
 	while (keep_updateing)
 	{
 		update();
+		using namespace std::literals::chrono_literals;
 		std::this_thread::sleep_for(30ms);
 	}
 }

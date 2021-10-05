@@ -2,7 +2,7 @@
 
 Scene::Scene()
 {
-	background = new CTexture("textures\\background.bmp");
+	background = new Texture("textures\\background.bmp");
 	vbo_background = 0;
 	vao_background = 0;
 	ebo_background = 0;
@@ -31,7 +31,7 @@ void Scene::draw(const glm::mat4& proj, const glm::mat4& view)
 {
 	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, background->GetId());
+	glBindTexture(GL_TEXTURE_2D, background->get_id());
 	shader_bg.enable();
 	shader_bg.set("TexID", 0);
 	shader_bg.set("transform", proj * view);
@@ -79,6 +79,6 @@ void Scene::load()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	background->Load();
-	background->Bind();
+	background->load();
+	background->bind();
 }

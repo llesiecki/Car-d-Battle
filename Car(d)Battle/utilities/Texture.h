@@ -1,22 +1,23 @@
 #pragma once
+#include "..\stdafx.h"
+#include "Bitmap.h"
+#include "lodepng.h"
 
-class CTexture
+class Texture
 {
-public:
-	bool IsLoaded;
-
-	CTexture(std::string, int = GL_LINEAR, int = GL_LINEAR);
-	~CTexture(void);
-	bool Load(void);
-	void Bind(void);
-	GLuint GetId(void);
-
-protected:
-	int _magFilter;
-	int _minFilter;
 	size_t width, height;
-	std::string _file;
-	GLuint _id;
+	GLuint id;
 	Bitmap* bmp;
-	std::vector<unsigned char>* png;
+	std::vector<GLubyte>* png;
+	std::string path;
+
+	inline bool ends_with(std::string const&, std::string const&);
+
+public:
+	Texture(std::string);
+	~Texture();
+	bool load();
+	void bind(int = GL_LINEAR, int = GL_LINEAR);
+	GLuint get_id();
+	bool is_loaded();
 };

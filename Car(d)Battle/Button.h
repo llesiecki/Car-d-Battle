@@ -13,7 +13,7 @@ class Button
 	GLuint vao;
 	GLuint ebo;
 	GLuint vbo;
-	CTexture * texture;
+	Texture * texture;
 	glm::ivec2 pos;
 	glm::ivec2 size;
 	glm::mat4 m, p, local, transform;

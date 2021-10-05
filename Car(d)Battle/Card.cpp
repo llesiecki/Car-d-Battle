@@ -1,6 +1,6 @@
 #include "Card.h"
 
-Card::Card(unsigned int id, CTexture* car_tex, CommonValues& common_values)
+Card::Card(unsigned int id, Texture* car_tex, CommonValues& common_values)
 	:common_values(common_values)
 {
 	this->id = id;
@@ -90,15 +90,15 @@ void Card::draw(const glm::mat4& mvp)
 	common_values.shader->set("transform", mvp * trans);
 
 	glBindVertexArray(common_values.vao);
-	glBindTexture(GL_TEXTURE_2D, common_values.back_tex->GetId());
+	glBindTexture(GL_TEXTURE_2D, common_values.back_tex->get_id());
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
 		static_cast<void*>(0));
 
-	glBindTexture(GL_TEXTURE_2D, car_tex->GetId());
+	glBindTexture(GL_TEXTURE_2D, car_tex->get_id());
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
 		reinterpret_cast<void*>(1 * 2 * 3 * sizeof(GLubyte)));
 
-	glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->GetId());
+	glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->get_id());
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
 		reinterpret_cast<void*>(2 * 2 * 3 * sizeof(GLubyte)));
 
@@ -171,7 +171,7 @@ void Card::delete_tex()
 	delete car_tex;
 }
 
-CTexture* Card::tex()
+Texture* Card::tex()
 {
 	return car_tex;
 }

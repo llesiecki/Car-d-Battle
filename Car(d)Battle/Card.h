@@ -11,7 +11,7 @@ public:
 	struct CommonValues
 	{
 		std::vector< std::string > field_names;
-		CTexture* back_tex, * fields_tex;
+		Texture* back_tex, * fields_tex;
 		GLuint vbo, vao, ebo;
 		Shader* shader;
 		Line highlight_line;
@@ -20,7 +20,7 @@ public:
 private:
 	unsigned int id;
 	int highlight;
-	CTexture* car_tex;
+	Texture* car_tex;
 	CommonValues& common_values;
 public:
 	glm::vec3 pos, rot;
@@ -30,7 +30,7 @@ public:
 	std::vector<std::string> values;
 
 	Card() = delete;
-	Card(unsigned int, CTexture*, CommonValues&);
+	Card(unsigned int, Texture*, CommonValues&);
 	Card(const Card&);
 	Card operator=(const Card&);
 	void reset_coords();
@@ -38,5 +38,5 @@ public:
 	std::string get_category_value(int num);
 	void draw(const glm::mat4&);
 	void delete_tex();
-	CTexture* tex();
+	Texture* tex();
 };

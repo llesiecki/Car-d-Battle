@@ -107,7 +107,7 @@ void Button::draw()
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture->GetId());
+	glBindTexture(GL_TEXTURE_2D, texture->get_id());
 	shader.enable();
 	shader.set("tex_id", 0);
 	shader.set("transform", transform);
@@ -181,7 +181,7 @@ void Button::set_texture(const std::string& path)
 {
 	if (texture)
 		delete texture;
-	texture = new CTexture(path);
-	texture->Load();
-	texture->Bind();
+	texture = new Texture(path);
+	texture->load();
+	texture->bind();
 }

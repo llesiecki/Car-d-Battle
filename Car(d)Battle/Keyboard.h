@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <mutex>
 #include <future>
+#include <chrono>
 
 class Keyboard
 {

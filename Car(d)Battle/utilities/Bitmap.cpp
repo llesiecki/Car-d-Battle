@@ -8,7 +8,7 @@
 //
 //The file Bitmap.h goes along with this file
 //
-#include "..\stdafx.h"
+#include "Bitmap.h"
 
 //basic constructor
 Bitmap::Bitmap() {

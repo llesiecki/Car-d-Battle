@@ -25,7 +25,6 @@ constexpr int FONT_SIZE = 48;
 #include <vector>
 #include <map>
 #include <Windows.h>
-#include "utilities\Bitmap.h"
 #include "GLFW/glfw3.h"
 #include "GLFW/glfw3native.h"
 #include "Glad/glad.h"
