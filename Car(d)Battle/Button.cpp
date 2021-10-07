@@ -4,28 +4,20 @@ Button::Button()
 	:pressed(), highlight(), texture(nullptr), local(),
 	pos(), size(), m(), p(), text(), shader(), transform()
 {
-	GLfloat vertices_data[] = {	// pos.x, pos.y, tex.x, tex.y
-		// button box with the left part of the texture:
-		0.0f, 1.0f,	0.0f, 1.0f,	// upper left
-		0.0f, 0.0f,	0.0f, 0.0f,	// lower left
-		1.0f, 0.0f,	0.5f, 0.0f,	// lower right
-		1.0f, 1.0f, 0.5f, 1.0f,	// upper right
 
-		// button box with the right part of the texture:
-		0.0f, 1.0f,	0.5f, 1.0f,	// upper left
-		0.0f, 0.0f,	0.5f, 0.0f,	// lower left
+	GLfloat vertices_data[] = {	// pos.x, pos.y, tex.x, tex.y
+		// button rectangle with the bottom part of the texture,
+		// tex coords can be shifted with a uniform
+		0.0f, 1.0f,	0.0f, 0.25f,	// upper left
+		0.0f, 0.0f,	0.0f, 0.0f,	// lower left
 		1.0f, 0.0f,	1.0f, 0.0f,	// lower right
-		1.0f, 1.0f, 1.0f, 1.0f,	// upper right
+		1.0f, 1.0f, 1.0f, 0.25f,	// upper right
 	};
 
 	GLubyte indices[] = {
-		// drawing the box with the left part of the texture:
+		// drawing the button rectangle:
 		0, 1, 2,	// first triangle
 		2, 3, 0,	// second triangle
-
-		// drawing the box with the right part of the texture:
-		4, 5, 6,	// first triangle
-		6, 7, 4,	// second triangle
 	};
 
 	glGenVertexArrays(1, &vao);
@@ -92,7 +84,7 @@ void Button::racalculate_transform()
 		fill_min,
 		0 });
 
-	float width = text.get_width();
+	int width = text.get_width();
 
 	glm::mat4 text_center = glm::translate(glm::mat4(1.0f), {
 		(size.x - width * fill_min) / 2,
@@ -113,13 +105,22 @@ void Button::draw()
 	shader.set("transform", transform);
 	glBindVertexArray(vao);
 
-	if (pressed) // draw the box with the left part of the texture:
-		// 2 * 3 -> 2 triangles, 3 vertexes each
-		glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
-			reinterpret_cast<void*>(1 * 2 * 3 * sizeof(GLubyte)));
+	if (highlight)
+	{
+		if(pressed)
+			shader.set("tex_shift", 0.0f);
+		else
+			shader.set("tex_shift", 0.5f);
+	}
 	else // draw the box with the right part of the texture:
-		glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
-			static_cast<void*>(0));
+	{
+		if (pressed)
+			shader.set("tex_shift", 0.25f);
+		else
+			shader.set("tex_shift", 0.75f);
+	}
+
+	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE, static_cast<void*>(0));
 
 	glDisable(GL_TEXTURE_2D);
 	text.draw();
