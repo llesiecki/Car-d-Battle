@@ -2,15 +2,16 @@
 
 Button::Button()
 	:pressed(), highlight(), texture(nullptr), local(),
-	pos(), size(), m(), p(), text(), shader(), transform()
+	pos(), size(), m(), p(), text(), shader(), transform(),
+	kb(nullptr), cursor_pos(nullptr)
 {
 
 	GLfloat vertices_data[] = {	// pos.x, pos.y, tex.x, tex.y
 		// button rectangle with the bottom part of the texture,
 		// tex coords can be shifted with a uniform
 		0.0f, 1.0f,	0.0f, 0.25f,	// upper left
-		0.0f, 0.0f,	0.0f, 0.0f,	// lower left
-		1.0f, 0.0f,	1.0f, 0.0f,	// lower right
+		0.0f, 0.0f,	0.0f, 0.0f,		// lower left
+		1.0f, 0.0f,	1.0f, 0.0f,		// lower right
 		1.0f, 1.0f, 1.0f, 0.25f,	// upper right
 	};
 
@@ -107,7 +108,7 @@ void Button::draw()
 
 	if (highlight)
 	{
-		if(pressed)
+		if (pressed)
 			shader.set("tex_shift", 0.0f);
 		else
 			shader.set("tex_shift", 0.5f);
@@ -176,6 +177,64 @@ void Button::set_font(const std::string& font)
 {
 	this->text.set_font(font);
 	racalculate_transform();
+}
+
+void Button::set_id(const std::string& id)
+{
+	this->id = id;
+}
+
+void Button::set_press_function(std::function<void(const std::string&)> function)
+{
+	press_function = function;
+}
+
+void Button::set_keyboard(Keyboard* keyboard)
+{
+	kb = keyboard;
+	if (kb)
+	{
+		std::function<void(BYTE, Keyboard::Key_action)> fp =
+			std::bind(&Button::keyboard_callback, this, std::_Ph<1>(), std::_Ph<2>());
+		kb->observe_key(VK_LBUTTON, fp);
+	}
+}
+
+void Button::set_cursor_pointer(std::pair<float, float>* cursor_pos)
+{
+	this->cursor_pos = cursor_pos;
+}
+
+void Button::keyboard_callback(BYTE key, Keyboard::Key_action act)
+{
+	if (key == VK_LBUTTON)
+	{
+		if (act == Keyboard::Key_action::on_press)
+		{
+			if (cursor_pos)
+				if (is_hovered({ cursor_pos->first, cursor_pos->second }))
+					set_press(true);
+		}
+		else if (act == Keyboard::Key_action::on_release)
+		{
+			if (pressed)
+			{
+				set_press(false);
+
+				if (cursor_pos)
+					if (is_hovered({ cursor_pos->first, cursor_pos->second }))
+						press_function(id);
+			}
+		}
+	}
+}
+
+void Button::update()
+{
+	if (cursor_pos)
+	{
+		set_highlight(is_hovered({ cursor_pos->first, cursor_pos->second }));
+	}
 }
 
 void Button::set_texture(const std::string& path)
