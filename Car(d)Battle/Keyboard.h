@@ -1,8 +1,8 @@
 #pragma once
 #include "stdafx.h"
-#include <mutex>
-#include <future>
 #include <chrono>
+#include <mutex>
+#include "Singleton.h"
 
 class Keyboard
 {
@@ -22,25 +22,19 @@ private:
 		unsigned int id;
 	};
 
-	BYTE key[KEYS_NUM];
-	bool keep_updateing;
-	bool current_key_state[KEYS_NUM];
-	bool previous_key_state[KEYS_NUM];
-	signed char time_pressed[KEYS_NUM];
-	HWND HgameWindow;
+	HHOOK hook_kb;
+	HHOOK hook_mouse;
 	std::mutex handlers_lock;
 	std::vector<handler*> handlers;
-	std::future<void> timer_thread;
 
-	unsigned int update();
-	void update_timer();
-
+	Keyboard();
 public:
-	Keyboard(HWND);
+	friend Keyboard& Singleton<Keyboard>();
+
 	~Keyboard();
-	bool getKeyState(char);
-	bool justPressed(char);
 	unsigned int observe_key(BYTE, std::function<void(BYTE, Key_action)>);
 	void unobserve_key(unsigned int);
+	void notify(BYTE, Key_action);
+	void set_focus(int);
+	static LRESULT CALLBACK kb_hook(int next_id, WPARAM wparam, LPARAM lparam);
 };
-
