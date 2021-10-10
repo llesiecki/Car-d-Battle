@@ -107,6 +107,11 @@ int Text::get_width()
 	return width;
 }
 
+int Text::get_descent()
+{
+	return ttf.get_descent(font);
+}
+
 void Text::set_font(const std::string& font)
 {
 	std::string path;

@@ -154,6 +154,16 @@ int TrueTypeFont::get_char_width(const std::string& font, char c)
 	return fonts[font][c].Advance;
 }
 
+int TrueTypeFont::get_descent(const std::string& font)
+{
+	if (fonts.find(font) == fonts.end())
+		return 0; //font not present
+
+	// 'g' is the first character with non zero descent
+	Character& c = fonts[font]['g'];
+	return c.Size.y - c.Bearing.y;
+}
+
 const Shader& TrueTypeFont::get_shader()
 {
 	return shader;

@@ -31,5 +31,6 @@ public:
 	GLuint get_VAO(const std::string&, char);
 	GLuint get_tex_id(const std::string&, char);
 	int get_char_width(const std::string&, char);
+	int get_descent(const std::string&);
 	const Shader& get_shader();
 };

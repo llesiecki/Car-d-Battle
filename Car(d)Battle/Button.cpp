@@ -1,9 +1,9 @@
 #include "Button.h"
 
 Button::Button()
-	:pressed(), highlight(), texture(nullptr), local(),
-	pos(), size(), m(), p(), text(), shader(), transform(),
-	kb(nullptr), cursor_pos(nullptr)
+	:pressed(), highlight(), texture(nullptr), scale(),
+	pos(), size(), text(), shader(), transform(), proj(),
+	kb(nullptr), cursor_pos(nullptr), scaled_size(), translate()
 {
 
 	GLfloat vertices_data[] = {	// pos.x, pos.y, tex.x, tex.y
@@ -73,26 +73,31 @@ Button::~Button()
 
 void Button::racalculate_transform()
 {
-	transform = p * m * local;
+	scaled_size = glm::ivec2(size.x * scale.x, size.y * scale.y);
 
-	float fill_x = (size.x * 0.8f) / text.get_width();
-	float fill_y = (size.y * 0.8f) / FONT_SIZE;
+	transform =
+		proj
+		* translate
+		* glm::scale(glm::mat4(1.0f), { scaled_size.x, scaled_size.y, 1 });
 
-	float fill_min = std::min({ fill_x, fill_y });
+	float fill_x = (scaled_size.x * 0.8f) / text.get_width();
+	float fill_y = (scaled_size.y * 0.8f) / FONT_SIZE;
+
+	float fill_min = std::min(fill_x, fill_y);
 
 	glm::mat4 text_scale = glm::scale(glm::mat4(1.0f), {
 		fill_min,
 		fill_min,
-		0 });
+		1 });
 
 	int width = text.get_width();
 
 	glm::mat4 text_center = glm::translate(glm::mat4(1.0f), {
-		(size.x - width * fill_min) / 2,
-		(size.y / 2) - (FONT_SIZE / 5),
+		(scaled_size.x - width * fill_min) / 2,
+		(scaled_size.y - FONT_SIZE * fill_min) / 2 + text.get_descent() * fill_min,
 		0 });
 
-	text.set_mvp(p * m * text_center * text_scale);
+	text.set_mvp(proj * translate * text_center * text_scale);
 }
 
 void Button::draw()
@@ -106,6 +111,7 @@ void Button::draw()
 	shader.set("transform", transform);
 	glBindVertexArray(vao);
 
+	// draw the recrangle with the right part of the texture:
 	if (highlight)
 	{
 		if (pressed)
@@ -113,7 +119,7 @@ void Button::draw()
 		else
 			shader.set("tex_shift", 0.5f);
 	}
-	else // draw the box with the right part of the texture:
+	else
 	{
 		if (pressed)
 			shader.set("tex_shift", 0.25f);
@@ -131,15 +137,15 @@ void Button::draw()
 bool Button::is_hovered(const glm::ivec2& cursor) const
 {
 	return
-		cursor.x > pos.x &&
-		cursor.x < pos.x + size.x &&
+		cursor.x >= pos.x &&
+		cursor.x < pos.x + scaled_size.x &&
 		cursor.y > pos.y &&
-		cursor.y < pos.y + size.y;
+		cursor.y <= pos.y + scaled_size.y;
 }
 
 void Button::set_projection(const glm::mat4& projection)
 {
-	this->p = projection;
+	proj = projection;
 	racalculate_transform();
 }
 
@@ -156,14 +162,19 @@ void Button::set_press(bool press)
 void Button::set_pos(const glm::ivec2& pos)
 {
 	this->pos = pos;
-	m = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
+	translate = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
 	racalculate_transform();
 }
 
 void Button::set_size(const glm::ivec2& size)
 {
 	this->size = size;
-	local = glm::scale(glm::mat4(1.0f), { size.x, size.y, 1 });
+	racalculate_transform();
+}
+
+void Button::set_scale(const glm::vec2& scale)
+{
+	this->scale = scale;
 	racalculate_transform();
 }
 

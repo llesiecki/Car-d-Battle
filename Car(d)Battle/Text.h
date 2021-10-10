@@ -32,4 +32,5 @@ public:
 	void set_font(const std::string&, const std::string&);
 	void set_mvp(const glm::mat4&);
 	int get_width();
+	int get_descent();
 };
