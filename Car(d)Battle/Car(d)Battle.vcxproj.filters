@@ -87,6 +87,9 @@
     <ClCompile Include="GL_Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Dimmer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cards.h">
@@ -153,6 +156,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GL_Context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dimmer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -355,6 +361,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="shaders\button_vert.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\dimmer_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\dimmer_vert.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>

@@ -161,6 +161,7 @@
     <ClCompile Include="Card.cpp" />
     <ClCompile Include="Cards.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="Dimmer.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Glad\src\glad.c" />
     <ClCompile Include="GL_Context.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="Card.h" />
     <ClInclude Include="Cards.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="Dimmer.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GL_Context.h" />
     <ClInclude Include="Keyboard.h" />
@@ -264,6 +266,8 @@
     <None Include="shaders\button_vert.glsl" />
     <None Include="shaders\card_frag.glsl" />
     <None Include="shaders\card_vert.glsl" />
+    <None Include="shaders\dimmer_frag.glsl" />
+    <None Include="shaders\dimmer_vert.glsl" />
     <None Include="shaders\line_frag.glsl" />
     <None Include="shaders\line_vert.glsl" />
     <None Include="shaders\scene_bg_frag.glsl" />
