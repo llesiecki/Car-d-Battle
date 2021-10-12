@@ -40,14 +40,24 @@ int main(int argc, char* argv[])
 	Singleton<GL_Context>().release();
 	
 	glfwSetFramebufferSizeCallback(window,
-		[](GLFWwindow* window, int w, int h)
-		{return ui.set_screen_size(w, h);
+		[](GLFWwindow*, int w, int h)
+		{
+			if (!w || !h) return;
+			ui.set_screen_size(w, h);
 		});
+
 	glfwSetCursorPosCallback(window,
-		[](GLFWwindow* window, double x, double y)
-		{return ui.set_cursor_pos(
-			static_cast<float>(x),
-			static_cast<float>(y));
+		[](GLFWwindow*, double x, double y)
+		{
+			ui.set_cursor_pos(
+				static_cast<float>(x),
+				static_cast<float>(y));
+		});
+
+	glfwSetWindowFocusCallback(window,
+		[](GLFWwindow*, int focused)
+		{
+			Singleton<Keyboard>().set_focus(focused);
 		});
 
 	glfwSwapInterval(1);//V-SYNC
