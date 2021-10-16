@@ -24,10 +24,30 @@ void Shader::load(const std::string & path, GLenum type)
 
 	glShaderSource(shader_ids.back(), 1, &p_source, NULL);
 	glCompileShader(shader_ids.back());
+	
+	GLint success;
+	std::string output;
 
-	std::string output = std::move(
-		get_compilation_output(program_id, 1024, glGetShaderInfoLog)
-	);
+	glGetShaderiv(shader_ids.back(), GL_COMPILE_STATUS, &success);
+	if (success == GL_FALSE)
+	{
+		GLint buffer_size;
+		glGetShaderiv(shader_ids.back(), GL_INFO_LOG_LENGTH, &buffer_size);
+
+		if (buffer_size != 0)
+		{
+			// log_len is returned without the null terminator,
+			// so it's worth to add 1
+			std::vector<GLchar> info_log(buffer_size + 1);
+
+			GLsizei bytes_written;
+			glGetShaderInfoLog(shader_ids.back(), buffer_size, &bytes_written, info_log.data());
+
+			if (bytes_written)
+				output = "ERROR::SHADER::COMPILATION_FAILED:\n" +
+				std::string(info_log.begin(), info_log.end());
+		}
+	}
 
 	if (!output.empty())
 	{
@@ -44,26 +64,34 @@ void Shader::link()
 
 	glLinkProgram(program_id);
 
-	std::string output = std::move(
-		get_compilation_output(program_id, 1024, glGetProgramInfoLog)
-	);
-	
-	if (!output.empty())
-		throw output;
+	GLint buffer_size;
+	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &buffer_size);
 
-	GLsizei count;
-	GLuint* shaders = new GLuint[shaders_max];
+	if (buffer_size != 0)
+	{
+		// log_len is returned without the null terminator,
+		// so it's worth to add 1
+		std::vector<GLchar> info_log(buffer_size + 1);
 
-	glGetAttachedShaders(program_id, shaders_max, &count, shaders);
+		GLsizei bytes_written;
+		glGetProgramInfoLog(program_id, buffer_size, &bytes_written,
+			info_log.data());
 
-	for (int i = 0; i < count && i < shaders_max; ++i)
-		glDetachShader(program_id, shaders[i]);
+		if (bytes_written != 0)
+			throw("ERROR::SHADER::LINK:\n" +
+				std::string(info_log.begin(), info_log.end()));
+	}
 
-	delete[] shaders;
+	// At this point all shaders are successfully
+	// compiled and linked into the shader program,
+	// so the shader objects can be detached and deleted
 
 	for (GLuint id : shader_ids)
+	{
+		glDetachShader(program_id, id);
 		glDeleteShader(id);
-	
+	}
+
 	shader_ids.clear();
 }
 
@@ -114,28 +142,4 @@ void Shader::disable() const
 	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
 	if(id == program_id)
 		glUseProgram(0);
-}
-
-std::string Shader::get_compilation_output(
-	GLuint id,
-	GLsizei buffer_size,
-	std::function<void(GLuint, GLsizei, GLsizei*, GLchar*)> GLgetInfoLog
-)
-{
-	GLint success;
-	std::string output;
-
-	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
-
-	if (success == GL_FALSE)
-	{
-		std::vector<GLchar> info_log(buffer_size);
-		GLsizei bytes_written;
-		GLgetInfoLog(id, buffer_size, &bytes_written, info_log.data());
-		if(bytes_written)
-			return("ERROR::SHADER::COMPILATION_FAILED:\n" +
-				std::string(info_log.begin(), info_log.end()));
-	}
-
-	return std::string();
 }

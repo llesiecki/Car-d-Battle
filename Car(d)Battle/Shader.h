@@ -7,11 +7,6 @@ class Shader
 	GLuint program_id;
 	const GLsizei shaders_max;
 
-	std::string get_compilation_output(
-		GLuint,
-		GLsizei,
-		std::function<void(GLuint, GLsizei, GLsizei*, GLchar*)>
-	);
 public:
 	Shader();
 	~Shader();
