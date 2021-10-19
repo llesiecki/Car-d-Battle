@@ -63,3 +63,54 @@ Blur::Blur()
 	shader.load("shaders\\blur_frag.glsl", GL_FRAGMENT_SHADER);
 	shader.link();
 }
+
+Blur::~Blur()
+{
+	glDeleteTextures(1, &frame_tex);
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ebo);
+}
+
+void Blur::set_size(glm::ivec2 size)
+{
+	this->size = size;
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, frame_tex);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB,
+		GL_UNSIGNED_BYTE, static_cast<void*>(0));
+}
+
+void Blur::draw()
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, frame_tex);
+
+	shader.enable();
+	shader.set("tex_id", 0);
+
+	for (int i = 0; i < 10; i++)
+	{
+		// The below line is commented out, because it generates
+		// the GL_INVALID_OPERATION error. Most likely it's caused
+		// because we try to read from a render buffer object here.
+		// The code works without it somehow.
+		// TODO: Use texture as color attachment instead.
+		
+		//glReadBuffer(GL_COLOR_ATTACHMENT0);
+		glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, size.x, size.y);
+		shader.set("direction", static_cast<GLboolean>(i % 2));
+
+		glBindVertexArray(vao);
+		glBindTexture(GL_TEXTURE_2D, frame_tex);
+		glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
+			static_cast<void*>(0));
+	}
+}
