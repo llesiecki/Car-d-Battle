@@ -156,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Blur.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Car(d)Battle.cpp" />
     <ClCompile Include="Card.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="WorkBook.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Blur.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Card.h" />
     <ClInclude Include="Cards.h" />
@@ -262,6 +264,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="carlist.xls" />
+    <None Include="shaders\blur_frag.glsl" />
+    <None Include="shaders\blur_vert.glsl" />
     <None Include="shaders\button_frag.glsl" />
     <None Include="shaders\button_vert.glsl" />
     <None Include="shaders\card_frag.glsl" />

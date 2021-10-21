@@ -90,6 +90,9 @@
     <ClCompile Include="Dimmer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Blur.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cards.h">
@@ -159,6 +162,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dimmer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Blur.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -367,6 +373,12 @@
       <Filter>Resource Files\shaders</Filter>
     </None>
     <None Include="shaders\dimmer_vert.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\blur_frag.glsl">
+      <Filter>Resource Files\shaders</Filter>
+    </None>
+    <None Include="shaders\blur_vert.glsl">
       <Filter>Resource Files\shaders</Filter>
     </None>
   </ItemGroup>
