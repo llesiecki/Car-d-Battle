@@ -68,7 +68,7 @@ bool Texture::load()
 		}
 
 		// Flip the texture vertically, because lodepng decodes it upside down
-		//
+		
 		// Old code, it took 210ms to flip a 707 x 589 image @ i7-4770K
 		// 
 		// for (size_t i = 0; i < height / 2; i++)
@@ -76,7 +76,7 @@ bool Texture::load()
 		//         std::swap(
 		//             (*png)[i * width * 4 + j],
 		//             (*png)[(height - i - 1) * width * 4 + j]);
-		//
+		
 		// New code, it takes 0.6ms to flip a 707 x 589 image @ i7-4770K
 		//
 		GLubyte* img = png->data();
@@ -87,7 +87,9 @@ bool Texture::load()
 		size_t missing_len = width * 4 % sizeof(buffer_t);
 
 		// flip the main part
-		for (size_t row = 0; row < width * 4 * height / 2; row += width * 4)
+		for (size_t row = 0;
+			row < width * 4 * height / 2;
+			row += width * 4)
 		{
 			buffer_t* upper = reinterpret_cast<buffer_t*>(&img[row]);
 			buffer_t* lower = reinterpret_cast<buffer_t*>(&img[offset - row]);
@@ -96,14 +98,16 @@ bool Texture::load()
 				buffer_t buff = *upper;
 				*upper = *lower;
 				*lower = buff;
-				lower++;
-				upper++;
+				++lower;
+				++upper;
 			}
 		}
 
 		// flip the missing part if exists
-		if(missing_len)
-			for (size_t row = 0; row < width * 4 * height / 2; row += width * 4)
+		if (missing_len)
+			for (size_t row = 0;
+				row < width * 4 * height / 2;
+				row += width * 4)
 			{
 				GLubyte* upper = &img[row + width * 4 - missing_len];
 				GLubyte* lower = &img[offset - row + width * 4 - missing_len];
@@ -112,8 +116,8 @@ bool Texture::load()
 					GLubyte buff = *upper;
 					*upper = *lower;
 					*lower = buff;
-					lower++;
-					upper++;
+					++lower;
+					++upper;
 				}
 			}
 
