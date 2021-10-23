@@ -40,7 +40,6 @@ void Text::draw()
 	const Shader& shader = ttf.get_shader();
 	shader.enable();
 	shader.set("textColor", color);
-	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glm::mat4 shift(1.0f);
 
@@ -54,7 +53,6 @@ void Text::draw()
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
-	glDisable(GL_TEXTURE_2D);
 }
 
 void Text::draw(const glm::mat4 & mvp)

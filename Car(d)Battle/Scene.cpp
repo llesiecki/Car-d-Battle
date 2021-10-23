@@ -29,7 +29,6 @@ Scene::~Scene()
 
 void Scene::draw(const glm::mat4& proj, const glm::mat4& view)
 {
-	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, background->get_id());
 	shader_bg.enable();
@@ -37,7 +36,6 @@ void Scene::draw(const glm::mat4& proj, const glm::mat4& view)
 	shader_bg.set("transform", proj * view);
 	glBindVertexArray(vao_background);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<void*>(0));
-	glDisable(GL_TEXTURE_2D);
 }
 
 void Scene::load()

@@ -83,7 +83,6 @@ void Card::draw(const glm::mat4& mvp)
 		0.0035f
 	));
 
-	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	common_values.shader->enable();
 	common_values.shader->set("TexID", 0);
@@ -101,8 +100,6 @@ void Card::draw(const glm::mat4& mvp)
 	glBindTexture(GL_TEXTURE_2D, common_values.fields_tex->get_id());
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
 		reinterpret_cast<void*>(2 * 2 * 3 * sizeof(GLubyte)));
-
-	glDisable(GL_TEXTURE_2D);
 
 	float text_scale = 0.001f;
 	float margin_horizontal = CARD_WIDTH / 40.0f;

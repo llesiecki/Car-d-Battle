@@ -5,7 +5,6 @@ Button::Button()
 	pos(), size(), text(), shader(), transform(), proj(),
 	kb(nullptr), cursor_pos(nullptr), scaled_size(), translate()
 {
-
 	GLfloat vertices_data[] = {	// pos.x, pos.y, tex.x, tex.y
 		// button rectangle with the bottom part of the texture,
 		// tex coords can be shifted with a uniform
@@ -103,7 +102,6 @@ void Button::racalculate_transform()
 void Button::draw()
 {
 	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_TEXTURE_2D);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture->get_id());
 	shader.enable();
@@ -129,7 +127,6 @@ void Button::draw()
 
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE, static_cast<void*>(0));
 
-	glDisable(GL_TEXTURE_2D);
 	text.draw();
 	glEnable(GL_DEPTH_TEST);
 }

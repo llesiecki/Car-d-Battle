@@ -128,8 +128,6 @@ bool Texture::load()
 
 void Texture::bind(int minFilter, int magFilter)
 {
-	glEnable(GL_TEXTURE_2D);
-
 	if (id)
 		glDeleteTextures(1, &id);
 
