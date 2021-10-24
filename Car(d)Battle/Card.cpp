@@ -70,8 +70,16 @@ void Card::draw(const glm::mat4& mvp)
 		)
 	));
 
+	// The card front is drawed only, if the card
+	// is not inverted or is rotated
+
+	bool draw_front = !invert;
+
 	if ((angle > 0.1 || angle < -0.1) && rot.length() > 0.1)
+	{
 		trans = glm::rotate(trans, glm::radians(angle), rot);
+		draw_front = true;
+	}
 
 	if (invert)
 		trans = glm::rotate(trans, glm::pi<GLfloat>(),
@@ -92,6 +100,9 @@ void Card::draw(const glm::mat4& mvp)
 	glBindTexture(GL_TEXTURE_2D, common_values.back_tex->get_id());
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
 		static_cast<void*>(0));
+
+	if (!draw_front)
+		return;
 
 	glBindTexture(GL_TEXTURE_2D, car_tex->get_id());
 	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
