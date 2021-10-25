@@ -6,8 +6,12 @@
 #include "Keyboard.h"
 #include "Game.h"
 #include "UI_Interface.h"
+#include "Text.h"
+#include "Button.h"
 #include "Singleton.h"
 #include "GL_Context.h"
+#include "Dimmer.h"
+#include "Blur.h"
 
 class UI
 	:public UI_Interface
@@ -21,11 +25,16 @@ class UI
 	Game* game;
 
 	bool pause;
-	Keyboard kb;
+	Keyboard& kb;
 	std::vector<unsigned int> handlers;
 	bool kill_threads;
 	POINT screen_size;
 	std::pair<float, float> cursor_pos;
+	glm::mat4 ortho;
+	Text text;
+	Button button_start, button_stop;
+	Dimmer dimmer;
+	Blur blur;
 
 	void key_handler(BYTE, Keyboard::Key_action);
 	std::map<std::string, std::string> get_server_response(
@@ -51,4 +60,5 @@ public:
 	void start();
 	//interface implementation:
 	void request_category();
+	void button_callback(const std::string&);
 };

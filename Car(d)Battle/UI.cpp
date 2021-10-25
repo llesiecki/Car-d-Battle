@@ -2,13 +2,12 @@
 
 UI::UI()
 	:network_client(80, 512),
-	game(game),
+	ortho(1.0f),
 	battle_id(0),
-	kb(FindWindowW(NULL, LGAME_NAME)),
+	kb(Singleton<Keyboard>()),
 	screen_size()
 {
-	game = new Game();
-	game->set_UI(this);
+	game = nullptr;
 	kill_threads = false;
 	pause = false;
 	network_client.start();
@@ -18,6 +17,32 @@ UI::UI()
 			VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME
 	};
 
+	button_start.set_size({ 400, 40 });
+	button_start.set_text("Start Singleplayer");
+	button_start.set_texture("textures\\button.bmp");
+	button_start.set_font("arial.ttf");
+	button_start.set_id("start_sp");
+	button_start.set_keyboard(&kb);
+	button_start.set_cursor_pointer(&cursor_pos);
+	std::function<void(const std::string&)> fp =
+		std::bind(&UI::button_callback, this, std::_Ph<1>());
+	button_start.set_press_function(fp);
+
+	button_stop.set_pos({ 0, 0 });
+	button_stop.set_size({ 400, 40 });
+	button_stop.set_text("Exit");
+	button_stop.set_texture("textures\\button.bmp");
+	button_stop.set_font("arial.ttf");
+	button_stop.set_id("stop");
+	button_stop.set_keyboard(&kb);
+	button_stop.set_cursor_pointer(&cursor_pos);
+	fp = std::bind(&UI::button_callback, this, std::_Ph<1>());
+	button_stop.set_press_function(fp);
+
+	text.set_text("Singleplayer");
+	text.set_font("arial.ttf");
+
+	text.set_color(glm::vec4(0, 0, 0, 1));
 	for (const char vk_code : keys_to_observe)
 	{
 		std::function<void(BYTE, Keyboard::Key_action)> fp =
@@ -30,7 +55,8 @@ UI::UI()
 UI::~UI()
 {
 	kill_threads = true;
-	delete game;
+	if(game != nullptr)
+		delete game;
 }
 
 void UI::key_handler(BYTE key, Keyboard::Key_action action)
@@ -38,12 +64,14 @@ void UI::key_handler(BYTE key, Keyboard::Key_action action)
 	if (key == VK_ESCAPE && action == Keyboard::Key_action::on_press)
 	{
 		pause ^= true;
-		game->set_pause(pause);
+		if (game != nullptr)
+			game->set_pause(pause);
 	}
 
 	if (!pause)
 	{
-		game->key_handler(key, action);
+		if (game != nullptr)
+			game->key_handler(key, action);
 	}
 }
 
@@ -70,7 +98,7 @@ std::map<std::string, std::string> UI::get_server_response(
 			break;
 		}
 
-		if(thread_sleep(kill_threads, 500ms))
+		if (thread_sleep(kill_threads, 500ms))
 			throw std::string("Thread killed");
 	}
 
@@ -106,7 +134,7 @@ int UI::create_battle()
 	return std::stoi(response["battle_id"]);
 }
 
-int UI::join_battle(int id, const std::string & passwd = "")
+int UI::join_battle(int id, const std::string& passwd = "")
 {
 	std::map<std::string, std::string> query;
 	query["battle_id"] = std::to_string(id);
@@ -126,8 +154,8 @@ int UI::start_battle()
 }
 
 std::string UI::register_user(
-	const std::string & username,
-	const std::string & passwd
+	const std::string& username,
+	const std::string& passwd
 )
 {
 	std::map<std::string, std::string> query;
@@ -138,8 +166,8 @@ std::string UI::register_user(
 }
 
 std::string UI::login_user(
-	const std::string & username,
-	const std::string & passwd
+	const std::string& username,
+	const std::string& passwd
 )
 {
 	std::map<std::string, std::string> query;
@@ -161,13 +189,13 @@ void UI::get_current_category()
 	{
 		response = get_server_response("get_current_category", query);
 	}
-	catch(std::string s)
+	catch (std::string s)
 	{
 		if (s == "Thread killed")
 			return;
 	}
 
-	if (game)
+	if (game != nullptr)
 		game->set_category(std::stoi(response["current_category"]));
 }
 
@@ -176,42 +204,57 @@ void UI::set_screen_size(int x, int y)
 	Singleton<GL_Context>().obtain();
 
 	glViewport(0, 0, x, y);
+	//glFlush();
 
 	Singleton<GL_Context>().release();
 
 	screen_size = { x, y };
-	game->set_screen_size(x, y);
+	ortho =
+		glm::ortho(
+			0.0f, static_cast<float>(screen_size.x),
+			0.0f, static_cast<float>(screen_size.y)
+		);
+	text.set_mvp(ortho);
+	if (game != nullptr)
+		game->set_screen_size(x, y);
+	Singleton<GL_Context>().obtain();
+	blur.set_size({ x, y });
+	Singleton<GL_Context>().release();
 }
 
 void UI::set_cursor_pos(float x, float y)
 {
 	y = screen_size.y - y;
 	cursor_pos = { x, y };
-	game->set_cursor_pos(x, y);
+	if (game != nullptr)
+		game->set_cursor_pos(x, y);
 }
 
 void UI::render()
 {
+	auto begin = std::chrono::high_resolution_clock::now();
 	Singleton<GL_Context>().obtain();
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (pause)
 		render_pause_menu();
 
-	game->draw();
+	if(game != nullptr)
+		game->draw();
+	glDisable(GL_DEPTH_TEST);
+	//blur.draw();
+	glEnable(GL_DEPTH_TEST);
 
 	glFlush();
 
 	Singleton<GL_Context>().release();
+	auto end = std::chrono::high_resolution_clock::now();
+	//std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "ms" << std::endl;
 }
 
 void UI::start()
 {
-	Singleton<GL_Context>().obtain();
-	game->load();
-	game->start(4);
-	Singleton<GL_Context>().release();
+	pause = true;
 }
 
 void UI::request_category()
@@ -219,7 +262,95 @@ void UI::request_category()
 	std::thread(&UI::get_current_category, this).detach();
 }
 
+void UI::button_callback(const std::string& button_id)
+{
+	std::cout << "Button " << button_id << " clicked.\n";
+
+	if (button_id == "start_sp" && game == nullptr)
+	{
+		Singleton<GL_Context>().obtain();
+		game = new Game();
+		game->set_UI(this);
+		game->load();
+		game->start(4);
+		game->set_pause(pause);
+		game->set_screen_size(screen_size.x, screen_size.y);
+		Singleton<GL_Context>().release();
+	}
+
+	if (button_id == "stop" && game != nullptr)
+	{
+		Singleton<GL_Context>().obtain();
+		delete game;
+		game = nullptr;
+		Singleton<GL_Context>().release();
+	}
+}
+
 void UI::render_pause_menu()
 {
+	const glm::vec2 ref_size(640, 480);
+	const glm::vec2 ref_resolution(1280, 720);
+
+	// case 1 - increase the menu size on larger screens:
+	glm::vec2 scale(glm::vec2(screen_size.x, screen_size.y) / ref_resolution);
+	scale = glm::vec2(std::min(scale.x, scale.y), std::min(scale.x, scale.y));
+	glm::vec2 size = ref_size * scale;
+
+	// case 2 - don't make the menu size too small on smaller screens:
+	if (size.x < ref_size.x || size.y < ref_size.y)
+	{
+		size = ref_size;
+	}
 	
+	// case 3 - match the menu size with a really small resolution:
+	if (size.x > screen_size.x)
+	{
+		size.x = static_cast<float>(screen_size.x);
+		size.y = size.x * ref_size.y / ref_size.x;
+	}
+	
+	if (size.y > screen_size.y)
+	{
+		size.y = static_cast<float>(screen_size.y);
+		size.x = size.y * ref_size.x / ref_size.y;
+	}
+
+	// recalculate scale:
+	scale = size / ref_size;
+	glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1));
+
+	// calculate origin:
+	glm::vec2 origin(
+		(screen_size.x - size.x) / 2,
+		(screen_size.y - size.y) / 2
+	);
+	glm::mat4 translate_mat = glm::translate(glm::mat4(1.0f), glm::vec3(origin, 0));
+
+	// create projection matrix:
+	glm::mat4 menu_ortho = glm::ortho(
+		0.0f, static_cast<float>(screen_size.x),
+		0.0f, static_cast<float>(screen_size.y)
+	);
+	menu_ortho *= translate_mat * scale_mat;
+
+	button_start.set_pos(origin);
+	button_start.set_projection(ortho);
+	button_start.set_scale(scale);
+	button_start.update();
+	button_start.draw();
+
+	button_stop.set_pos(origin + 60.0f);
+	button_stop.set_projection(ortho);
+	button_stop.set_scale(scale);
+	button_stop.update();
+	button_stop.draw();
+
+	text.draw();
+
+	glDisable(GL_DEPTH_TEST);
+	dimmer.set_mvp(menu_ortho);
+	dimmer.set_size(ref_size);
+	dimmer.draw();
+	glEnable(GL_DEPTH_TEST);
 }
