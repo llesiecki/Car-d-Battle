@@ -236,14 +236,11 @@ void UI::render()
 	Singleton<GL_Context>().obtain();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (pause)
-		render_pause_menu();
-
 	if(game != nullptr)
 		game->draw();
-	glDisable(GL_DEPTH_TEST);
-	//blur.draw();
-	glEnable(GL_DEPTH_TEST);
+
+	if (pause)
+		render_pause_menu();
 
 	glFlush();
 
@@ -338,19 +335,21 @@ void UI::render_pause_menu()
 	button_start.set_projection(ortho);
 	button_start.set_scale(scale);
 	button_start.update();
-	button_start.draw();
 
 	button_stop.set_pos(origin + 60.0f);
 	button_stop.set_projection(ortho);
 	button_stop.set_scale(scale);
 	button_stop.update();
-	button_stop.draw();
 
-	text.draw();
-
-	glDisable(GL_DEPTH_TEST);
 	dimmer.set_mvp(menu_ortho);
 	dimmer.set_size(ref_size);
+
+
+	glDisable(GL_DEPTH_TEST);
+	blur.draw();
 	dimmer.draw();
+	text.draw();
+	button_start.draw();
+	button_stop.draw();
 	glEnable(GL_DEPTH_TEST);
 }

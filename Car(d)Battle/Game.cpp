@@ -840,16 +840,13 @@ void Game::key_handler(BYTE key, Keyboard::Key_action act)
 
 void Game::draw()
 {
-	if (!pause)
-	{
-		scene.draw(projection, view);
-		draw_cards_stack(central_stack, projection * view);
-		draw_players_stacks();
-		draw_players_cards();
+	scene.draw(projection, view);
+	draw_cards_stack(central_stack, projection * view);
+	draw_players_stacks();
+	draw_players_cards();
 
-		for (Text& text : texts)
-			text.draw();
-	}
+	for (Text& text : texts)
+		text.draw();
 
 	if (new_state != old_state)
 	{
