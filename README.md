@@ -1,8 +1,8 @@
 # Car(d) Battle
 A card game focused on car parameters.
-![Car(d)Battle](https://user-images.githubusercontent.com/37122127/119583742-873d1180-bdc7-11eb-8389-6f67f44bfbe9.png)
-
 ![Car(d)Battle](https://user-images.githubusercontent.com/37122127/120085423-43545000-c0d8-11eb-9db7-61e4e7824eb5.gif)
+
+![Car(d)Battle](https://user-images.githubusercontent.com/37122127/119583742-873d1180-bdc7-11eb-8389-6f67f44bfbe9.png)
 
 This game is developed with pure C++ and OpenGL, no game engines, no frameworks.
 # Description
@@ -42,3 +42,4 @@ The game also uses a native C++ code for **.PNG** pictures decompression to bitm
 * Platform: [Windows](https://www.microsoft.com/en-us/windows) 7 SP1 and newer
 * Library for M$ Excel sheets reading: [LibXL](https://www.libxl.com/)
 * .PNG decoding: [LodePNG](https://github.com/lvandeve/lodepng)
+* .TTF decoding: [FreeType](https://freetype.org/)
