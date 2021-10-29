@@ -8,6 +8,7 @@
 
 class TextInput
 {
+	bool active;
 	GLuint vao;
 	GLuint ebo;
 	GLuint vbo;
@@ -21,7 +22,7 @@ class TextInput
 	glm::mat4 proj, translate, transform;
 	std::function<void(const std::string&)> enter_function;
 	std::string content;
-	std::string ids;
+	std::string id;
 	Text text;
 	Shader shader;
 
