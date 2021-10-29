@@ -21,6 +21,7 @@ class TextInput
 	glm::mat4 proj, translate, transform;
 	std::function<void(const std::string&)> enter_function;
 	std::string content;
+	std::string ids;
 	Text text;
 	Shader shader;
 
@@ -38,8 +39,10 @@ public:
 	void set_texture(const std::string&);
 	void set_text(const std::string&);
 	void set_font(const std::string&);
+	void set_id(const std::string&);
 	void set_enter_function(std::function<void(const std::string&)>);
 	void set_keyboard(Keyboard*);
+	std::string get_text();
 	void set_cursor_pointer(std::pair<float, float>*);
 	void keyboard_callback(BYTE, Keyboard::Key_action);
 };

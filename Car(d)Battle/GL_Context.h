@@ -19,4 +19,3 @@ public:
 	void release();
 	void set(GLFWwindow*);
 };
-
