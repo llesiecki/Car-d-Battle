@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "utilities/Texture.h"
+#include "utilities/th_sleep.h"
 #include "Keyboard.h"
 #include "Text.h"
 #include "Shader.h"
@@ -9,6 +10,7 @@
 class TextInput
 {
 	bool active;
+	bool kill_threads;
 	GLuint vao;
 	GLuint ebo;
 	GLuint vbo;
@@ -23,9 +25,13 @@ class TextInput
 	std::function<void(const std::string&)> enter_function;
 	std::string content;
 	std::string id;
+	std::chrono::time_point<std::chrono::system_clock> last_input;
+	std::atomic<bool> draw_caret;
+	std::thread caret_timer;
 	Text text;
 	Shader shader;
 
+	void caret_function();
 	void racalculate_transform();
 
 public:
