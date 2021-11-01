@@ -1,20 +1,18 @@
 #pragma once
 
 #include "stdafx.h"
-#include "utilities/Texture.h"
+#include "chrono"
 #include "utilities/th_sleep.h"
+#include "utilities/Bitmap.h"
 #include "Keyboard.h"
 #include "Text.h"
-#include "Shader.h"
+#include "Dimmer.h"
 
 class TextInput
 {
 	bool active;
 	bool kill_threads;
-	GLuint vao;
-	GLuint ebo;
-	GLuint vbo;
-	Texture* texture;
+	float border_width;
 	Keyboard* kb;
 	std::pair<float, float>* cursor_pos;
 	glm::ivec2 pos;
@@ -28,8 +26,8 @@ class TextInput
 	std::chrono::time_point<std::chrono::system_clock> last_input;
 	std::atomic<bool> draw_caret;
 	std::thread caret_timer;
+	Dimmer dimm_left, dimm_right, dimm_up, dimm_down, dimm_center;
 	Text text;
-	Shader shader;
 
 	void caret_function();
 	void racalculate_transform();
@@ -43,7 +41,6 @@ public:
 	void set_pos(const glm::ivec2&);
 	void set_size(const glm::ivec2&);
 	void set_scale(const glm::vec2&);
-	void set_texture(const std::string&);
 	void set_text(const std::string&);
 	void set_font(const std::string&);
 	void set_id(const std::string&);

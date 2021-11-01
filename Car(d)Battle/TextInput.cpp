@@ -1,80 +1,19 @@
 #include "TextInput.h"
 
 TextInput::TextInput()
-	:texture(nullptr), scale(),
-	pos(), size(), text(), shader(), transform(), proj(),
+	:scale(), pos(), size(), text(), transform(), proj(),
 	kb(nullptr), cursor_pos(nullptr), scaled_size(), translate()
 {
 	active = false;
 	kill_threads = false;
 	draw_caret = false;
 	last_input = std::chrono::system_clock::now();
-
-	GLfloat vertices_data[] = {	// pos.x, pos.y, tex.x, tex.y
-		// button rectangle with the bottom part of the texture,
-		// tex coords can be shifted with a uniform
-		0.0f, 1.0f,	0.0f, 0.25f,	// upper left
-		0.0f, 0.0f,	0.0f, 0.0f,		// lower left
-		1.0f, 0.0f,	1.0f, 0.0f,		// lower right
-		1.0f, 1.0f, 1.0f, 0.25f,	// upper right
-	};
-
-	GLubyte indices[] = {
-		// drawing the button rectangle:
-		0, 1, 2,	// first triangle
-		2, 3, 0,	// second triangle
-	};
-
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-
-	glBindVertexArray(vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_data),
-		vertices_data, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),
-		indices, GL_STATIC_DRAW);
-
-	// attrib 0 - vertex coords:
-	glVertexAttribPointer(
-		0, // attrib num
-		2, // qty of buffer items
-		GL_FLOAT, // type
-		GL_FALSE, // normalize?
-		4 * sizeof(GLfloat), // stride
-		static_cast<void*>(0) // offset
-	);
-	glEnableVertexAttribArray(0);
-
-	// attrib 1 - tex coords:
-	glVertexAttribPointer(
-		1, // attrib num
-		2, // qty of buffer items
-		GL_FLOAT, // type
-		GL_FALSE, // normalize?
-		4 * sizeof(GLfloat), // stride
-		reinterpret_cast<void*>(2 * sizeof(GLfloat)) // offset
-	);
-	glEnableVertexAttribArray(1);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	shader.load("shaders\\text_input_vert.glsl", GL_VERTEX_SHADER);
-	shader.load("shaders\\text_input_frag.glsl", GL_FRAGMENT_SHADER);
-	shader.link();
-
 	caret_timer = std::thread(&TextInput::caret_function, this);
 }
 
 TextInput::~TextInput()
 {
-	if (texture)
-		delete texture;
+
 }
 
 void TextInput::caret_function()
@@ -85,6 +24,8 @@ void TextInput::caret_function()
 	{
 		if (active)
 		{
+			using namespace std::literals::chrono_literals;
+
 			if (std::chrono::system_clock::now() - last_input > 500ms)
 			{
 				thread_sleep(kill_threads, 500ms);
@@ -137,16 +78,15 @@ void TextInput::racalculate_transform()
 void TextInput::draw()
 {
 	glDisable(GL_DEPTH_TEST);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture->get_id());
-	shader.enable();
-	shader.set("tex_id", 0);
-	shader.set("transform", transform);
-	glBindVertexArray(vao);
 
-	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE, static_cast<void*>(0));
+	dimm_center.draw();
+	dimm_left.draw();
+	dimm_down.draw();
+	dimm_right.draw();
+	dimm_up.draw();
 
 	text.draw();
+
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -175,6 +115,14 @@ void TextInput::set_pos(const glm::ivec2& pos)
 void TextInput::set_size(const glm::ivec2& size)
 {
 	this->size = size;
+
+	border_width = std::min(size.x, size.y) * 0.05f;
+
+	dimm_left.set_size({ border_width, size.y });
+	dimm_right.set_size({ border_width, size.y });
+	dimm_up.set_size({ size.x - 2 * border_width, border_width });
+	dimm_down.set_size({ size.x - 2 * border_width, border_width });
+	dimm_center.set_size(size);
 	racalculate_transform();
 }
 
@@ -212,7 +160,11 @@ void TextInput::set_keyboard(Keyboard* keyboard)
 	if (kb)
 	{
 		std::function<void(BYTE, Keyboard::Key_action)> fp =
-			std::bind(&TextInput::keyboard_callback, this, std::_Ph<1>(), std::_Ph<2>());
+			std::bind(
+				&TextInput::keyboard_callback,
+				this,
+				std::_Ph<1>(), std::_Ph<2>()
+			);
 		kb->observe_key(VK_LBUTTON, fp);
 	}
 }
@@ -272,13 +224,4 @@ void TextInput::keyboard_callback(BYTE key, Keyboard::Key_action act)
 			last_input = std::chrono::system_clock::now();
 		}
 	}
-}
-
-void TextInput::set_texture(const std::string& path)
-{
-	if (texture)
-		delete texture;
-	texture = new Texture(path);
-	texture->load();
-	texture->bind();
 }
