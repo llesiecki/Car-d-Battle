@@ -88,6 +88,7 @@ std::map<std::string, std::string> UI::get_server_response(
 	// when no variables provided
 	request.pop_back();
 
+	using namespace std::literals::chrono_literals;
 	std::chrono::time_point<std::chrono::system_clock> timeout =
 		std::chrono::system_clock::now() + 10s;
 	while (!network_client.http_get(std::string(SERVER_ADDRESS), request))

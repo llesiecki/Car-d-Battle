@@ -43,6 +43,7 @@ void Game::clean()
 	}
 
 	kill_threads = true;
+	using namespace std::literals::chrono_literals;
 	std::this_thread::sleep_for(400ms);
 	for (auto& th : threads)
 	{
@@ -135,6 +136,7 @@ void Game::move_cards(const Card_translation transltion_type[])
 	const int iterations_max = 60;
 	for (int i = 0; i < iterations_max; i++)
 	{
+		using namespace std::literals::chrono_literals;
 		if (thread_sleep(kill_threads, 17ms))
 		{
 			delete[] height_diff;
@@ -191,6 +193,7 @@ void Game::flip_cards(const bool flip[])
 
 	for (int i = 0; i < iterations_max; i++)
 	{
+		using namespace std::literals::chrono_literals;
 		if (thread_sleep(kill_threads, 17ms))
 			return;
 		for (int player_num = 0; player_num < players_num; player_num++)
@@ -235,6 +238,7 @@ void Game::distribute_cards()
 
 		for (int i = 0; i < iterations_max; i++)
 		{
+			using namespace std::literals::chrono_literals;
 			if (thread_sleep(kill_threads, 17ms))
 				return;
 			switch (card_num%players_num)
@@ -338,6 +342,7 @@ void Game::choose_category()
 
 		while (choosen_category == -1)
 		{
+			using namespace std::literals::chrono_literals;
 			if (thread_sleep(kill_threads, 17ms))
 				return;
 
@@ -364,6 +369,7 @@ void Game::choose_category()
 		ui->request_category();
 		while (choosen_category == -1)
 		{
+			using namespace std::literals::chrono_literals;
 			if (thread_sleep(kill_threads, 500ms))
 				return;
 		}
@@ -396,6 +402,7 @@ void Game::compare_by_choosen_category()
 		player_card[player_num].back().highlight_row(choosen_category);
 	}
 
+	using namespace std::literals::chrono_literals;
 	if (thread_sleep(kill_threads, 3s))
 		return;
 
@@ -488,7 +495,8 @@ void Game::tiebreak()
 			{
 				const int iterations_max = 60;
 				for (int i = 0; i < iterations_max; i++)
-				{
+				{ 
+					using namespace std::literals::chrono_literals;
 					if (thread_sleep(kill_threads, 17ms))
 					{
 						delete[] translation;
@@ -577,6 +585,7 @@ void Game::tiebreak()
 				if (winner[player_num])
 					player_card[player_num].back().highlight_row(choosen_category);
 
+			using namespace std::literals::chrono_literals;
 			if (thread_sleep(kill_threads, 3s))
 				return;
 
@@ -633,6 +642,7 @@ void Game::cards_to_winner()
 		const int iterations_max = 60;
 		for (int i = 0; i < iterations_max; i++)
 		{
+			using namespace std::literals::chrono_literals;
 			if (thread_sleep(kill_threads, 17ms))
 				return;
 

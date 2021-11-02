@@ -6,6 +6,7 @@
 template <class _Rep, class _Period>
 bool thread_sleep(bool& stop, std::chrono::duration<_Rep, _Period> delay)
 {
+	using namespace std::literals::chrono_literals;
 	std::chrono::time_point<std::chrono::system_clock> finish =
 		std::chrono::system_clock::now() + delay;
 

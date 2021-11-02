@@ -106,6 +106,7 @@ bool Cards::load_textures()
 			to_load.pop_back();
 		}
 
+		using namespace std::literals::chrono_literals;
 		std::this_thread::sleep_for(10ms);
 	}
 

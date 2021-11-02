@@ -58,7 +58,7 @@ bool Bitmap::loadBMP(std::string file) {
         return false;
     }
 
-    cout << "BMP read: " << file << endl;
+    std::cout << "BMP read: " << file << std::endl;
 
     //read in the entire BITMAPFILEHEADER
     fread(&bmfh, sizeof(BitmapFileHeader), 1, in);

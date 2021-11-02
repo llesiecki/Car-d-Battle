@@ -54,7 +54,7 @@ class Game
 	bool pause;
 	std::pair<float, float> cursor_pos;
 	POINT screen_size;
-	std::vector<thread> threads;
+	std::vector<std::thread> threads;
 	std::vector<Text> texts;
 	bool kill_threads;
 	glm::mat4 projection;

@@ -13,7 +13,6 @@
 #include <iostream>
 #include <cstdio>
 #include <string>
-using namespace std;
 
 const short BITMAP_MAGIC_NUMBER = 19778;
 const int RGB_BYTE_SIZE = 3;
@@ -59,7 +58,7 @@ public:
     bool loaded;
     int width, height;
     unsigned short bpp;
-    string error;
+    std::string error;
     //methods
     Bitmap(void);
     Bitmap(std::string);
