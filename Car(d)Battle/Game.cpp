@@ -43,8 +43,6 @@ void Game::clean()
 	}
 
 	kill_threads = true;
-	using namespace std::literals::chrono_literals;
-	std::this_thread::sleep_for(400ms);
 	for (auto& th : threads)
 	{
 		if (th.joinable())

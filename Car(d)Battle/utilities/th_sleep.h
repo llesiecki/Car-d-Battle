@@ -14,8 +14,9 @@ bool thread_sleep(bool& stop, std::chrono::duration<_Rep, _Period> delay)
 		return true;
 
 	while (finish - std::chrono::system_clock::now() > 200ms)
-		thread_sleep(stop, 200ms);
+		if (thread_sleep(stop, 200ms))
+			return true;
 
-	std::this_thread::sleep_for(finish - std::chrono::system_clock::now());
+	std::this_thread::sleep_until(finish);
 	return false;
 }

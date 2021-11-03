@@ -13,11 +13,12 @@ TextInput::TextInput()
 
 TextInput::~TextInput()
 {
-
+	kill_threads = true;
+	caret_timer.join();
 }
 
 void TextInput::caret_function()
-{ 
+{
 	bool phase = false;
 
 	while (!kill_threads)
