@@ -2,7 +2,7 @@
 
 TextInput::TextInput()
 	:scale(), pos(), size(), text(), transform(), proj(),
-	kb(nullptr), cursor_pos(nullptr), scaled_size(), translate()
+	cursor_pos(nullptr), scaled_size(), translate()
 {
 	active = false;
 	kill_threads = false;
@@ -23,13 +23,12 @@ void TextInput::caret_function()
 
 	while (!kill_threads)
 	{
+		using namespace std::literals::chrono_literals;
+
 		if (active)
 		{
-			using namespace std::literals::chrono_literals;
-
 			if (std::chrono::system_clock::now() - last_input > 500ms)
 			{
-				thread_sleep(kill_threads, 500ms);
 				if (std::chrono::system_clock::now() - last_input > 500ms)
 				{
 					phase ^= true;
@@ -48,6 +47,11 @@ void TextInput::caret_function()
 		else
 		{
 			draw_caret = false;
+		}
+
+		if (thread_sleep(kill_threads, 500ms))
+		{
+			break;
 		}
 	}
 }
@@ -155,21 +159,6 @@ void TextInput::set_enter_function(std::function<void(const std::string&)> funct
 	enter_function = function;
 }
 
-void TextInput::set_keyboard(Keyboard* keyboard)
-{
-	kb = keyboard;
-	if (kb)
-	{
-		std::function<void(BYTE, Keyboard::Key_action)> fp =
-			std::bind(
-				&TextInput::keyboard_callback,
-				this,
-				std::_Ph<1>(), std::_Ph<2>()
-			);
-		kb->observe_key(VK_LBUTTON, fp);
-	}
-}
-
 std::string TextInput::get_text()
 {
 	return content;
@@ -180,7 +169,7 @@ void TextInput::set_cursor_pointer(std::pair<float, float>* cursor_pos)
 	this->cursor_pos = cursor_pos;
 }
 
-void TextInput::keyboard_callback(BYTE key, Keyboard::Key_action act)
+void TextInput::key_handler(BYTE key, Keyboard::Key_action act)
 {
 	if (key == VK_LBUTTON)
 	{
@@ -194,20 +183,36 @@ void TextInput::keyboard_callback(BYTE key, Keyboard::Key_action act)
 				}
 			active = false;
 		}
+		return;
 	}
 
 	if (active)
 	{
-		if (key == VK_RETURN)
+		if (key == VK_RETURN && act == Keyboard::Key_action::on_press)
 		{
 			if (act == Keyboard::Key_action::on_release)
 				enter_function(id);
 		}
 
+		if (key == VK_SPACE && act == Keyboard::Key_action::on_press)
+		{
+			content += ' ';
+			text.set_text(content);
+		}
+
+		if (key == VK_OEM_1 && act == Keyboard::Key_action::on_press)
+		{
+			content += ':';
+			text.set_text(content);
+		}
+
 		if (key == VK_BACK && act == Keyboard::Key_action::on_press)
 		{
 			if (!content.empty())
+			{
 				content.pop_back();
+				text.set_text(content);
+			}
 			last_input = std::chrono::system_clock::now();
 		}
 
@@ -215,14 +220,13 @@ void TextInput::keyboard_callback(BYTE key, Keyboard::Key_action act)
 		{
 			content += key;
 			text.set_text(content);
-
-			if (text.get_width() > size.x)
-			{
-				content.pop_back();
-				text.set_text(content);
-			}
-
 			last_input = std::chrono::system_clock::now();
+		}
+
+		if (text.get_width() > size.x)
+		{
+			content.pop_back();
+			text.set_text(content);
 		}
 	}
 }

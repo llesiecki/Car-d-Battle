@@ -13,7 +13,6 @@ class TextInput
 	bool active;
 	bool kill_threads;
 	float border_width;
-	Keyboard* kb;
 	std::pair<float, float>* cursor_pos;
 	glm::ivec2 pos;
 	glm::ivec2 size;
@@ -45,8 +44,7 @@ public:
 	void set_font(const std::string&);
 	void set_id(const std::string&);
 	void set_enter_function(std::function<void(const std::string&)>);
-	void set_keyboard(Keyboard*);
 	std::string get_text();
 	void set_cursor_pointer(std::pair<float, float>*);
-	void keyboard_callback(BYTE, Keyboard::Key_action);
+	void key_handler(BYTE, Keyboard::Key_action);
 };
