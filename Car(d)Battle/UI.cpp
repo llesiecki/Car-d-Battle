@@ -11,11 +11,16 @@ UI::UI()
 	kill_threads = false;
 	pause = false;
 	network_client.start();
-	std::string keys_to_observe = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
-	keys_to_observe += {
+	std::string keys;
+	keys = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
+	keys += {
 		VK_LBUTTON, VK_BACK, VK_RETURN, VK_SHIFT, VK_ESCAPE, VK_END,
-			VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME
+		VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME, VK_SPACE
 	};
+
+	std::vector<BYTE> keys_to_observe(keys.begin(), keys.end());
+
+	keys_to_observe.push_back(VK_OEM_1);
 
 	button_start.set_size({ 400, 40 });
 	button_start.set_text("Start Singleplayer");
@@ -43,7 +48,7 @@ UI::UI()
 	text.set_font("arial.ttf");
 
 	text.set_color(glm::vec4(0, 0, 0, 1));
-	for (const char vk_code : keys_to_observe)
+	for (const BYTE vk_code : keys_to_observe)
 	{
 		std::function<void(BYTE, Keyboard::Key_action)> fp =
 			std::bind(&UI::key_handler, this, std::_Ph<1>(), std::_Ph<2>());
@@ -112,6 +117,7 @@ std::map<std::string, std::string> UI::get_server_response(
 	);
 	std::sregex_iterator end;
 
+	// TODO: Try to use a for each lopp here
 	while (it != end)
 	{
 		if (it->size() != 3)
