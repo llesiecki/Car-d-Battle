@@ -63,7 +63,24 @@ void TextInput::racalculate_transform()
 	transform =
 		proj
 		* translate
-		* glm::scale(glm::mat4(1.0f), { scaled_size.x, scaled_size.y, 1 });
+		* glm::scale(glm::mat4(1.0f), { scale.x, scale.y, 1 });
+
+	glm::mat4 dimm_mvp = transform;
+
+	dimm_center.set_mvp(dimm_mvp);
+	dimm_left.set_mvp(dimm_mvp);
+
+	dimm_mvp = glm::translate(transform, { border_width, 0, 0 });
+
+	dimm_down.set_mvp(dimm_mvp);
+
+	dimm_mvp = glm::translate(transform, { size.x - border_width, 0, 0 });
+
+	dimm_right.set_mvp(dimm_mvp);
+
+	dimm_mvp = glm::translate(transform, { border_width, size.y - border_width, 0 });
+
+	dimm_up.set_mvp(dimm_mvp);
 
 	float fill_y = (scaled_size.y * 0.8f) / FONT_SIZE;
 
@@ -72,12 +89,12 @@ void TextInput::racalculate_transform()
 		fill_y,
 		1 });
 
-	glm::mat4 text_center = glm::translate(glm::mat4(1.0f), {
-		0,
+	glm::mat4 text_pos = glm::translate(glm::mat4(1.0f), {
+		FONT_SIZE * 0.2f,
 		(scaled_size.y - FONT_SIZE * fill_y) / 2 + text.get_descent() * fill_y,
 		0 });
 
-	text.set_mvp(proj * translate * text_center * text_scale);
+	text.set_mvp(proj * translate * text_pos * text_scale);
 }
 
 void TextInput::draw()
@@ -223,7 +240,7 @@ void TextInput::key_handler(BYTE key, Keyboard::Key_action act)
 			last_input = std::chrono::system_clock::now();
 		}
 
-		if (text.get_width() > size.x)
+		if (text.get_width() > size.x - 2 * (border_width + FONT_SIZE * 0.2f))
 		{
 			content.pop_back();
 			text.set_text(content);
