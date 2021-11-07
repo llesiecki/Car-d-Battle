@@ -12,6 +12,7 @@
 #include "GL_Context.h"
 #include "Dimmer.h"
 #include "Blur.h"
+#include "TextInput.h"
 
 class UI
 	:public UI_Interface
@@ -35,6 +36,7 @@ class UI
 	Button button_start, button_stop;
 	Dimmer dimmer;
 	Blur blur;
+	TextInput input;
 
 	void key_handler(BYTE, Keyboard::Key_action);
 	std::map<std::string, std::string> get_server_response(

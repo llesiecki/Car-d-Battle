@@ -15,7 +15,7 @@ UI::UI()
 	keys = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
 	keys += {
 		VK_LBUTTON, VK_BACK, VK_RETURN, VK_SHIFT, VK_ESCAPE, VK_END,
-		VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME, VK_SPACE
+			VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME, VK_SPACE
 	};
 
 	std::vector<BYTE> keys_to_observe(keys.begin(), keys.end());
@@ -44,6 +44,12 @@ UI::UI()
 	fp = std::bind(&UI::button_callback, this, std::_Ph<1>());
 	button_stop.set_press_function(fp);
 
+	input.set_font("arial.ttf");
+	input.set_cursor_pointer(&cursor_pos);
+	input.set_id("input");
+	input.set_text("Initial text");
+	input.set_size({ 300, 60 });
+
 	text.set_text("Singleplayer");
 	text.set_font("arial.ttf");
 
@@ -60,7 +66,7 @@ UI::UI()
 UI::~UI()
 {
 	kill_threads = true;
-	if(game != nullptr)
+	if (game != nullptr)
 		delete game;
 }
 
@@ -78,6 +84,8 @@ void UI::key_handler(BYTE key, Keyboard::Key_action action)
 		if (game != nullptr)
 			game->key_handler(key, action);
 	}
+
+	input.key_handler(key, action);
 }
 
 std::map<std::string, std::string> UI::get_server_response(
@@ -243,7 +251,7 @@ void UI::render()
 	Singleton<GL_Context>().obtain();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if(game != nullptr)
+	if (game != nullptr)
 		game->draw();
 
 	if (pause)
@@ -306,14 +314,14 @@ void UI::render_pause_menu()
 	{
 		size = ref_size;
 	}
-	
+
 	// case 3 - match the menu size with a really small resolution:
 	if (size.x > screen_size.x)
 	{
 		size.x = static_cast<float>(screen_size.x);
 		size.y = size.x * ref_size.y / ref_size.x;
 	}
-	
+
 	if (size.y > screen_size.y)
 	{
 		size.y = static_cast<float>(screen_size.y);
@@ -343,13 +351,17 @@ void UI::render_pause_menu()
 	button_start.set_scale(scale);
 	button_start.update();
 
-	button_stop.set_pos(origin + 60.0f);
+	button_stop.set_pos(origin + 60.0f * scale);
 	button_stop.set_projection(ortho);
 	button_stop.set_scale(scale);
 	button_stop.update();
 
 	dimmer.set_mvp(menu_ortho);
 	dimmer.set_size(ref_size);
+
+	input.set_pos(origin + 120.0f * scale);
+	input.set_projection(ortho);
+	input.set_scale(scale);
 
 
 	glDisable(GL_DEPTH_TEST);
@@ -358,5 +370,6 @@ void UI::render_pause_menu()
 	text.draw();
 	button_start.draw();
 	button_stop.draw();
+	input.draw();
 	glEnable(GL_DEPTH_TEST);
 }
