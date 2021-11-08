@@ -188,62 +188,52 @@ void TextInput::set_cursor_pointer(std::pair<float, float>* cursor_pos)
 
 void TextInput::key_handler(BYTE key, Keyboard::Key_action act)
 {
+	if(active)
+		last_input = std::chrono::system_clock::now();
+
+	if (key == VK_RETURN && active)
+	{
+		if (act == Keyboard::Key_action::on_release)
+			enter_function(id);
+	}
+
+	if (act != Keyboard::Key_action::on_press)
+		return;
+
+	const bool shift_pressed =
+		Singleton<Keyboard>().get_key_state(VK_SHIFT) ||
+		Singleton<Keyboard>().get_key_state(VK_LSHIFT) ||
+		Singleton<Keyboard>().get_key_state(VK_RSHIFT);
+
 	if (key == VK_LBUTTON)
 	{
-		if (act == Keyboard::Key_action::on_press)
-		{
-			if (cursor_pos)
-				if (is_hovered({ cursor_pos->first, cursor_pos->second }))
-				{
-					active = true;
-					return;
-				}
-			active = false;
-		}
+		if (cursor_pos)
+			if (is_hovered({ cursor_pos->first, cursor_pos->second }))
+			{
+				active = true;
+				return;
+			}
+		active = false;
 		return;
 	}
 
-	if (active)
+	if (!active)
+		return;
+	
+	if (key == VK_BACK && !content.empty())
+		content.pop_back();
+
+	char printable_char =
+		Singleton<Keyboard>().key_to_char(key, shift_pressed);
+
+	if (printable_char != '\0')
+		content += printable_char;
+		
+	text.set_text(content);
+
+	while (text.get_width() > size.x - 2 * (border_width + FONT_SIZE * 0.2f))
 	{
-		if (key == VK_RETURN && act == Keyboard::Key_action::on_press)
-		{
-			if (act == Keyboard::Key_action::on_release)
-				enter_function(id);
-		}
-
-		if (key == VK_SPACE && act == Keyboard::Key_action::on_press)
-		{
-			content += ' ';
-			text.set_text(content);
-		}
-
-		if (key == VK_OEM_1 && act == Keyboard::Key_action::on_press)
-		{
-			content += ':';
-			text.set_text(content);
-		}
-
-		if (key == VK_BACK && act == Keyboard::Key_action::on_press)
-		{
-			if (!content.empty())
-			{
-				content.pop_back();
-				text.set_text(content);
-			}
-			last_input = std::chrono::system_clock::now();
-		}
-
-		if (isalnum(key) && act == Keyboard::Key_action::on_press)
-		{
-			content += key;
-			text.set_text(content);
-			last_input = std::chrono::system_clock::now();
-		}
-
-		if (text.get_width() > size.x - 2 * (border_width + FONT_SIZE * 0.2f))
-		{
-			content.pop_back();
-			text.set_text(content);
-		}
+		content.pop_back();
+		text.set_text(content);
 	}
 }
