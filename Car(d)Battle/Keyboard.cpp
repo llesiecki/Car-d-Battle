@@ -6,13 +6,13 @@ Keyboard::Keyboard()
 	// install kb_hook member function into the Windows hook chain
 	hook_kb = SetWindowsHookExW(
 		WH_KEYBOARD_LL,
-		(HOOKPROC)Keyboard::kb_hook,
+		static_cast<HOOKPROC>(Keyboard::kb_hook),
 		GetModuleHandleW(LGAME_NAME),
 		0
 	);
 	hook_mouse = SetWindowsHookExW(
 		WH_MOUSE_LL,
-		(HOOKPROC)Keyboard::kb_hook,
+		static_cast<HOOKPROC>(Keyboard::kb_hook),
 		GetModuleHandleW(LGAME_NAME),
 		0
 	);
@@ -32,7 +32,8 @@ Keyboard::~Keyboard()
 
 LRESULT CALLBACK Keyboard::kb_hook(int next_id, WPARAM wparam, LPARAM lparam)
 {
-	const BYTE vk_code = static_cast<BYTE>(((KBDLLHOOKSTRUCT*)lparam)->vkCode);
+	const BYTE vk_code =
+		static_cast<BYTE>(reinterpret_cast<KBDLLHOOKSTRUCT*>(lparam)->vkCode);
 
 	switch (wparam)
 	{
@@ -151,6 +152,7 @@ void Keyboard::set_focus(int focus)
 		handlers_lock.unlock();
 	}
 }
+
 bool Keyboard::get_key_state(BYTE key)
 {
 	return key_states[key];
