@@ -1,6 +1,7 @@
 #include "Keyboard.h"
 
 Keyboard::Keyboard()
+	:key_states(), char_lut(), char_lut_shift()
 {
 	// install kb_hook member function into the Windows hook chain
 	hook_kb = SetWindowsHookExW(
@@ -15,6 +16,8 @@ Keyboard::Keyboard()
 		GetModuleHandleW(LGAME_NAME),
 		0
 	);
+
+	fill_char_lut();
 }
 
 Keyboard::~Keyboard()
@@ -29,31 +32,112 @@ Keyboard::~Keyboard()
 
 LRESULT CALLBACK Keyboard::kb_hook(int next_id, WPARAM wparam, LPARAM lparam)
 {
+	const BYTE vk_code = static_cast<BYTE>(((KBDLLHOOKSTRUCT*)lparam)->vkCode);
+
 	switch (wparam)
 	{
 	case WM_KEYDOWN:
-		Singleton<Keyboard>().notify(
-		static_cast<BYTE>(((KBDLLHOOKSTRUCT*)lparam)->vkCode),
-		Key_action::on_press);
+		Singleton<Keyboard>().notify(vk_code, Key_action::on_press);
+		Singleton<Keyboard>().key_states[vk_code] = true;
 		break;
 	case WM_KEYUP:
-		Singleton<Keyboard>().notify(
-			static_cast<BYTE>(((KBDLLHOOKSTRUCT*)lparam)->vkCode),
-			Key_action::on_release);
+		Singleton<Keyboard>().notify(vk_code, Key_action::on_release);
+		Singleton<Keyboard>().key_states[vk_code] = false;
 		break;
 	case WM_LBUTTONDOWN:
 		Singleton<Keyboard>().notify(
 			static_cast<BYTE>(VK_LBUTTON),
 			Key_action::on_press);
+		Singleton<Keyboard>().key_states[VK_LBUTTON] = true;
 		break;
 	case WM_LBUTTONUP:
 		Singleton<Keyboard>().notify(
 			static_cast<BYTE>(VK_LBUTTON),
 			Key_action::on_release);
+		Singleton<Keyboard>().key_states[VK_LBUTTON] = false;
 		break;
 	}
 
 	return CallNextHookEx(NULL, next_id, wparam, lparam);
+}
+
+void Keyboard::fill_char_lut()
+{
+	std::string alpha = "QWERTYUIOPASDFGHJKLZXCVBNM";
+
+	for (const char c : alpha)
+	{
+		char_lut[c] = c + ('a' - 'A');
+		char_lut_shift[c] = c;
+	}
+
+	std::string digits = "0123456789";
+
+	for (const char c : digits)
+		char_lut[c] = c;
+
+	char_lut_shift['0'] = ')';
+	char_lut_shift['1'] = '!';
+	char_lut_shift['2'] = '@';
+	char_lut_shift['3'] = '#';
+	char_lut_shift['4'] = '$';
+	char_lut_shift['5'] = '%';
+	char_lut_shift['6'] = '^';
+	char_lut_shift['7'] = '&';
+	char_lut_shift['8'] = '*';
+	char_lut_shift['9'] = '(';
+
+	char_lut[VK_SPACE] = ' ';
+	char_lut_shift[VK_SPACE] = ' ';
+
+	char_lut[VK_OEM_1] = ';';
+	char_lut_shift[VK_OEM_1] = ':';
+
+	char_lut[VK_OEM_2] = '/';
+	char_lut_shift[VK_OEM_2] = '?';
+
+	char_lut[VK_OEM_3] = '`';
+	char_lut_shift[VK_OEM_3] = '~';
+
+	char_lut[VK_OEM_4] = '[';
+	char_lut_shift[VK_OEM_4] = '{';
+
+	char_lut[VK_OEM_5] = '\\';
+	char_lut_shift[VK_OEM_5] = '|';
+
+	char_lut[VK_OEM_6] = ']';
+	char_lut_shift[VK_OEM_6] = '}';
+
+	char_lut[VK_OEM_7] = '\'';
+	char_lut_shift[VK_OEM_7] = '\"';
+
+	char_lut[VK_NUMPAD0] = '0';
+	char_lut[VK_NUMPAD1] = '1';
+	char_lut[VK_NUMPAD2] = '2';
+	char_lut[VK_NUMPAD3] = '3';
+	char_lut[VK_NUMPAD4] = '4';
+	char_lut[VK_NUMPAD5] = '5';
+	char_lut[VK_NUMPAD6] = '6';
+	char_lut[VK_NUMPAD7] = '7';
+	char_lut[VK_NUMPAD8] = '8';
+	char_lut[VK_NUMPAD9] = '9';
+	char_lut[VK_MULTIPLY] = '*';
+	char_lut[VK_ADD] = '+';
+	char_lut[VK_SUBTRACT] = '-';
+	char_lut[VK_DIVIDE] = '/';
+	char_lut[VK_SEPARATOR] = ',';
+
+	char_lut[VK_OEM_PLUS] = '=';
+	char_lut_shift[VK_OEM_PLUS] = '+';
+
+	char_lut[VK_OEM_PERIOD] = '.';
+	char_lut_shift[VK_OEM_PERIOD] = '>';
+
+	char_lut[VK_OEM_MINUS] = '-';
+	char_lut_shift[VK_OEM_MINUS] = '_';
+
+	char_lut[VK_OEM_COMMA] = ',';
+	char_lut_shift[VK_OEM_COMMA] = '<';
 }
 
 void Keyboard::set_focus(int focus)
@@ -66,6 +150,17 @@ void Keyboard::set_focus(int focus)
 			h->function(h->key, Key_action::on_release);
 		handlers_lock.unlock();
 	}
+}
+bool Keyboard::get_key_state(BYTE key)
+{
+	return key_states[key];
+}
+
+char Keyboard::key_to_char(BYTE key, bool shift)
+{
+	if(shift)
+		return char_lut_shift[key];
+	return char_lut[key];
 }
 
 unsigned int Keyboard::observe_key(BYTE key, std::function<void(BYTE, Key_action)> func)
