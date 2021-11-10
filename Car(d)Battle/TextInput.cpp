@@ -82,19 +82,19 @@ void TextInput::racalculate_transform()
 
 	dimm_up.set_mvp(dimm_mvp);
 
-	float fill_y = (scaled_size.y * 0.8f) / FONT_SIZE;
+	text_scale = (scaled_size.y * 0.8f) / FONT_SIZE;
 
-	glm::mat4 text_scale = glm::scale(glm::mat4(1.0f), {
-		fill_y,
-		fill_y,
+	glm::mat4 text_scale_mat = glm::scale(glm::mat4(1.0f), {
+		text_scale,
+		text_scale,
 		1 });
 
 	glm::mat4 text_pos = glm::translate(glm::mat4(1.0f), {
-		FONT_SIZE * 0.2f,
-		(scaled_size.y - FONT_SIZE * fill_y) / 2 + text.get_descent() * fill_y,
+		text_scale * FONT_SIZE * 0.2f,
+		(scaled_size.y - FONT_SIZE * text_scale) / 2 + text.get_descent() * text_scale,
 		0 });
 
-	text.set_mvp(proj * translate * text_pos * text_scale);
+	text.set_mvp(proj * translate * text_pos * text_scale_mat);
 }
 
 void TextInput::draw()
@@ -231,7 +231,8 @@ void TextInput::key_handler(BYTE key, Keyboard::Key_action act)
 		
 	text.set_text(content);
 
-	while (text.get_width() > size.x - 2 * (border_width + FONT_SIZE * 0.2f))
+	while (text.get_width() * text_scale >
+		scaled_size.x - 2 * (border_width + FONT_SIZE * text_scale * 0.2f))
 	{
 		content.pop_back();
 		text.set_text(content);

@@ -12,7 +12,7 @@ class TextInput
 {
 	bool active;
 	bool kill_threads;
-	float border_width;
+	float border_width, text_scale;
 	std::pair<float, float>* cursor_pos;
 	glm::ivec2 pos;
 	glm::ivec2 size;
