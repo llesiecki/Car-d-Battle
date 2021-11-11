@@ -168,6 +168,7 @@
     <ClCompile Include="GL_Context.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Line.cpp" />
+    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="GL_Context.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Line.h" />
+    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Singleton.h" />
