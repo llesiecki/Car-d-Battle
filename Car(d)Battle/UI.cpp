@@ -13,14 +13,18 @@ UI::UI()
 	network_client.start();
 	std::string keys;
 	keys = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
-	keys += {
+	std::vector<BYTE> keys_to_observe = {
 		VK_LBUTTON, VK_BACK, VK_RETURN, VK_SHIFT, VK_ESCAPE, VK_END,
-			VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME, VK_SPACE
+		VK_DELETE, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_HOME, VK_SPACE,
+		VK_RSHIFT, VK_LSHIFT, VK_OEM_1, VK_OEM_2, VK_OEM_3, VK_OEM_4,
+		VK_OEM_5, VK_OEM_6, VK_OEM_7, VK_NUMPAD0, VK_NUMPAD1, VK_NUMPAD2,
+		VK_NUMPAD3, VK_NUMPAD4, VK_NUMPAD5, VK_NUMPAD6, VK_NUMPAD7,
+		VK_NUMPAD8, VK_NUMPAD9, VK_MULTIPLY, VK_ADD, VK_OEM_PLUS,
+		VK_SEPARATOR, VK_OEM_PERIOD, VK_SUBTRACT, VK_OEM_MINUS, VK_DIVIDE,
+		VK_OEM_COMMA,
 	};
 
-	std::vector<BYTE> keys_to_observe(keys.begin(), keys.end());
-
-	keys_to_observe.push_back(VK_OEM_1);
+	keys_to_observe.insert(keys_to_observe.end(), keys.begin(), keys.end());
 
 	button_start.set_size({ 400, 40 });
 	button_start.set_text("Start Singleplayer");
