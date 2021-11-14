@@ -1,9 +1,10 @@
 #include "Button.h"
 
 Button::Button()
-	:pressed(), highlight(), texture(nullptr), scale(),
-	pos(), size(), text(), shader(), transform(), proj(),
-	kb(nullptr), cursor_pos(nullptr), scaled_size(), translate()
+	:pressed(), highlight(), texture(nullptr),
+	pos(), size(), text(), shader(), transform(),
+	kb(nullptr), cursor_pos(nullptr), proj(),
+	on_screen_pos(), on_screen_size(), screen_size()
 {
 	GLfloat vertices_data[] = {	// pos.x, pos.y, tex.x, tex.y
 		// button rectangle with the bottom part of the texture,
@@ -70,17 +71,16 @@ Button::~Button()
 		delete texture;
 }
 
-void Button::racalculate_transform()
+void Button::recalculate_transform()
 {
-	scaled_size = glm::ivec2(size.x * scale.x, size.y * scale.y);
-
+	glm::mat4 translate = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
 	transform =
 		proj
 		* translate
-		* glm::scale(glm::mat4(1.0f), { scaled_size.x, scaled_size.y, 1 });
+		* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1 });
 
-	float fill_x = (scaled_size.x * 0.8f) / text.get_width();
-	float fill_y = (scaled_size.y * 0.8f) / FONT_SIZE;
+	float fill_x = (size.x * 0.8f) / text.get_width();
+	float fill_y = (size.y * 0.8f) / FONT_SIZE;
 
 	float fill_min = std::min(fill_x, fill_y);
 
@@ -89,14 +89,26 @@ void Button::racalculate_transform()
 		fill_min,
 		1 });
 
-	int width = text.get_width();
-
 	glm::mat4 text_center = glm::translate(glm::mat4(1.0f), {
-		(scaled_size.x - width * fill_min) / 2,
-		(scaled_size.y - FONT_SIZE * fill_min) / 2 + text.get_descent() * fill_min,
+		(size.x - text.get_width() * fill_min) / 2,
+		(size.y - FONT_SIZE * fill_min) / 2 + text.get_descent() * fill_min,
 		0 });
 
 	text.set_mvp(proj * translate * text_center * text_scale);
+
+	glm::vec4 gl_pos = transform * glm::vec4(0.0, 0.0, 0.0, 1.0);
+	on_screen_pos = {
+		(gl_pos.x + 1.0f) / 2.0f * screen_size.x,
+		(gl_pos.y + 1.0f) / 2.0f * screen_size.y
+	};
+
+	gl_pos = transform * glm::vec4(1.0, 1.0, 0.0, 1.0);
+	glm::vec2 upper_right(
+		(gl_pos.x + 1.0f) / 2.0f * screen_size.x,
+		(gl_pos.y + 1.0f) / 2.0f * screen_size.y
+	);
+
+	on_screen_size = upper_right - on_screen_pos;
 }
 
 void Button::draw()
@@ -125,7 +137,8 @@ void Button::draw()
 			shader.set("tex_shift", 0.75f);
 	}
 
-	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE, static_cast<void*>(0));
+	glDrawElements(GL_TRIANGLES, 2 * 3, GL_UNSIGNED_BYTE,
+		static_cast<void*>(0));
 
 	text.draw();
 	glEnable(GL_DEPTH_TEST);
@@ -134,16 +147,16 @@ void Button::draw()
 bool Button::is_hovered(const glm::ivec2& cursor) const
 {
 	return
-		cursor.x >= pos.x &&
-		cursor.x < pos.x + scaled_size.x &&
-		cursor.y > pos.y &&
-		cursor.y <= pos.y + scaled_size.y;
+		cursor.x >= on_screen_pos.x &&
+		cursor.x < on_screen_pos.x + on_screen_size.x &&
+		cursor.y > on_screen_pos.y &&
+		cursor.y <= on_screen_pos.y + on_screen_size.y;
 }
 
 void Button::set_projection(const glm::mat4& projection)
 {
 	proj = projection;
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void Button::set_highlight(bool highlight)
@@ -159,32 +172,31 @@ void Button::set_press(bool press)
 void Button::set_pos(const glm::ivec2& pos)
 {
 	this->pos = pos;
-	translate = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void Button::set_size(const glm::ivec2& size)
 {
 	this->size = size;
-	racalculate_transform();
+	recalculate_transform();
 }
 
-void Button::set_scale(const glm::vec2& scale)
+void Button::set_screen_size(const glm::ivec2& screen_size)
 {
-	this->scale = scale;
-	racalculate_transform();
+	this->screen_size = screen_size;
+	recalculate_transform();
 }
 
 void Button::set_text(const std::string& text)
 {
 	this->text.set_text(text);
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void Button::set_font(const std::string& font)
 {
 	this->text.set_font(font);
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void Button::set_id(const std::string& id)
@@ -192,7 +204,8 @@ void Button::set_id(const std::string& id)
 	this->id = id;
 }
 
-void Button::set_press_function(std::function<void(const std::string&)> function)
+void Button::set_press_function(
+	std::function<void(const std::string&)> function)
 {
 	press_function = function;
 }
@@ -203,7 +216,12 @@ void Button::set_keyboard(Keyboard* keyboard)
 	if (kb)
 	{
 		std::function<void(BYTE, Keyboard::Key_action)> fp =
-			std::bind(&Button::keyboard_callback, this, std::_Ph<1>(), std::_Ph<2>());
+			std::bind(
+				&Button::keyboard_callback,
+				this,
+				std::_Ph<1>(),
+				std::_Ph<2>()
+			);
 		kb->observe_key(VK_LBUTTON, fp);
 	}
 }

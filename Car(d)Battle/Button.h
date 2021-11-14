@@ -19,15 +19,16 @@ class Button
 	std::pair<float, float>* cursor_pos;
 	glm::ivec2 pos;
 	glm::ivec2 size;
-	glm::vec2 scale;
-	glm::vec2 scaled_size;
-	glm::mat4 proj, translate, transform;
+	glm::ivec2 screen_size;
+	glm::vec2 on_screen_pos;
+	glm::vec2 on_screen_size;
+	glm::mat4 proj, transform;
 	std::string id;
 	std::function<void(const std::string&)> press_function;
 	Text text;
 	Shader shader;
 
-	void racalculate_transform();
+	void recalculate_transform();
 	void set_press(bool);
 
 public:
@@ -39,7 +40,7 @@ public:
 	void set_highlight(bool);
 	void set_pos(const glm::ivec2&);
 	void set_size(const glm::ivec2&);
-	void set_scale(const glm::vec2&);
+	void set_screen_size(const glm::ivec2&);
 	void set_texture(const std::string&);
 	void set_text(const std::string&);
 	void set_font(const std::string&);

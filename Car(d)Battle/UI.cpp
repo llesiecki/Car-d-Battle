@@ -26,6 +26,7 @@ UI::UI()
 
 	keys_to_observe.insert(keys_to_observe.end(), keys.begin(), keys.end());
 
+	button_start.set_pos({ 0, 0 });
 	button_start.set_size({ 400, 40 });
 	button_start.set_text("Start Singleplayer");
 	button_start.set_texture("textures\\button.bmp");
@@ -37,7 +38,7 @@ UI::UI()
 		std::bind(&UI::button_callback, this, std::_Ph<1>());
 	button_start.set_press_function(fp);
 
-	button_stop.set_pos({ 0, 0 });
+	button_stop.set_pos({ 60, 60 });
 	button_stop.set_size({ 400, 40 });
 	button_stop.set_text("Exit");
 	button_stop.set_texture("textures\\button.bmp");
@@ -238,6 +239,8 @@ void UI::set_screen_size(int x, int y)
 	text.set_mvp(ortho);
 	if (game != nullptr)
 		game->set_screen_size(x, y);
+	button_start.set_screen_size({ x, y });
+	button_stop.set_screen_size({ x, y });
 	Singleton<GL_Context>().obtain();
 	blur.set_size({ x, y });
 	Singleton<GL_Context>().release();
@@ -336,30 +339,25 @@ void UI::render_pause_menu()
 
 	// recalculate scale:
 	scale = size / ref_size;
-	glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1));
+	const glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1));
 
 	// calculate origin:
-	glm::vec2 origin(
+	const glm::vec2 origin(
 		(screen_size.x - size.x) / 2,
 		(screen_size.y - size.y) / 2
 	);
-	glm::mat4 translate_mat = glm::translate(glm::mat4(1.0f), glm::vec3(origin, 0));
+	const glm::mat4 translate_mat = glm::translate(glm::mat4(1.0f), glm::vec3(origin, 0));
 
 	// create projection matrix:
-	glm::mat4 menu_ortho = glm::ortho(
+	const glm::mat4 menu_ortho = glm::ortho(
 		0.0f, static_cast<float>(screen_size.x),
 		0.0f, static_cast<float>(screen_size.y)
-	);
-	menu_ortho *= translate_mat * scale_mat;
+	) * translate_mat * scale_mat;
 
-	button_start.set_pos(origin);
-	button_start.set_projection(ortho);
-	button_start.set_scale(scale);
+	button_start.set_projection(menu_ortho);
 	button_start.update();
 
-	button_stop.set_pos(origin + 60.0f * scale);
-	button_stop.set_projection(ortho);
-	button_stop.set_scale(scale);
+	button_stop.set_projection(menu_ortho);
 	button_stop.update();
 
 	dimmer.set_mvp(menu_ortho);
