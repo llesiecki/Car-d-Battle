@@ -49,6 +49,7 @@ class UI
 	std::string register_user(const std::string &, const std::string &);
 	std::string login_user(const std::string &, const std::string &);
 	void render_pause_menu();
+	void start_game(int);
 
 	UI();
 public:

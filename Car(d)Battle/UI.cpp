@@ -52,7 +52,7 @@ UI::UI()
 	input.set_cursor_pointer(&cursor_pos);
 	input.set_id("input");
 	input.set_text("Initial text");
-	input.set_size({ 300, 60 });
+	input.set_size({ 300, 30 });
 
 	text.set_text("Singleplayer");
 	text.set_font("arial.ttf");
@@ -181,6 +181,7 @@ std::string UI::register_user(
 	query["username"] = username;
 	query["passwd"] = passwd;
 	auto response = get_server_response("register_user", query);
+	user_token = response["user_token"];
 	return response["user_token"];
 }
 
@@ -193,6 +194,7 @@ std::string UI::login_user(
 	query["username"] = username;
 	query["passwd"] = passwd;
 	auto response = get_server_response("login_user", query);
+	user_token = response["user_token"];
 	return response["user_token"];
 }
 
@@ -376,4 +378,16 @@ void UI::render_pause_menu()
 	button_stop.draw();
 	input.draw();
 	glEnable(GL_DEPTH_TEST);
+}
+
+void UI::start_game(int opponents)
+{
+	Singleton<GL_Context>().obtain();
+	game = new Game();
+	game->set_UI(this);
+	game->load();
+	game->start(opponents + 1);
+	game->set_pause(pause);
+	game->set_screen_size(screen_size.x, screen_size.y);
+	Singleton<GL_Context>().release();
 }
