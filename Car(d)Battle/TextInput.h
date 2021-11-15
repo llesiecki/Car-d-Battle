@@ -16,9 +16,10 @@ class TextInput
 	std::pair<float, float>* cursor_pos;
 	glm::ivec2 pos;
 	glm::ivec2 size;
-	glm::vec2 scale;
-	glm::vec2 scaled_size;
-	glm::mat4 proj, translate, transform;
+	glm::ivec2 screen_size;
+	glm::vec2 on_screen_pos;
+	glm::vec2 on_screen_size;
+	glm::mat4 proj, transform;
 	std::function<void(const std::string&)> enter_function;
 	std::string content;
 	std::string id;
@@ -29,7 +30,7 @@ class TextInput
 	Text text;
 
 	void caret_function();
-	void racalculate_transform();
+	void recalculate_transform();
 
 public:
 	TextInput();
@@ -39,7 +40,7 @@ public:
 	void set_projection(const glm::mat4&);
 	void set_pos(const glm::ivec2&);
 	void set_size(const glm::ivec2&);
-	void set_scale(const glm::vec2&);
+	void set_screen_size(const glm::ivec2&);
 	void set_text(const std::string&);
 	void set_font(const std::string&);
 	void set_id(const std::string&);

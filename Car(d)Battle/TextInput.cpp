@@ -1,8 +1,8 @@
 #include "TextInput.h"
 
 TextInput::TextInput()
-	:scale(), pos(), size(), text(), transform(), proj(),
-	cursor_pos(nullptr), scaled_size(), translate()
+	:pos(), size(), text(), transform(),
+	cursor_pos(nullptr), proj()
 {
 	active = false;
 	kill_threads = false;
@@ -56,33 +56,34 @@ void TextInput::caret_function()
 	}
 }
 
-void TextInput::racalculate_transform()
+void TextInput::recalculate_transform()
 {
-	scaled_size = glm::ivec2(size.x * scale.x, size.y * scale.y);
+	glm::mat4 translate =
+		glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
 
-	transform =
-		proj
-		* translate
-		* glm::scale(glm::mat4(1.0f), { scale.x, scale.y, 1 });
+	transform = proj * translate;
 
 	glm::mat4 dimm_mvp = transform;
 
 	dimm_center.set_mvp(dimm_mvp);
 	dimm_left.set_mvp(dimm_mvp);
 
-	dimm_mvp = glm::translate(transform, { border_width, 0, 0 });
+	dimm_mvp = glm::translate(transform,
+		{ border_width, 0, 0 });
 
 	dimm_down.set_mvp(dimm_mvp);
 
-	dimm_mvp = glm::translate(transform, { size.x - border_width, 0, 0 });
+	dimm_mvp = glm::translate(transform,
+		{ size.x - border_width, 0, 0 });
 
 	dimm_right.set_mvp(dimm_mvp);
 
-	dimm_mvp = glm::translate(transform, { border_width, size.y - border_width, 0 });
+	dimm_mvp = glm::translate(transform,
+		{ border_width, size.y - border_width, 0 });
 
 	dimm_up.set_mvp(dimm_mvp);
 
-	text_scale = (scaled_size.y * 0.8f) / FONT_SIZE;
+	text_scale = (size.y * 0.8f) / FONT_SIZE;
 
 	glm::mat4 text_scale_mat = glm::scale(glm::mat4(1.0f), {
 		text_scale,
@@ -91,10 +92,24 @@ void TextInput::racalculate_transform()
 
 	glm::mat4 text_pos = glm::translate(glm::mat4(1.0f), {
 		text_scale * FONT_SIZE * 0.2f,
-		(scaled_size.y - FONT_SIZE * text_scale) / 2 + text.get_descent() * text_scale,
+		(size.y - FONT_SIZE * text_scale) / 2 + text.get_descent() * text_scale,
 		0 });
 
 	text.set_mvp(proj * translate * text_pos * text_scale_mat);
+
+	glm::vec4 gl_pos = transform * glm::vec4(0.0, 0.0, 0.0, 1.0);
+	on_screen_pos = {
+		(gl_pos.x + 1.0f) / 2.0f * screen_size.x,
+		(gl_pos.y + 1.0f) / 2.0f * screen_size.y
+	};
+
+	gl_pos = transform * glm::vec4(size.x, size.y, 0.0, 1.0);
+	glm::vec2 upper_right(
+		(gl_pos.x + 1.0f) / 2.0f * screen_size.x,
+		(gl_pos.y + 1.0f) / 2.0f * screen_size.y
+	);
+
+	on_screen_size = upper_right - on_screen_pos;
 }
 
 void TextInput::draw()
@@ -115,23 +130,22 @@ void TextInput::draw()
 bool TextInput::is_hovered(const glm::ivec2& cursor) const
 {
 	return
-		cursor.x >= pos.x &&
-		cursor.x < pos.x + scaled_size.x &&
-		cursor.y > pos.y &&
-		cursor.y <= pos.y + scaled_size.y;
+		cursor.x >= on_screen_pos.x &&
+		cursor.x < on_screen_pos.x + on_screen_size.x &&
+		cursor.y > on_screen_pos.y &&
+		cursor.y <= on_screen_pos.y + on_screen_size.y;
 }
 
 void TextInput::set_projection(const glm::mat4& projection)
 {
 	proj = projection;
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void TextInput::set_pos(const glm::ivec2& pos)
 {
 	this->pos = pos;
-	translate = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void TextInput::set_size(const glm::ivec2& size)
@@ -145,25 +159,25 @@ void TextInput::set_size(const glm::ivec2& size)
 	dimm_up.set_size({ size.x - 2 * border_width, border_width });
 	dimm_down.set_size({ size.x - 2 * border_width, border_width });
 	dimm_center.set_size(size);
-	racalculate_transform();
+	recalculate_transform();
 }
 
-void TextInput::set_scale(const glm::vec2& scale)
+void TextInput::set_screen_size(const glm::ivec2& size)
 {
-	this->scale = scale;
-	racalculate_transform();
+	this->screen_size = size;
+	recalculate_transform();
 }
 
 void TextInput::set_text(const std::string& text)
 {
 	this->text.set_text(text);
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void TextInput::set_font(const std::string& font)
 {
 	this->text.set_font(font);
-	racalculate_transform();
+	recalculate_transform();
 }
 
 void TextInput::set_id(const std::string& id)
@@ -232,7 +246,7 @@ void TextInput::key_handler(BYTE key, Keyboard::Key_action act)
 	text.set_text(content);
 
 	while (text.get_width() * text_scale >
-		scaled_size.x - 2 * (border_width + FONT_SIZE * text_scale * 0.2f))
+		size.x - 2 * (border_width + FONT_SIZE * text_scale * 0.2f))
 	{
 		content.pop_back();
 		text.set_text(content);
