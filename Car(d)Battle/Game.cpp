@@ -14,7 +14,6 @@ Game::Game()
 			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f,
 			(static_cast<float>(rand()) / RAND_MAX - 0.5f) / 9999.0f });
 
-
 	kill_threads = false;
 	ui = nullptr;
 
@@ -343,6 +342,11 @@ void Game::choose_category()
 			using namespace std::literals::chrono_literals;
 			if (thread_sleep(kill_threads, 17ms))
 				return;
+
+			// prevent the game from choosing a category when paused
+			while(pause)
+				if (thread_sleep(kill_threads, 17ms))
+					return;
 
 			for (int i = 0; i < 6; i++)//6 categories
 			{
