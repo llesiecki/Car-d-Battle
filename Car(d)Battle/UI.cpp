@@ -54,6 +54,7 @@ UI::UI()
 	input.set_id("input");
 	input.set_text("Initial text");
 	input.set_size({ 300, 30 });
+	input.set_pos({ 120.0f, 120.0f });
 
 	text.set_text("Singleplayer");
 	text.set_font("arial.ttf");
@@ -241,6 +242,7 @@ void UI::set_screen_size(int x, int y)
 		game->set_screen_size(x, y);
 	button_start.set_screen_size({ x, y });
 	button_stop.set_screen_size({ x, y });
+	input.set_screen_size({ x, y });
 	Singleton<GL_Context>().obtain();
 	blur.set_size({ x, y });
 	Singleton<GL_Context>().release();
@@ -363,10 +365,7 @@ void UI::render_pause_menu()
 	dimmer.set_mvp(menu_ortho);
 	dimmer.set_size(ref_size);
 
-	input.set_pos(origin + 120.0f * scale);
-	input.set_projection(ortho);
-	input.set_scale(scale);
-
+	input.set_projection(menu_ortho);
 
 	glDisable(GL_DEPTH_TEST);
 	blur.draw();
