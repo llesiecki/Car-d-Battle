@@ -82,27 +82,33 @@ MainMenu::~MainMenu()
 
 void MainMenu::draw()
 {
+	if (game != nullptr)
+		game->draw();
+	blur.draw();
+	dimmer.draw();
+
 	switch (state)
 	{
 	case MainMenu::State::login:
-		inputs["login"].draw();
-		inputs["password"].draw();
-		buttons["password"].draw();
+		inputs["login"]->draw();
+		inputs["password"]->draw();
+		buttons["login"]->draw();
 		break;
 	case MainMenu::State::choose_mode:
-		buttons["singleplayer"].draw();
-		buttons["multiplayer"].draw();
+		buttons["singleplayer"]->draw();
+		buttons["multiplayer"]->draw();
 		break;
 	case MainMenu::State::singleplayer:
-		buttons["1_opponent"].draw();
-		buttons["2_opponents"].draw();
-		buttons["3_opponents"].draw();
+		buttons["1_opponent"]->draw();
+		buttons["2_opponents"]->draw();
+		buttons["3_opponents"]->draw();
 		break;
 	case MainMenu::State::multiplayer:
-		buttons["create_battle"].draw();
-		buttons["launch_battle"].draw();
-		buttons["join_battle"].draw();
-		buttons["leave_battle"].draw();
+		buttons["create_battle"]->draw();
+		buttons["start_battle"]->draw();
+		buttons["join_battle"]->draw();
+		buttons["leave_battle"]->draw();
+		inputs["battle_id"]->draw();
 		break;
 	default:
 		break;
@@ -112,6 +118,19 @@ void MainMenu::draw()
 void MainMenu::set_ui(UI_Interface* ui)
 {
 	this->ui = ui;
+}
+
+void MainMenu::set_mvp(const glm::mat4& mvp)
+{
+	this->mvp = mvp;
+
+	dimmer.set_mvp(mvp);
+
+	for (auto& kv : inputs)
+		kv.second->set_projection(mvp);
+
+	for (auto& kv : buttons)
+		kv.second->set_projection(mvp);
 }
 
 void MainMenu::set_screen_size(glm::ivec2 size)
