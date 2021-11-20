@@ -133,11 +133,63 @@ void MainMenu::set_mvp(const glm::mat4& mvp)
 		kv.second->set_projection(mvp);
 }
 
-void MainMenu::set_screen_size(glm::ivec2 size)
+void MainMenu::set_screen_size(const glm::ivec2 size)
 {
 	screen_size = size;
+	blur.set_size(size);
+	dimmer.set_size(size);
+	if (game != nullptr)
+		game->set_screen_size(size.x, size.y);
+
+	for (auto& kv : inputs)
+		kv.second->set_screen_size(size);
+
+	for (auto& kv : buttons)
+		kv.second->set_screen_size(size);
 }
 
-void MainMenu::button_callback(const std::string&)
+void MainMenu::button_callback(const std::string& id)
 {
+	if (id == "singleplayer")
+	{
+		state = State::singleplayer;
+	}
+	else if (id == "multiplayer")
+	{
+		state = State::multiplayer;
+	}
+	else if (id == "button_login")
+	{
+		std::string login = inputs["login"]->get_text();
+		std::string passwd = inputs["password"]->get_text();
+		std::string token = ui->login_user(login, passwd);
+		if (!token.empty())
+			state = State::choose_mode;
+	}
+	else if (id == "1_opponent")
+	{
+		ui->start_game(1);
+	}
+	else if (id == "2_opponents")
+	{
+		ui->start_game(2);
+	}
+	else if (id == "3_opponents")
+	{
+		ui->start_game(3);
+	}
+	else if (id == "create_battle")
+	{
+		ui->create_battle();
+	}
+	else if (id == "start_battle")
+	{
+		ui->start_battle();
+	}
+	else if (id == "join_battle")
+	{
+		int battle_id = std::stoi(inputs["battle_id"]->get_text());
+		std::string passwd = inputs["battle_password"]->get_text();
+		ui->join_battle(battle_id, passwd);
+	}
 }
