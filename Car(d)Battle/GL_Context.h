@@ -9,7 +9,7 @@
 class GL_Context
 {
 	std::recursive_mutex gl_lock;
-	std::thread::id locker_id;
+	std::thread::id last_owner;
 	GLFWwindow* window;
 	GL_Context();
 public:
