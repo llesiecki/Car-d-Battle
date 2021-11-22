@@ -34,6 +34,9 @@ class MainMenu
 	Dimmer dimmer;
 
 	void change_state(State);
+	void configure(std::unique_ptr<Button>&);
+	void configure(std::unique_ptr<Text>&);
+	void configure(std::unique_ptr<TextInput>&);
 
 public:
 	MainMenu(Keyboard*, std::pair<float, float>*, const glm::mat4&);

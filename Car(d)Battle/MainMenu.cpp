@@ -120,7 +120,7 @@ void MainMenu::change_state(State new_state)
 	case MainMenu::State::singleplayer:
 
 		assert(new_state == State::choose_mode);
-		
+
 		if (new_state == State::choose_mode)
 		{
 			state = State::choose_mode;
@@ -140,6 +140,31 @@ void MainMenu::change_state(State new_state)
 	default:
 		break;
 	}
+}
+
+void MainMenu::configure(std::unique_ptr<Button>& button)
+{
+	button->set_size({ 200, 40 });
+	button->set_texture("textures\\button.bmp");
+	button->set_font("arial.ttf");
+	button->set_keyboard(kb);
+	button->set_cursor_pointer(cursor_pos);
+	button->set_projection(mvp);
+	std::function<void(const std::string&)> fp =
+		std::bind(&MainMenu::button_callback, this, std::_Ph<1>());
+	button->set_press_function(fp);
+}
+
+void MainMenu::configure(std::unique_ptr<Text>&)
+{
+}
+
+void MainMenu::configure(std::unique_ptr<TextInput>& input)
+{
+	input->set_font("arial.ttf");
+	input->set_cursor_pointer(cursor_pos);
+	input->set_size({ 200, 30 });
+	input->set_projection(mvp);
 }
 
 void MainMenu::draw()
