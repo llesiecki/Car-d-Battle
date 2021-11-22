@@ -33,6 +33,8 @@ class MainMenu
 	Blur blur;
 	Dimmer dimmer;
 
+	void change_state(State);
+
 public:
 	MainMenu(Keyboard*, std::pair<float, float>*, const glm::mat4&);
 	~MainMenu();

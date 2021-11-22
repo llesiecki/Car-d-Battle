@@ -80,6 +80,68 @@ MainMenu::~MainMenu()
 		delete game;
 }
 
+void MainMenu::change_state(State new_state)
+{
+	switch (state)
+	{
+	case MainMenu::State::login:
+
+		assert(new_state == State::choose_mode);
+
+		if (new_state == State::choose_mode)
+		{
+			state = State::choose_mode;
+		}
+
+		break;
+
+	case MainMenu::State::choose_mode:
+
+		assert(new_state == State::login);
+		assert(new_state == State::singleplayer);
+		assert(new_state == State::multiplayer);
+
+		if (new_state == State::login)
+		{
+			state = State::login;
+		}
+
+		if (new_state == State::singleplayer)
+		{
+			state = State::singleplayer;
+		}
+
+		if (new_state == State::multiplayer)
+		{
+			state = State::multiplayer;
+		}
+
+		break;
+	case MainMenu::State::singleplayer:
+
+		assert(new_state == State::choose_mode);
+		
+		if (new_state == State::choose_mode)
+		{
+			state = State::choose_mode;
+		}
+
+		break;
+	case MainMenu::State::multiplayer:
+
+		assert(new_state == State::choose_mode);
+
+		if (new_state == State::choose_mode)
+		{
+			state = State::choose_mode;
+		}
+
+		break;
+	default:
+		break;
+	}
+}
+
 void MainMenu::draw()
 {
 	if (game != nullptr)
@@ -152,11 +214,11 @@ void MainMenu::button_callback(const std::string& id)
 {
 	if (id == "singleplayer")
 	{
-		state = State::singleplayer;
+		change_state(State::singleplayer);
 	}
 	else if (id == "multiplayer")
 	{
-		state = State::multiplayer;
+		change_state(State::multiplayer);
 	}
 	else if (id == "button_login")
 	{
@@ -164,7 +226,7 @@ void MainMenu::button_callback(const std::string& id)
 		std::string passwd = inputs["password"]->get_text();
 		std::string token = ui->login_user(login, passwd);
 		if (!token.empty())
-			state = State::choose_mode;
+			change_state(State::choose_mode);
 	}
 	else if (id == "1_opponent")
 	{
