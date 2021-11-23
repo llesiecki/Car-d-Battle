@@ -86,20 +86,35 @@ void MainMenu::change_state(State new_state)
 	{
 	case MainMenu::State::login:
 
-		assert(new_state == State::choose_mode);
-
-		if (new_state == State::choose_mode)
+		if (new_state == State::login)
 		{
-			state = State::choose_mode;
+			state = State::login;
+
+			buttons.clear();
+			inputs.clear();
+
+			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+			buttons["login"] = std::move(button_ptr);
+			configure(buttons["login"]);
+			buttons["login"]->set_pos({ 480, 30 });
+			buttons["login"]->set_text("Login");
+
+			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
+			inputs["password"] = std::move(input_ptr);
+			configure(inputs["password"]);
+			inputs["password"]->set_pos({ 260, 30 });
+			inputs["password"]->set_text("Password");
+
+			input_ptr = std::make_unique<TextInput>();
+			inputs["login"] = std::move(input_ptr);
+			configure(inputs["login"]);
+			inputs["login"]->set_pos({ 30, 30 });
+			inputs["login"]->set_text("Nickname");
 		}
 
 		break;
 
 	case MainMenu::State::choose_mode:
-
-		assert(new_state == State::login);
-		assert(new_state == State::singleplayer);
-		assert(new_state == State::multiplayer);
 
 		if (new_state == State::login)
 		{
@@ -119,8 +134,6 @@ void MainMenu::change_state(State new_state)
 		break;
 	case MainMenu::State::singleplayer:
 
-		assert(new_state == State::choose_mode);
-
 		if (new_state == State::choose_mode)
 		{
 			state = State::choose_mode;
@@ -128,8 +141,6 @@ void MainMenu::change_state(State new_state)
 
 		break;
 	case MainMenu::State::multiplayer:
-
-		assert(new_state == State::choose_mode);
 
 		if (new_state == State::choose_mode)
 		{
