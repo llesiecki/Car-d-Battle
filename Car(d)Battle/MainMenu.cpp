@@ -119,6 +119,27 @@ void MainMenu::change_state(State new_state)
 		if (new_state == State::login)
 		{
 			state = State::login;
+
+			buttons.clear();
+			inputs.clear();
+
+			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+			buttons["login"] = std::move(button_ptr);
+			configure(buttons["login"]);
+			buttons["login"]->set_pos({ 480, 30 });
+			buttons["login"]->set_text("Login");
+
+			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
+			inputs["password"] = std::move(input_ptr);
+			configure(inputs["password"]);
+			inputs["password"]->set_pos({ 260, 30 });
+			inputs["password"]->set_text("Password");
+
+			input_ptr = std::make_unique<TextInput>();
+			inputs["login"] = std::move(input_ptr);
+			configure(inputs["login"]);
+			inputs["login"]->set_pos({ 30, 30 });
+			inputs["login"]->set_text("Nickname");
 		}
 
 		if (new_state == State::singleplayer)
@@ -191,6 +212,7 @@ void MainMenu::draw()
 		inputs["login"]->draw();
 		inputs["password"]->draw();
 		buttons["login"]->draw();
+		buttons["login"]->update();
 		break;
 	case MainMenu::State::choose_mode:
 		buttons["singleplayer"]->draw();
