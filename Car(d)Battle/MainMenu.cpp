@@ -16,7 +16,7 @@ MainMenu::MainMenu(
 	// inputs configuration:
 
 	std::vector<std::string> input_names = {
-	"login", "password", "battle_id"
+		"login", "password", "battle_id"
 	};
 
 	for (std::string name : input_names)
@@ -72,6 +72,7 @@ MainMenu::MainMenu(
 	buttons["start_battle"]->set_text("Start");
 	buttons["join_battle"]->set_text("Join");
 	buttons["leave_battle"]->set_text("Leave");
+	change_state(State::login);
 }
 
 MainMenu::~MainMenu()
@@ -92,6 +93,7 @@ void MainMenu::change_state(State new_state)
 
 			buttons.clear();
 			inputs.clear();
+			texts.clear();
 
 			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
 			buttons["login"] = std::move(button_ptr);
@@ -122,6 +124,7 @@ void MainMenu::change_state(State new_state)
 
 			buttons.clear();
 			inputs.clear();
+			texts.clear();
 
 			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
 			buttons["login"] = std::move(button_ptr);
@@ -145,6 +148,38 @@ void MainMenu::change_state(State new_state)
 		if (new_state == State::singleplayer)
 		{
 			state = State::singleplayer;
+
+			buttons.clear();
+			inputs.clear();
+			texts.clear();
+
+			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+			buttons["1_opponent"] = std::move(button_ptr);
+			configure(buttons["1_opponent"]);
+			buttons["1_opponent"]->set_pos({ 30, 30 });
+			buttons["1_opponent"]->set_size({ 30, 30 });
+			buttons["1_opponent"]->set_text("1");
+
+			button_ptr = std::make_unique<Button>();
+			buttons["2_opponents"] = std::move(button_ptr);
+			configure(buttons["2_opponents"]);
+			buttons["2_opponents"]->set_pos({ 60, 30 });
+			buttons["2_opponents"]->set_size({ 30, 30 });
+			buttons["2_opponents"]->set_text("2");
+
+			button_ptr = std::make_unique<Button>();
+			buttons["3_opponents"] = std::move(button_ptr);
+			configure(buttons["3_opponents"]);
+			buttons["3_opponents"]->set_pos({ 90, 30 });
+			buttons["3_opponents"]->set_size({ 30, 30 });
+			buttons["3_opponents"]->set_text("3");
+
+			std::unique_ptr<Text> text_ptr = std::make_unique<Text>();
+			texts["opponents_num"] = std::move(text_ptr);
+			configure(texts["opponents_num"]);
+			texts["opponents_num"]->set_text("Choose nuber of opponents:");
+			// TODO: Extend the Text class with a "set_pos" member function
+			//texts["opponents_num"]->set_pos({ 150, 30 });
 		}
 
 		if (new_state == State::multiplayer)
@@ -187,8 +222,11 @@ void MainMenu::configure(std::unique_ptr<Button>& button)
 	button->set_press_function(fp);
 }
 
-void MainMenu::configure(std::unique_ptr<Text>&)
+void MainMenu::configure(std::unique_ptr<Text>& text)
 {
+	text->set_font("arial.ttf");
+	text->set_color(glm::vec4(0, 0, 0, 1));
+	text->set_mvp(mvp);
 }
 
 void MainMenu::configure(std::unique_ptr<TextInput>& input)
