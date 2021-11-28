@@ -196,12 +196,20 @@ void Keyboard::unobserve_key(unsigned int id)
 
 void Keyboard::notify(BYTE key, Key_action act)
 {
-	handlers_lock.lock();
-	for (auto& h : handlers)
-	{
-		// if handler observes this key
-		if (h->key == key)
-			h->function(key, act);
-	}
-	handlers_lock.unlock();
+	auto notifier =
+		[this](BYTE key, Key_action act) -> void
+		{
+			Singleton<GL_Context>().obtain();
+			handlers_lock.lock();
+			for (auto& h : handlers)
+			{
+				// if handler observes this key
+				if (h->key == key)
+					h->function(key, act);
+			}
+			handlers_lock.unlock();
+			Singleton<GL_Context>().release();
+		};
+
+	std::thread(notifier, key, act).detach();
 }
