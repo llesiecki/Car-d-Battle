@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include <mutex>
 #include "Blur.h"
 #include "Button.h"
 #include "Dimmer.h"
@@ -9,6 +10,8 @@
 #include "TextInput.h"
 #include "UI_Interface.h"
 #include "Keyboard.h"
+#include "Singleton.h"
+#include "GL_Context.h"
 
 class MainMenu
 {
@@ -32,6 +35,7 @@ class MainMenu
 	std::map<std::string, std::unique_ptr<TextInput>> inputs;
 	Blur blur;
 	Dimmer dimmer;
+	std::mutex state_mutex;
 
 	void change_state(State);
 	void configure(std::unique_ptr<Button>&);

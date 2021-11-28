@@ -23,6 +23,8 @@ MainMenu::~MainMenu()
 
 void MainMenu::change_state(State new_state)
 {
+	state_mutex.lock();
+
 	switch (state)
 	{
 	case MainMenu::State::login:
@@ -40,6 +42,7 @@ void MainMenu::change_state(State new_state)
 			configure(buttons["login"]);
 			buttons["login"]->set_pos({ 480, 30 });
 			buttons["login"]->set_text("Login");
+			buttons["login"]->set_id("button_login");
 
 			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
 			inputs["password"] = std::move(input_ptr);
@@ -52,6 +55,29 @@ void MainMenu::change_state(State new_state)
 			configure(inputs["login"]);
 			inputs["login"]->set_pos({ 30, 30 });
 			inputs["login"]->set_text("Nickname");
+		}
+
+		if (new_state == State::choose_mode)
+		{
+			state = State::choose_mode;
+
+			buttons.clear();
+			inputs.clear();
+			texts.clear();
+
+			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+			buttons["singleplayer"] = std::move(button_ptr);
+			configure(buttons["singleplayer"]);
+			buttons["singleplayer"]->set_pos({ 30, 30 });
+			buttons["singleplayer"]->set_text("Singleplayer");
+			buttons["singleplayer"]->set_id("singleplayer");
+
+			button_ptr = std::make_unique<Button>();
+			buttons["multiplayer"] = std::move(button_ptr);
+			configure(buttons["multiplayer"]);
+			buttons["multiplayer"]->set_pos({ 30, 70 });
+			buttons["multiplayer"]->set_text("Multiplayer");
+			buttons["multiplayer"]->set_id("multiplayer");
 		}
 
 		break;
@@ -71,6 +97,7 @@ void MainMenu::change_state(State new_state)
 			configure(buttons["login"]);
 			buttons["login"]->set_pos({ 480, 30 });
 			buttons["login"]->set_text("Login");
+			buttons["login"]->set_id("button_login");
 
 			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
 			inputs["password"] = std::move(input_ptr);
@@ -139,19 +166,19 @@ void MainMenu::change_state(State new_state)
 			button_ptr = std::make_unique<Button>();
 			buttons["start_battle"] = std::move(button_ptr);
 			configure(buttons["start_battle"]);
-			buttons["start_battle"]->set_pos({ 60, 30 });
+			buttons["start_battle"]->set_pos({ 30, 70 });
 			buttons["start_battle"]->set_text("Start Battle");
 
 			button_ptr = std::make_unique<Button>();
 			buttons["join_battle"] = std::move(button_ptr);
 			configure(buttons["join_battle"]);
-			buttons["join_battle"]->set_pos({ 90, 30 });
+			buttons["join_battle"]->set_pos({ 30, 110 });
 			buttons["join_battle"]->set_text("Join Battle");
 
 			button_ptr = std::make_unique<Button>();
 			buttons["leave_battle"] = std::move(button_ptr);
 			configure(buttons["leave_battle"]);
-			buttons["leave_battle"]->set_pos({ 90, 30 });
+			buttons["leave_battle"]->set_pos({ 30, 150 });
 			buttons["leave_battle"]->set_text("Leave Battle");
 
 			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
@@ -181,6 +208,8 @@ void MainMenu::change_state(State new_state)
 	default:
 		break;
 	}
+
+	state_mutex.unlock();
 }
 
 void MainMenu::configure(std::unique_ptr<Button>& button)
@@ -191,6 +220,7 @@ void MainMenu::configure(std::unique_ptr<Button>& button)
 	button->set_keyboard(kb);
 	button->set_cursor_pointer(cursor_pos);
 	button->set_projection(mvp);
+	button->set_screen_size(screen_size);
 	std::function<void(const std::string&)> fp =
 		std::bind(&MainMenu::button_callback, this, std::_Ph<1>());
 	button->set_press_function(fp);
@@ -218,24 +248,28 @@ void MainMenu::draw()
 	blur.draw();
 	dimmer.draw();
 
+	state_mutex.lock();
+
 	switch (state)
 	{
-	case MainMenu::State::login:
+	case State::login:
 		inputs["login"]->draw();
 		inputs["password"]->draw();
 		buttons["login"]->draw();
 		buttons["login"]->update();
 		break;
-	case MainMenu::State::choose_mode:
+	case State::choose_mode:
 		buttons["singleplayer"]->draw();
+		buttons["singleplayer"]->update();
 		buttons["multiplayer"]->draw();
+		buttons["multiplayer"]->update();
 		break;
-	case MainMenu::State::singleplayer:
+	case State::singleplayer:
 		buttons["1_opponent"]->draw();
 		buttons["2_opponents"]->draw();
 		buttons["3_opponents"]->draw();
 		break;
-	case MainMenu::State::multiplayer:
+	case State::multiplayer:
 		buttons["create_battle"]->draw();
 		buttons["start_battle"]->draw();
 		buttons["join_battle"]->draw();
@@ -245,6 +279,8 @@ void MainMenu::draw()
 	default:
 		break;
 	}
+
+	state_mutex.unlock();
 }
 
 void MainMenu::set_ui(UI_Interface* ui)
@@ -282,6 +318,8 @@ void MainMenu::set_screen_size(const glm::ivec2 size)
 
 void MainMenu::button_callback(const std::string& id)
 {
+	Singleton<GL_Context>().obtain();
+
 	if (id == "singleplayer")
 	{
 		change_state(State::singleplayer);
@@ -324,4 +362,6 @@ void MainMenu::button_callback(const std::string& id)
 		std::string passwd = inputs["battle_password"]->get_text();
 		ui->join_battle(battle_id, passwd);
 	}
+
+	Singleton<GL_Context>().release();
 }
