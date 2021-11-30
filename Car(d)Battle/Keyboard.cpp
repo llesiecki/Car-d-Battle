@@ -39,23 +39,19 @@ LRESULT CALLBACK Keyboard::kb_hook(int next_id, WPARAM wparam, LPARAM lparam)
 	{
 	case WM_KEYDOWN:
 		Singleton<Keyboard>().notify(vk_code, Key_action::on_press);
-		Singleton<Keyboard>().key_states[vk_code] = true;
 		break;
 	case WM_KEYUP:
 		Singleton<Keyboard>().notify(vk_code, Key_action::on_release);
-		Singleton<Keyboard>().key_states[vk_code] = false;
 		break;
 	case WM_LBUTTONDOWN:
 		Singleton<Keyboard>().notify(
 			static_cast<BYTE>(VK_LBUTTON),
 			Key_action::on_press);
-		Singleton<Keyboard>().key_states[VK_LBUTTON] = true;
 		break;
 	case WM_LBUTTONUP:
 		Singleton<Keyboard>().notify(
 			static_cast<BYTE>(VK_LBUTTON),
 			Key_action::on_release);
-		Singleton<Keyboard>().key_states[VK_LBUTTON] = false;
 		break;
 	}
 
@@ -196,6 +192,11 @@ void Keyboard::unobserve_key(unsigned int id)
 
 void Keyboard::notify(BYTE key, Key_action act)
 {
+	if(act == Key_action::on_press)
+		key_states[key] = true;
+	else if (act == Key_action::on_release)
+		key_states[key] = false;
+
 	auto notifier =
 		[this](BYTE key, Key_action act) -> void
 		{

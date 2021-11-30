@@ -27,7 +27,7 @@ private:
 
 	HHOOK hook_kb;
 	HHOOK hook_mouse;
-	std::mutex handlers_lock;
+	std::recursive_mutex handlers_lock;
 	std::vector<handler*> handlers;
 	std::array<bool, UCHAR_MAX> key_states;
 	std::array<char, UCHAR_MAX> char_lut;

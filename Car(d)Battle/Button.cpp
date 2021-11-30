@@ -63,12 +63,17 @@ Button::Button()
 	shader.load("shaders\\button_vert.glsl", GL_VERTEX_SHADER);
 	shader.load("shaders\\button_frag.glsl", GL_FRAGMENT_SHADER);
 	shader.link();
+
+	handler_id = 0;
 }
 
 Button::~Button()
 {
 	if (texture)
 		delete texture;
+
+	if (handler_id != 0)
+		kb->unobserve_key(handler_id);
 }
 
 void Button::recalculate_transform()
@@ -222,7 +227,7 @@ void Button::set_keyboard(Keyboard* keyboard)
 				std::_Ph<1>(),
 				std::_Ph<2>()
 			);
-		kb->observe_key(VK_LBUTTON, fp);
+		handler_id = kb->observe_key(VK_LBUTTON, fp);
 	}
 }
 

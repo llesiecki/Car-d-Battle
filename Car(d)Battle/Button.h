@@ -14,6 +14,7 @@ class Button
 	GLuint vao;
 	GLuint ebo;
 	GLuint vbo;
+	unsigned int handler_id;
 	Texture* texture;
 	Keyboard* kb;
 	std::pair<float, float>* cursor_pos;
