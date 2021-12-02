@@ -26,8 +26,6 @@ class MainMenu
 	State state;
 	Game* game;
 	UI_Interface* ui;
-	Keyboard* kb;
-	std::pair<float, float>* cursor_pos;
 	glm::ivec2 screen_size;
 	glm::mat4 mvp;
 	std::map<std::string, std::unique_ptr<Button>> buttons;
@@ -43,11 +41,13 @@ class MainMenu
 	void configure(std::unique_ptr<TextInput>&);
 
 public:
-	MainMenu(Keyboard*, std::pair<float, float>*, const glm::mat4&);
+	MainMenu(const glm::mat4& = glm::mat4(1.0f));
 	~MainMenu();
 	void draw();
 	void set_ui(UI_Interface*);
 	void set_mvp(const glm::mat4&);
 	void set_screen_size(const glm::ivec2);
+	void set_cursor_pos(std::pair<float, float>);
 	void button_callback(const std::string&);
+	void keyboard_callback(BYTE, Keyboard::Key_action);
 };

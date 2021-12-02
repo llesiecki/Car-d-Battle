@@ -16,8 +16,6 @@ class Button
 	GLuint vbo;
 	unsigned int handler_id;
 	Texture* texture;
-	Keyboard* kb;
-	std::pair<float, float>* cursor_pos;
 	glm::ivec2 pos;
 	glm::ivec2 size;
 	glm::ivec2 screen_size;
@@ -47,8 +45,6 @@ public:
 	void set_font(const std::string&);
 	void set_id(const std::string&);
 	void set_press_function(std::function<void(const std::string&)>);
-	void set_keyboard(Keyboard*);
-	void set_cursor_pointer(std::pair<float, float>*);
+	void set_cursor_pos(std::pair<float, float>);
 	void keyboard_callback(BYTE, Keyboard::Key_action);
-	void update();
 };

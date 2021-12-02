@@ -1,11 +1,7 @@
 #include "MainMenu.h"
 
-MainMenu::MainMenu(
-	Keyboard* kb,
-	std::pair<float, float>* cursor_pos,
-	const glm::mat4& mvp
-)
-	:screen_size(1, 1), kb(kb), cursor_pos(cursor_pos), mvp(mvp)
+MainMenu::MainMenu(const glm::mat4& mvp)
+	:screen_size(1, 1), mvp(mvp)
 {
 	state = State::login;
 	game = nullptr;
@@ -217,8 +213,6 @@ void MainMenu::configure(std::unique_ptr<Button>& button)
 	button->set_size({ 200, 40 });
 	button->set_texture("textures\\button.bmp");
 	button->set_font("arial.ttf");
-	button->set_keyboard(kb);
-	button->set_cursor_pointer(cursor_pos);
 	button->set_projection(mvp);
 	button->set_screen_size(screen_size);
 	std::function<void(const std::string&)> fp =
@@ -236,7 +230,6 @@ void MainMenu::configure(std::unique_ptr<Text>& text)
 void MainMenu::configure(std::unique_ptr<TextInput>& input)
 {
 	input->set_font("arial.ttf");
-	input->set_cursor_pointer(cursor_pos);
 	input->set_size({ 200, 30 });
 	input->set_projection(mvp);
 }
@@ -256,13 +249,10 @@ void MainMenu::draw()
 		inputs["login"]->draw();
 		inputs["password"]->draw();
 		buttons["login"]->draw();
-		buttons["login"]->update();
 		break;
 	case State::choose_mode:
 		buttons["singleplayer"]->draw();
-		buttons["singleplayer"]->update();
 		buttons["multiplayer"]->draw();
-		buttons["multiplayer"]->update();
 		break;
 	case State::singleplayer:
 		buttons["1_opponent"]->draw();
@@ -316,6 +306,12 @@ void MainMenu::set_screen_size(const glm::ivec2 size)
 		kv.second->set_screen_size(size);
 }
 
+void MainMenu::set_cursor_pos(std::pair<float, float> cursor_pos)
+{
+	for (auto& kv : buttons)
+		kv.second->set_cursor_pos(cursor_pos);
+}
+
 void MainMenu::button_callback(const std::string& id)
 {
 	Singleton<GL_Context>().obtain();
@@ -364,4 +360,19 @@ void MainMenu::button_callback(const std::string& id)
 	}
 
 	Singleton<GL_Context>().release();
+}
+
+void MainMenu::keyboard_callback(BYTE key, Keyboard::Key_action act)
+{
+	State initial_state = state;
+
+	for (auto& kv : buttons)
+	{
+		kv.second->keyboard_callback(key, act);
+
+		// a state change deletes all the buttons
+		// so the loop must be broken
+		if (state != initial_state)
+			break;
+	}
 }
