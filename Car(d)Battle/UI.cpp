@@ -32,8 +32,6 @@ UI::UI()
 	button_start.set_texture("textures\\button.bmp");
 	button_start.set_font("arial.ttf");
 	button_start.set_id("start_sp");
-	button_start.set_keyboard(&kb);
-	button_start.set_cursor_pointer(&cursor_pos);
 	std::function<void(const std::string&)> fp =
 		std::bind(&UI::button_callback, this, std::_Ph<1>());
 	button_start.set_press_function(fp);
@@ -44,13 +42,10 @@ UI::UI()
 	button_stop.set_texture("textures\\button.bmp");
 	button_stop.set_font("arial.ttf");
 	button_stop.set_id("stop");
-	button_stop.set_keyboard(&kb);
-	button_stop.set_cursor_pointer(&cursor_pos);
 	fp = std::bind(&UI::button_callback, this, std::_Ph<1>());
 	button_stop.set_press_function(fp);
 
 	input.set_font("arial.ttf");
-	input.set_cursor_pointer(&cursor_pos);
 	input.set_id("input");
 	input.set_text("Initial text");
 	input.set_size({ 300, 30 });
@@ -92,6 +87,8 @@ void UI::key_handler(BYTE key, Keyboard::Key_action action)
 	}
 
 	input.key_handler(key, action);
+	button_start.keyboard_callback(key, action);
+	button_stop.keyboard_callback(key, action);
 }
 
 std::map<std::string, std::string> UI::get_server_response(
@@ -252,6 +249,9 @@ void UI::set_cursor_pos(float x, float y)
 {
 	y = screen_size.y - y;
 	cursor_pos = { x, y };
+	button_stop.set_cursor_pos(cursor_pos);
+	button_start.set_cursor_pos(cursor_pos);
+	input.set_cursor_pos(cursor_pos);
 	if (game != nullptr)
 		game->set_cursor_pos(x, y);
 }
@@ -357,10 +357,8 @@ void UI::render_pause_menu()
 	) * translate_mat * scale_mat;
 
 	button_start.set_projection(menu_ortho);
-	button_start.update();
 
 	button_stop.set_projection(menu_ortho);
-	button_stop.update();
 
 	dimmer.set_mvp(menu_ortho);
 	dimmer.set_size(ref_size);

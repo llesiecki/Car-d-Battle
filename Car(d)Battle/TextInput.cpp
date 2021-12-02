@@ -1,8 +1,7 @@
 #include "TextInput.h"
 
 TextInput::TextInput()
-	:pos(), size(), text(), transform(),
-	cursor_pos(nullptr), proj()
+	:pos(), size(), text(), transform(), proj()
 {
 	active = false;
 	kill_threads = false;
@@ -195,7 +194,7 @@ std::string TextInput::get_text()
 	return content;
 }
 
-void TextInput::set_cursor_pointer(std::pair<float, float>* cursor_pos)
+void TextInput::set_cursor_pos(std::pair<float, float> cursor_pos)
 {
 	this->cursor_pos = cursor_pos;
 }
@@ -221,12 +220,11 @@ void TextInput::key_handler(BYTE key, Keyboard::Key_action act)
 
 	if (key == VK_LBUTTON)
 	{
-		if (cursor_pos)
-			if (is_hovered({ cursor_pos->first, cursor_pos->second }))
-			{
-				active = true;
-				return;
-			}
+		if (is_hovered({ cursor_pos.first, cursor_pos.second }))
+		{
+			active = true;
+			return;
+		}
 		active = false;
 		return;
 	}

@@ -232,6 +232,7 @@ void MainMenu::configure(std::unique_ptr<TextInput>& input)
 	input->set_font("arial.ttf");
 	input->set_size({ 200, 30 });
 	input->set_projection(mvp);
+	input->set_screen_size(screen_size);
 }
 
 void MainMenu::draw()
@@ -310,6 +311,9 @@ void MainMenu::set_cursor_pos(std::pair<float, float> cursor_pos)
 {
 	for (auto& kv : buttons)
 		kv.second->set_cursor_pos(cursor_pos);
+
+	for (auto& kv : inputs)
+		kv.second->set_cursor_pos(cursor_pos);
 }
 
 void MainMenu::button_callback(const std::string& id)
@@ -374,5 +378,18 @@ void MainMenu::keyboard_callback(BYTE key, Keyboard::Key_action act)
 		// so the loop must be broken
 		if (state != initial_state)
 			break;
+	}
+
+	if (state == initial_state)
+	{
+		for (auto& kv : inputs)
+		{
+			kv.second->key_handler(key, act);
+
+			// a state change deletes all the inputs
+			// so the loop must be broken
+			if (state != initial_state)
+				break;
+		}
 	}
 }
