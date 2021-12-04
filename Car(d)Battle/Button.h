@@ -14,7 +14,6 @@ class Button
 	GLuint vao;
 	GLuint ebo;
 	GLuint vbo;
-	unsigned int handler_id;
 	Texture* texture;
 	glm::ivec2 pos;
 	glm::ivec2 size;

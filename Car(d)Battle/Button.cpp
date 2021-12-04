@@ -64,7 +64,7 @@ Button::Button()
 	shader.load("shaders\\button_frag.glsl", GL_FRAGMENT_SHADER);
 	shader.link();
 
-	handler_id = 0;
+	press_function = [](const std::string&) -> void {};
 }
 
 Button::~Button()

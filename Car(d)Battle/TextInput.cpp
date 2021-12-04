@@ -8,6 +8,7 @@ TextInput::TextInput()
 	draw_caret = false;
 	last_input = std::chrono::system_clock::now();
 	caret_timer = std::thread(&TextInput::caret_function, this);
+	enter_function = [](const std::string&) -> void {};
 }
 
 TextInput::~TextInput()
