@@ -24,185 +24,139 @@ void MainMenu::change_state(State new_state)
 	switch (state)
 	{
 	case MainMenu::State::login:
-
-		if (new_state == State::login)
-		{
-			state = State::login;
-
-			buttons.clear();
-			inputs.clear();
-			texts.clear();
-
-			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
-			buttons["login"] = std::move(button_ptr);
-			configure(buttons["login"]);
-			buttons["login"]->set_pos({ 480, 30 });
-			buttons["login"]->set_text("Login");
-			buttons["login"]->set_id("button_login");
-
-			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
-			inputs["password"] = std::move(input_ptr);
-			configure(inputs["password"]);
-			inputs["password"]->set_pos({ 260, 30 });
-			inputs["password"]->set_text("Password");
-
-			input_ptr = std::make_unique<TextInput>();
-			inputs["login"] = std::move(input_ptr);
-			configure(inputs["login"]);
-			inputs["login"]->set_pos({ 30, 30 });
-			inputs["login"]->set_text("Nickname");
-		}
-
-		if (new_state == State::choose_mode)
-		{
-			state = State::choose_mode;
-
-			buttons.clear();
-			inputs.clear();
-			texts.clear();
-
-			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
-			buttons["singleplayer"] = std::move(button_ptr);
-			configure(buttons["singleplayer"]);
-			buttons["singleplayer"]->set_pos({ 30, 30 });
-			buttons["singleplayer"]->set_text("Singleplayer");
-			buttons["singleplayer"]->set_id("singleplayer");
-
-			button_ptr = std::make_unique<Button>();
-			buttons["multiplayer"] = std::move(button_ptr);
-			configure(buttons["multiplayer"]);
-			buttons["multiplayer"]->set_pos({ 30, 70 });
-			buttons["multiplayer"]->set_text("Multiplayer");
-			buttons["multiplayer"]->set_id("multiplayer");
-		}
-
+		assert(
+			new_state == State::login ||
+			new_state == State::choose_mode
+		);
 		break;
 
 	case MainMenu::State::choose_mode:
-
-		if (new_state == State::login)
-		{
-			state = State::login;
-
-			buttons.clear();
-			inputs.clear();
-			texts.clear();
-
-			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
-			buttons["login"] = std::move(button_ptr);
-			configure(buttons["login"]);
-			buttons["login"]->set_pos({ 480, 30 });
-			buttons["login"]->set_text("Login");
-			buttons["login"]->set_id("button_login");
-
-			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
-			inputs["password"] = std::move(input_ptr);
-			configure(inputs["password"]);
-			inputs["password"]->set_pos({ 260, 30 });
-			inputs["password"]->set_text("Password");
-
-			input_ptr = std::make_unique<TextInput>();
-			inputs["login"] = std::move(input_ptr);
-			configure(inputs["login"]);
-			inputs["login"]->set_pos({ 30, 30 });
-			inputs["login"]->set_text("Nickname");
-		}
-
-		if (new_state == State::singleplayer)
-		{
-			state = State::singleplayer;
-
-			buttons.clear();
-			inputs.clear();
-			texts.clear();
-
-			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
-			buttons["1_opponent"] = std::move(button_ptr);
-			configure(buttons["1_opponent"]);
-			buttons["1_opponent"]->set_pos({ 30, 30 });
-			buttons["1_opponent"]->set_size({ 30, 30 });
-			buttons["1_opponent"]->set_text("1");
-
-			button_ptr = std::make_unique<Button>();
-			buttons["2_opponents"] = std::move(button_ptr);
-			configure(buttons["2_opponents"]);
-			buttons["2_opponents"]->set_pos({ 60, 30 });
-			buttons["2_opponents"]->set_size({ 30, 30 });
-			buttons["2_opponents"]->set_text("2");
-
-			button_ptr = std::make_unique<Button>();
-			buttons["3_opponents"] = std::move(button_ptr);
-			configure(buttons["3_opponents"]);
-			buttons["3_opponents"]->set_pos({ 90, 30 });
-			buttons["3_opponents"]->set_size({ 30, 30 });
-			buttons["3_opponents"]->set_text("3");
-
-			std::unique_ptr<Text> text_ptr = std::make_unique<Text>();
-			texts["opponents_num"] = std::move(text_ptr);
-			configure(texts["opponents_num"]);
-			texts["opponents_num"]->set_text("Choose nuber of opponents:");
-			// TODO: Extend the Text class with a "set_pos" member function
-			//texts["opponents_num"]->set_pos({ 150, 30 });
-		}
-
-		if (new_state == State::multiplayer)
-		{
-			state = State::multiplayer;
-
-			buttons.clear();
-			inputs.clear();
-			texts.clear();
-			
-			std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
-			buttons["create_battle"] = std::move(button_ptr);
-			configure(buttons["create_battle"]);
-			buttons["create_battle"]->set_pos({ 30, 30 });
-			buttons["create_battle"]->set_text("Create Battle");
-
-			button_ptr = std::make_unique<Button>();
-			buttons["start_battle"] = std::move(button_ptr);
-			configure(buttons["start_battle"]);
-			buttons["start_battle"]->set_pos({ 30, 70 });
-			buttons["start_battle"]->set_text("Start Battle");
-
-			button_ptr = std::make_unique<Button>();
-			buttons["join_battle"] = std::move(button_ptr);
-			configure(buttons["join_battle"]);
-			buttons["join_battle"]->set_pos({ 30, 110 });
-			buttons["join_battle"]->set_text("Join Battle");
-
-			button_ptr = std::make_unique<Button>();
-			buttons["leave_battle"] = std::move(button_ptr);
-			configure(buttons["leave_battle"]);
-			buttons["leave_battle"]->set_pos({ 30, 150 });
-			buttons["leave_battle"]->set_text("Leave Battle");
-
-			std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
-			inputs["battle_id"] = std::move(input_ptr);
-			configure(inputs["battle_id"]);
-			inputs["battle_id"]->set_pos({ 260, 30 });
-			inputs["battle_id"]->set_text("Battle ID");
-		}
-
+		assert(
+			new_state == State::login ||
+			new_state == State::singleplayer ||
+			new_state == State::multiplayer
+		);
 		break;
+
 	case MainMenu::State::singleplayer:
-
-		if (new_state == State::choose_mode)
-		{
-			state = State::choose_mode;
-		}
-
+		assert(new_state == State::choose_mode);
 		break;
+
 	case MainMenu::State::multiplayer:
-
-		if (new_state == State::choose_mode)
-		{
-			state = State::choose_mode;
-		}
-
+		assert(new_state == State::choose_mode);
 		break;
+
 	default:
 		break;
+	}
+
+	state = new_state;
+
+	buttons.clear();
+	inputs.clear();
+	texts.clear();
+
+	if (new_state == State::login)
+	{
+		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+		buttons["login"] = std::move(button_ptr);
+		configure(buttons["login"]);
+		buttons["login"]->set_pos({ 480, 30 });
+		buttons["login"]->set_text("Login");
+		buttons["login"]->set_id("button_login");
+
+		std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
+		inputs["password"] = std::move(input_ptr);
+		configure(inputs["password"]);
+		inputs["password"]->set_pos({ 260, 30 });
+		inputs["password"]->set_text("Password");
+
+		input_ptr = std::make_unique<TextInput>();
+		inputs["login"] = std::move(input_ptr);
+		configure(inputs["login"]);
+		inputs["login"]->set_pos({ 30, 30 });
+		inputs["login"]->set_text("Nickname");
+	}
+
+	if (new_state == State::choose_mode)
+	{
+		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+		buttons["singleplayer"] = std::move(button_ptr);
+		configure(buttons["singleplayer"]);
+		buttons["singleplayer"]->set_pos({ 30, 30 });
+		buttons["singleplayer"]->set_text("Singleplayer");
+		buttons["singleplayer"]->set_id("singleplayer");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["multiplayer"] = std::move(button_ptr);
+		configure(buttons["multiplayer"]);
+		buttons["multiplayer"]->set_pos({ 30, 70 });
+		buttons["multiplayer"]->set_text("Multiplayer");
+		buttons["multiplayer"]->set_id("multiplayer");
+	}
+
+	if (new_state == State::singleplayer)
+	{
+		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+		buttons["1_opponent"] = std::move(button_ptr);
+		configure(buttons["1_opponent"]);
+		buttons["1_opponent"]->set_pos({ 30, 30 });
+		buttons["1_opponent"]->set_size({ 30, 30 });
+		buttons["1_opponent"]->set_text("1");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["2_opponents"] = std::move(button_ptr);
+		configure(buttons["2_opponents"]);
+		buttons["2_opponents"]->set_pos({ 60, 30 });
+		buttons["2_opponents"]->set_size({ 30, 30 });
+		buttons["2_opponents"]->set_text("2");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["3_opponents"] = std::move(button_ptr);
+		configure(buttons["3_opponents"]);
+		buttons["3_opponents"]->set_pos({ 90, 30 });
+		buttons["3_opponents"]->set_size({ 30, 30 });
+		buttons["3_opponents"]->set_text("3");
+
+		std::unique_ptr<Text> text_ptr = std::make_unique<Text>();
+		texts["opponents_num"] = std::move(text_ptr);
+		configure(texts["opponents_num"]);
+		texts["opponents_num"]->set_text("Choose nuber of opponents:");
+		// TODO: Extend the Text class with a "set_pos" member function
+		//texts["opponents_num"]->set_pos({ 150, 30 });
+	}
+
+	if (new_state == State::multiplayer)
+	{
+		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
+		buttons["create_battle"] = std::move(button_ptr);
+		configure(buttons["create_battle"]);
+		buttons["create_battle"]->set_pos({ 30, 30 });
+		buttons["create_battle"]->set_text("Create Battle");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["start_battle"] = std::move(button_ptr);
+		configure(buttons["start_battle"]);
+		buttons["start_battle"]->set_pos({ 30, 70 });
+		buttons["start_battle"]->set_text("Start Battle");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["join_battle"] = std::move(button_ptr);
+		configure(buttons["join_battle"]);
+		buttons["join_battle"]->set_pos({ 30, 110 });
+		buttons["join_battle"]->set_text("Join Battle");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["leave_battle"] = std::move(button_ptr);
+		configure(buttons["leave_battle"]);
+		buttons["leave_battle"]->set_pos({ 30, 150 });
+		buttons["leave_battle"]->set_text("Leave Battle");
+
+		std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
+		inputs["battle_id"] = std::move(input_ptr);
+		configure(inputs["battle_id"]);
+		inputs["battle_id"]->set_pos({ 260, 30 });
+		inputs["battle_id"]->set_text("Battle ID");
 	}
 
 	state_mutex.unlock();
