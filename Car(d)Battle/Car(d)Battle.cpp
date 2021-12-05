@@ -60,6 +60,18 @@ int main(int argc, char* argv[])
 			Singleton<Keyboard>().set_focus(focused);
 		});
 
+	//glfwSetMouseButtonCallback(window,
+	//	[](GLFWwindow*, int button, int act, int)
+	//	{
+	//		if (button == GLFW_MOUSE_BUTTON_LEFT)
+	//		{
+	//			if (act == GLFW_PRESS)
+	//				Singleton<Keyboard>().notify(1, Keyboard::Key_action::on_press);
+	//			else
+	//				Singleton<Keyboard>().notify(1, Keyboard::Key_action::on_release);
+	//		}
+	//	});
+
 	glfwSwapInterval(1);//V-SYNC
 
 	ui.set_screen_size(1280, 720);
