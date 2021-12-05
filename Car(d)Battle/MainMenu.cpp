@@ -56,26 +56,31 @@ void MainMenu::change_state(State new_state)
 	inputs.clear();
 	texts.clear();
 
+	GLuint bottom_offset = 150;
+	GLuint left_offset = 315;
+
 	if (new_state == State::login)
 	{
+
+		std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
+		inputs["login"] = std::move(input_ptr);
+		configure(inputs["login"]);
+		inputs["login"]->set_pos({ left_offset, bottom_offset + 65 });
+		inputs["login"]->set_text("Nickname");
+
+		input_ptr = std::make_unique<TextInput>();
+		inputs["password"] = std::move(input_ptr);
+		configure(inputs["password"]);
+		inputs["password"]->set_pos({ left_offset + 225, bottom_offset + 65 });
+		inputs["password"]->set_text("Password");
+		inputs["password"]->set_id("input_login");
+
 		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
 		buttons["login"] = std::move(button_ptr);
 		configure(buttons["login"]);
-		buttons["login"]->set_pos({ 480, 30 });
+		buttons["login"]->set_pos({ left_offset + 450, bottom_offset + 65 });
 		buttons["login"]->set_text("Login");
 		buttons["login"]->set_id("button_login");
-
-		std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
-		inputs["password"] = std::move(input_ptr);
-		configure(inputs["password"]);
-		inputs["password"]->set_pos({ 260, 30 });
-		inputs["password"]->set_text("Password");
-
-		input_ptr = std::make_unique<TextInput>();
-		inputs["login"] = std::move(input_ptr);
-		configure(inputs["login"]);
-		inputs["login"]->set_pos({ 30, 30 });
-		inputs["login"]->set_text("Nickname");
 	}
 
 	if (new_state == State::choose_mode)
@@ -83,14 +88,14 @@ void MainMenu::change_state(State new_state)
 		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
 		buttons["singleplayer"] = std::move(button_ptr);
 		configure(buttons["singleplayer"]);
-		buttons["singleplayer"]->set_pos({ 30, 30 });
+		buttons["singleplayer"]->set_pos({ left_offset, bottom_offset + 65 });
 		buttons["singleplayer"]->set_text("Singleplayer");
 		buttons["singleplayer"]->set_id("singleplayer");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["multiplayer"] = std::move(button_ptr);
 		configure(buttons["multiplayer"]);
-		buttons["multiplayer"]->set_pos({ 30, 70 });
+		buttons["multiplayer"]->set_pos({ left_offset + 225, bottom_offset + 65 });
 		buttons["multiplayer"]->set_text("Multiplayer");
 		buttons["multiplayer"]->set_id("multiplayer");
 	}
@@ -100,22 +105,22 @@ void MainMenu::change_state(State new_state)
 		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
 		buttons["1_opponent"] = std::move(button_ptr);
 		configure(buttons["1_opponent"]);
-		buttons["1_opponent"]->set_pos({ 30, 30 });
-		buttons["1_opponent"]->set_size({ 30, 30 });
+		buttons["1_opponent"]->set_pos({ left_offset + 400, bottom_offset + 195 });
+		buttons["1_opponent"]->set_size({ 40, 40 });
 		buttons["1_opponent"]->set_text("1");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["2_opponents"] = std::move(button_ptr);
 		configure(buttons["2_opponents"]);
-		buttons["2_opponents"]->set_pos({ 60, 30 });
-		buttons["2_opponents"]->set_size({ 30, 30 });
+		buttons["2_opponents"]->set_pos({ left_offset + 400, bottom_offset + 130 });
+		buttons["2_opponents"]->set_size({ 40, 40 });
 		buttons["2_opponents"]->set_text("2");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["3_opponents"] = std::move(button_ptr);
 		configure(buttons["3_opponents"]);
-		buttons["3_opponents"]->set_pos({ 90, 30 });
-		buttons["3_opponents"]->set_size({ 30, 30 });
+		buttons["3_opponents"]->set_pos({ left_offset + 400, bottom_offset + 65 });
+		buttons["3_opponents"]->set_size({ 40, 40 });
 		buttons["3_opponents"]->set_text("3");
 
 		std::unique_ptr<Text> text_ptr = std::make_unique<Text>();
@@ -123,7 +128,7 @@ void MainMenu::change_state(State new_state)
 		configure(texts["opponents_num"]);
 		texts["opponents_num"]->set_text("Choose nuber of opponents:");
 		// TODO: Extend the Text class with a "set_pos" member function
-		//texts["opponents_num"]->set_pos({ 150, 30 });
+		// texts["opponents_num"]->set_pos({ 150, 30 });
 	}
 
 	if (new_state == State::multiplayer)
@@ -131,31 +136,31 @@ void MainMenu::change_state(State new_state)
 		std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
 		buttons["create_battle"] = std::move(button_ptr);
 		configure(buttons["create_battle"]);
-		buttons["create_battle"]->set_pos({ 30, 30 });
+		buttons["create_battle"]->set_pos({ left_offset + 450, bottom_offset + 130 });
 		buttons["create_battle"]->set_text("Create Battle");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["start_battle"] = std::move(button_ptr);
 		configure(buttons["start_battle"]);
-		buttons["start_battle"]->set_pos({ 30, 70 });
+		buttons["start_battle"]->set_pos({ left_offset + 450, bottom_offset + 65 });
 		buttons["start_battle"]->set_text("Start Battle");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["join_battle"] = std::move(button_ptr);
 		configure(buttons["join_battle"]);
-		buttons["join_battle"]->set_pos({ 30, 110 });
+		buttons["join_battle"]->set_pos({ left_offset , bottom_offset + 65 });
 		buttons["join_battle"]->set_text("Join Battle");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["leave_battle"] = std::move(button_ptr);
 		configure(buttons["leave_battle"]);
-		buttons["leave_battle"]->set_pos({ 30, 150 });
+		buttons["leave_battle"]->set_pos({ left_offset + 225, bottom_offset });
 		buttons["leave_battle"]->set_text("Leave Battle");
 
 		std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
 		inputs["battle_id"] = std::move(input_ptr);
 		configure(inputs["battle_id"]);
-		inputs["battle_id"]->set_pos({ 260, 30 });
+		inputs["battle_id"]->set_pos({ left_offset , bottom_offset + 130 });
 		inputs["battle_id"]->set_text("Battle ID");
 	}
 
@@ -184,9 +189,12 @@ void MainMenu::configure(std::unique_ptr<Text>& text)
 void MainMenu::configure(std::unique_ptr<TextInput>& input)
 {
 	input->set_font("arial.ttf");
-	input->set_size({ 200, 30 });
+	input->set_size({ 200, 40 });
 	input->set_projection(mvp);
 	input->set_screen_size(screen_size);
+	std::function<void(const std::string&)> fp =
+		std::bind(&MainMenu::button_callback, this, std::_Ph<1>());
+	input->set_enter_function(fp);
 }
 
 void MainMenu::draw()
@@ -282,7 +290,7 @@ void MainMenu::button_callback(const std::string& id)
 	{
 		change_state(State::multiplayer);
 	}
-	else if (id == "button_login")
+	else if (id == "button_login" || id == "input_login")
 	{
 		std::string login = inputs["login"]->get_text();
 		std::string passwd = inputs["password"]->get_text();
