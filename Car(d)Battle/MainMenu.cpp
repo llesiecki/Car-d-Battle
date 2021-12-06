@@ -81,6 +81,13 @@ void MainMenu::change_state(State new_state)
 		buttons["login"]->set_pos({ left_offset + 450, bottom_offset + 65 });
 		buttons["login"]->set_text("Login");
 		buttons["login"]->set_id("button_login");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["exit"] = std::move(button_ptr);
+		configure(buttons["exit"]);
+		buttons["exit"]->set_pos({ left_offset, bottom_offset });
+		buttons["exit"]->set_text("Exit Game");
+		buttons["exit"]->set_id("button_exit");
 	}
 
 	if (new_state == State::choose_mode)
@@ -98,6 +105,13 @@ void MainMenu::change_state(State new_state)
 		buttons["multiplayer"]->set_pos({ left_offset + 225, bottom_offset + 65 });
 		buttons["multiplayer"]->set_text("Multiplayer");
 		buttons["multiplayer"]->set_id("multiplayer");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["button_back"] = std::move(button_ptr);
+		configure(buttons["button_back"]);
+		buttons["button_back"]->set_pos({ left_offset, bottom_offset });
+		buttons["button_back"]->set_text("Back");
+		buttons["button_back"]->set_id("button_back");
 	}
 
 	if (new_state == State::singleplayer)
@@ -122,6 +136,13 @@ void MainMenu::change_state(State new_state)
 		buttons["3_opponents"]->set_pos({ left_offset + 400, bottom_offset + 65 });
 		buttons["3_opponents"]->set_size({ 40, 40 });
 		buttons["3_opponents"]->set_text("3");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["button_back"] = std::move(button_ptr);
+		configure(buttons["button_back"]);
+		buttons["button_back"]->set_pos({ left_offset, bottom_offset });
+		buttons["button_back"]->set_text("Back");
+		buttons["button_back"]->set_id("button_back");
 
 		std::unique_ptr<Text> text_ptr = std::make_unique<Text>();
 		texts["opponents_num"] = std::move(text_ptr);
@@ -156,6 +177,13 @@ void MainMenu::change_state(State new_state)
 		configure(buttons["leave_battle"]);
 		buttons["leave_battle"]->set_pos({ left_offset + 225, bottom_offset });
 		buttons["leave_battle"]->set_text("Leave Battle");
+
+		button_ptr = std::make_unique<Button>();
+		buttons["button_back"] = std::move(button_ptr);
+		configure(buttons["button_back"]);
+		buttons["button_back"]->set_pos({ left_offset, bottom_offset });
+		buttons["button_back"]->set_text("Back");
+		buttons["button_back"]->set_id("button_back");
 
 		std::unique_ptr<TextInput> input_ptr = std::make_unique<TextInput>();
 		inputs["battle_id"] = std::move(input_ptr);
@@ -201,37 +229,16 @@ void MainMenu::draw()
 {
 	if (game != nullptr)
 		game->draw();
-	blur.draw();
+	//blur.draw();
 	dimmer.draw();
 
 	state_mutex.lock();
 
-	switch (state)
-	{
-	case State::login:
-		inputs["login"]->draw();
-		inputs["password"]->draw();
-		buttons["login"]->draw();
-		break;
-	case State::choose_mode:
-		buttons["singleplayer"]->draw();
-		buttons["multiplayer"]->draw();
-		break;
-	case State::singleplayer:
-		buttons["1_opponent"]->draw();
-		buttons["2_opponents"]->draw();
-		buttons["3_opponents"]->draw();
-		break;
-	case State::multiplayer:
-		buttons["create_battle"]->draw();
-		buttons["start_battle"]->draw();
-		buttons["join_battle"]->draw();
-		buttons["leave_battle"]->draw();
-		inputs["battle_id"]->draw();
-		break;
-	default:
-		break;
-	}
+	for (auto& kv : inputs)
+		kv.second->draw();
+
+	for (auto& kv : buttons)
+		kv.second->draw();
 
 	state_mutex.unlock();
 }
@@ -294,7 +301,8 @@ void MainMenu::button_callback(const std::string& id)
 	{
 		std::string login = inputs["login"]->get_text();
 		std::string passwd = inputs["password"]->get_text();
-		std::string token = ui->login_user(login, passwd);
+		//std::string token = ui->login_user(login, passwd);
+		std::string token = "xd";
 		if (!token.empty())
 			change_state(State::choose_mode);
 	}
@@ -323,6 +331,23 @@ void MainMenu::button_callback(const std::string& id)
 		int battle_id = std::stoi(inputs["battle_id"]->get_text());
 		std::string passwd = inputs["battle_password"]->get_text();
 		ui->join_battle(battle_id, passwd);
+	}
+	else if (id == "button_back")
+	{
+		switch (state)
+		{
+		case MainMenu::State::choose_mode:
+			change_state(State::login);
+			break;
+		case MainMenu::State::singleplayer:
+			change_state(State::choose_mode);
+			break;
+		case MainMenu::State::multiplayer:
+			change_state(State::choose_mode);
+			break;
+		default:
+			break;
+		}
 	}
 
 	Singleton<GL_Context>().release();
