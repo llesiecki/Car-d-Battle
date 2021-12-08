@@ -13,6 +13,7 @@
 #include "Dimmer.h"
 #include "Blur.h"
 #include "TextInput.h"
+#include "MainMenu.h"
 
 class UI
 	:public UI_Interface
@@ -37,6 +38,7 @@ class UI
 	Dimmer dimmer;
 	Blur blur;
 	TextInput input;
+	MainMenu mainmenu;
 
 	void key_handler(BYTE, Keyboard::Key_action);
 	std::map<std::string, std::string> get_server_response(

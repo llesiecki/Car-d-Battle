@@ -5,11 +5,13 @@ UI::UI()
 	ortho(1.0f),
 	battle_id(0),
 	kb(Singleton<Keyboard>()),
-	screen_size()
+	screen_size(),
+	mainmenu()
 {
 	game = nullptr;
 	kill_threads = false;
 	pause = false;
+	mainmenu.set_ui(this);
 	network_client.start();
 	std::string keys;
 	keys = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
@@ -89,6 +91,7 @@ void UI::key_handler(BYTE key, Keyboard::Key_action action)
 	input.key_handler(key, action);
 	button_start.keyboard_callback(key, action);
 	button_stop.keyboard_callback(key, action);
+	mainmenu.keyboard_callback(key, action);
 }
 
 std::map<std::string, std::string> UI::get_server_response(
@@ -235,6 +238,8 @@ void UI::set_screen_size(int x, int y)
 			0.0f, static_cast<float>(screen_size.y)
 		);
 	text.set_mvp(ortho);
+	mainmenu.set_mvp(ortho);
+	mainmenu.set_screen_size({ x, y });
 	if (game != nullptr)
 		game->set_screen_size(x, y);
 	button_start.set_screen_size({ x, y });
@@ -252,6 +257,7 @@ void UI::set_cursor_pos(float x, float y)
 	button_stop.set_cursor_pos(cursor_pos);
 	button_start.set_cursor_pos(cursor_pos);
 	input.set_cursor_pos(cursor_pos);
+	mainmenu.set_cursor_pos(cursor_pos);
 	if (game != nullptr)
 		game->set_cursor_pos(x, y);
 }
@@ -372,6 +378,7 @@ void UI::render_pause_menu()
 	button_start.draw();
 	button_stop.draw();
 	input.draw();
+	mainmenu.draw();
 	glEnable(GL_DEPTH_TEST);
 }
 
