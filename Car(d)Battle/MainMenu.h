@@ -27,6 +27,7 @@ class MainMenu
 	Game* game;
 	UI_Interface* ui;
 	glm::ivec2 screen_size;
+	const glm::vec2 ref_size;
 	glm::mat4 mvp;
 	std::map<std::string, std::unique_ptr<Button>> buttons;
 	std::map<std::string, std::unique_ptr<Text>> texts;
@@ -46,7 +47,7 @@ public:
 	void draw();
 	void set_ui(UI_Interface*);
 	void set_mvp(const glm::mat4&);
-	void set_screen_size(const glm::ivec2);
+	void set_screen_size(glm::ivec2);
 	void set_cursor_pos(std::pair<float, float>);
 	void button_callback(const std::string&);
 	void keyboard_callback(BYTE, Keyboard::Key_action);

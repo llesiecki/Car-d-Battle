@@ -1,7 +1,7 @@
 #include "MainMenu.h"
 
 MainMenu::MainMenu(const glm::mat4& mvp)
-	:screen_size(1, 1), mvp(mvp)
+	:screen_size(1, 1), mvp(mvp), ref_size(1280, 720)
 {
 	state = State::login;
 	game = nullptr;
@@ -252,8 +252,6 @@ void MainMenu::set_mvp(const glm::mat4& mvp)
 {
 	this->mvp = mvp;
 
-	dimmer.set_mvp(mvp);
-
 	for (auto& kv : inputs)
 		kv.second->set_projection(mvp);
 
@@ -263,8 +261,13 @@ void MainMenu::set_mvp(const glm::mat4& mvp)
 
 void MainMenu::set_screen_size(const glm::ivec2 size)
 {
+	const glm::mat4 full_screen_ortho = glm::ortho(
+		0.0f, static_cast<float>(screen_size.x),
+		0.0f, static_cast<float>(screen_size.y)
+	);
 	screen_size = size;
 	blur.set_size(size);
+	dimmer.set_mvp(full_screen_ortho);
 	dimmer.set_size(size);
 	if (game != nullptr)
 		game->set_screen_size(size.x, size.y);
@@ -274,6 +277,49 @@ void MainMenu::set_screen_size(const glm::ivec2 size)
 
 	for (auto& kv : buttons)
 		kv.second->set_screen_size(size);
+
+	// case 1 - increase the menu size on larger screens:
+	glm::vec2 scale(glm::vec2(screen_size.x, screen_size.y) / ref_size);
+	scale = glm::vec2(std::min(scale.x, scale.y), std::min(scale.x, scale.y));
+	glm::vec2 menu_size = ref_size * scale;
+
+	// case 2 - don't make the menu size too small on smaller screens:
+	if (menu_size.x < ref_size.x || menu_size.y < ref_size.y)
+	{
+		menu_size = ref_size;
+	}
+
+	// case 3 - match the menu size with a really small resolution:
+	if (menu_size.x > screen_size.x)
+	{
+		menu_size.x = static_cast<float>(screen_size.x);
+		menu_size.y = menu_size.x * ref_size.y / ref_size.x;
+	}
+
+	if (menu_size.y > screen_size.y)
+	{
+		menu_size.y = static_cast<float>(screen_size.y);
+		menu_size.x = menu_size.y * ref_size.x / ref_size.y;
+	}
+
+	// recalculate scale:
+	scale = menu_size / ref_size;
+	const glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1));
+
+	// calculate origin:
+	const glm::vec2 origin(
+		(screen_size.x - menu_size.x) / 2,
+		(screen_size.y - menu_size.y) / 2
+	);
+	const glm::mat4 translate_mat = glm::translate(glm::mat4(1.0f), glm::vec3(origin, 0));
+
+	// create projection matrix:
+	const glm::mat4 menu_ortho = glm::ortho(
+		0.0f, static_cast<float>(screen_size.x),
+		0.0f, static_cast<float>(screen_size.y)
+	) * translate_mat * scale_mat;
+
+	this->set_mvp(menu_ortho);
 }
 
 void MainMenu::set_cursor_pos(std::pair<float, float> cursor_pos)
