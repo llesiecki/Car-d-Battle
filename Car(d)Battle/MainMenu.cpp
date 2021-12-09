@@ -19,7 +19,7 @@ MainMenu::~MainMenu()
 
 void MainMenu::change_state(State new_state)
 {
-	state_mutex.lock();
+	std::scoped_lock<std::mutex> lock(state_mutex);
 
 	switch (state)
 	{
@@ -191,8 +191,6 @@ void MainMenu::change_state(State new_state)
 		inputs["battle_id"]->set_pos({ left_offset , bottom_offset + 130 });
 		inputs["battle_id"]->set_text("Battle ID");
 	}
-
-	state_mutex.unlock();
 }
 
 void MainMenu::configure(std::unique_ptr<Button>& button)

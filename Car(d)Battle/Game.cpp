@@ -538,7 +538,8 @@ void Game::tiebreak()
 					animations_lock.lock();
 					player_stack[player_num] = player_card[player_num];
 					player_card[player_num].clear();
-					std::random_shuffle(player_stack[player_num].begin(), player_stack[player_num].end(), [](int a) -> int {return rand() % a; });
+					for (unsigned int i = 1; i < player_stack[player_num].size(); i++)
+						std::swap(player_stack[player_num][i], player_stack[player_num][rand() % i]);
 					animations_lock.unlock();
 
 					//it is possible, that all the winners left have the same value in the selected category.
@@ -762,7 +763,8 @@ void Game::start(int players_num)
 	player_card.clear();
 	player_stack.clear();
 
-	std::random_shuffle(central_stack.begin(), central_stack.end(), [](int a) -> int {return rand() % a; });
+	for (unsigned int i = 1; i < central_stack.size(); i++)
+		std::swap(central_stack[i], central_stack[rand() % i]);
 	if (central_stack.size() != 24)
 		std::cerr << "Number of cards is != 24 (" + std::to_string(central_stack.size()) + ")\n";
 	winner = new bool[players_num];

@@ -1,5 +1,19 @@
 #include "WorkBook.h"
 
+std::string WorkBook::wstring_to_string(const std::wstring& wstring)
+{
+    std::string str;
+
+    if (!wstring.empty())
+    {
+        int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstring.data(), wstring.size(), NULL, 0, NULL, NULL);
+        str = std::string(size_needed, 0);
+        WideCharToMultiByte(CP_UTF8, 0, wstring.data(), wstring.size(), str.data(), size_needed, NULL, NULL);
+    }
+    
+    return str;
+}
+
 WorkBook::WorkBook(const wchar_t* filename)
     :book(nullptr), sheet(nullptr)
 {
@@ -13,10 +27,11 @@ WorkBook::WorkBook(const wchar_t* filename)
     }
     if (!good)
     {
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        
+
         throw std::runtime_error(
             "Couldn't open file: " +
-            converter.to_bytes(filename) +
+            wstring_to_string(filename) +
             " for reading.\n"
         );
     }
@@ -39,7 +54,7 @@ std::string WorkBook::cell_to_string(int row, int col)
         str.erase(str.find_last_not_of('0') + 1, std::string::npos);
         str.erase(str.find_last_not_of('.') + 1, std::string::npos);
         return str;
-    case libxl::CELLTYPE_STRING: return std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>().to_bytes(sheet->readStr(row, col));
+    case libxl::CELLTYPE_STRING: return wstring_to_string(sheet->readStr(row, col));
     case libxl::CELLTYPE_BOOLEAN: return std::string(sheet->readBool(row, col) ? "true" : "false");
     default: return std::string();
     }
