@@ -1,7 +1,7 @@
 #include "MainMenu.h"
 
 MainMenu::MainMenu(const glm::mat4& mvp)
-	:screen_size(1, 1), mvp(mvp), ref_size(1280, 720)
+	:screen_size(1, 1), mvp(mvp), ref_size(650, 500), ref_resolution(1280, 720)
 {
 	state = State::login;
 	game = nullptr;
@@ -56,8 +56,8 @@ void MainMenu::change_state(State new_state)
 	inputs.clear();
 	texts.clear();
 
-	GLuint bottom_offset = 150;
-	GLuint left_offset = 315;
+	GLuint bottom_offset = 0;
+	GLuint left_offset = 0;
 
 	if (new_state == State::login)
 	{
@@ -259,14 +259,14 @@ void MainMenu::set_mvp(const glm::mat4& mvp)
 
 void MainMenu::set_screen_size(const glm::ivec2 size)
 {
+	screen_size = size;
 	const glm::mat4 full_screen_ortho = glm::ortho(
 		0.0f, static_cast<float>(screen_size.x),
 		0.0f, static_cast<float>(screen_size.y)
 	);
-	screen_size = size;
 	blur.set_size(size);
-	dimmer.set_mvp(full_screen_ortho);
 	dimmer.set_size(size);
+	dimmer.set_mvp(full_screen_ortho);
 	if (game != nullptr)
 		game->set_screen_size(size.x, size.y);
 
@@ -277,9 +277,10 @@ void MainMenu::set_screen_size(const glm::ivec2 size)
 		kv.second->set_screen_size(size);
 
 	// case 1 - increase the menu size on larger screens:
-	glm::vec2 scale(glm::vec2(screen_size.x, screen_size.y) / ref_size);
+	glm::vec2 scale(glm::vec2(screen_size.x, screen_size.y) / ref_resolution);
 	scale = glm::vec2(std::min(scale.x, scale.y), std::min(scale.x, scale.y));
 	glm::vec2 menu_size = ref_size * scale;
+	std::cout << menu_size.x << " " << menu_size.y << std::endl;
 
 	// case 2 - don't make the menu size too small on smaller screens:
 	if (menu_size.x < ref_size.x || menu_size.y < ref_size.y)
@@ -299,6 +300,7 @@ void MainMenu::set_screen_size(const glm::ivec2 size)
 		menu_size.y = static_cast<float>(screen_size.y);
 		menu_size.x = menu_size.y * ref_size.x / ref_size.y;
 	}
+
 
 	// recalculate scale:
 	scale = menu_size / ref_size;
