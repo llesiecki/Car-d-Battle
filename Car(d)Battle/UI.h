@@ -66,4 +66,5 @@ public:
 	//interface implementation:
 	void request_category();
 	void button_callback(const std::string&);
+	void exit_game();
 };

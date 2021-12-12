@@ -10,7 +10,7 @@ class GL_Context
 {
 	unsigned int lock_count;
 	std::recursive_mutex gl_lock;
-	std::thread::id last_owner;
+	std::thread::id owner;
 	GLFWwindow* window;
 	GL_Context();
 public:
@@ -19,4 +19,5 @@ public:
 	void obtain();
 	void release();
 	void set(GLFWwindow*);
+	GLFWwindow* get_window();
 };

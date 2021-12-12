@@ -238,7 +238,6 @@ void UI::set_screen_size(int x, int y)
 			0.0f, static_cast<float>(screen_size.y)
 		);
 	text.set_mvp(ortho);
-	mainmenu.set_mvp(ortho);
 	mainmenu.set_screen_size({ x, y });
 	if (game != nullptr)
 		game->set_screen_size(x, y);
@@ -314,6 +313,14 @@ void UI::button_callback(const std::string& button_id)
 		game = nullptr;
 		Singleton<GL_Context>().release();
 	}
+}
+
+void UI::exit_game()
+{
+	Singleton<GL_Context>().obtain();
+	GLFWwindow* window = Singleton<GL_Context>().get_window();
+	glfwSetWindowShouldClose(window, 1);
+	Singleton<GL_Context>().release();
 }
 
 void UI::render_pause_menu()

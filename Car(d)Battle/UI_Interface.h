@@ -10,4 +10,5 @@ public:
 	virtual std::string register_user(const std::string&, const std::string&) = 0;
 	virtual std::string login_user(const std::string&, const std::string&) = 0;
 	virtual void start_game(int) = 0;
+	virtual void exit_game() = 0;
 };

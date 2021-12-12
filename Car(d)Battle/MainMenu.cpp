@@ -280,7 +280,6 @@ void MainMenu::set_screen_size(const glm::ivec2 size)
 	glm::vec2 scale(glm::vec2(screen_size.x, screen_size.y) / ref_resolution);
 	scale = glm::vec2(std::min(scale.x, scale.y), std::min(scale.x, scale.y));
 	glm::vec2 menu_size = ref_size * scale;
-	std::cout << menu_size.x << " " << menu_size.y << std::endl;
 
 	// case 2 - don't make the menu size too small on smaller screens:
 	if (menu_size.x < ref_size.x || menu_size.y < ref_size.y)
@@ -394,6 +393,10 @@ void MainMenu::button_callback(const std::string& id)
 		default:
 			break;
 		}
+	}
+	else if (id == "button_exit")
+	{
+		std::thread(&UI_Interface::exit_game, this->ui).detach();
 	}
 
 	Singleton<GL_Context>().release();
