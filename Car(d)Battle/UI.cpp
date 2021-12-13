@@ -296,14 +296,7 @@ void UI::button_callback(const std::string& button_id)
 
 	if (button_id == "start_sp" && game == nullptr)
 	{
-		Singleton<GL_Context>().obtain();
-		game = new Game();
-		game->set_UI(this);
-		game->load();
-		game->start(4);
-		game->set_pause(pause);
-		game->set_screen_size(screen_size.x, screen_size.y);
-		Singleton<GL_Context>().release();
+		start_game(4);
 	}
 
 	if (button_id == "stop" && game != nullptr)
@@ -389,13 +382,13 @@ void UI::render_pause_menu()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void UI::start_game(int opponents)
+void UI::start_game(int players)
 {
 	Singleton<GL_Context>().obtain();
 	game = new Game();
 	game->set_UI(this);
 	game->load();
-	game->start(opponents + 1);
+	game->start(players);
 	game->set_pause(pause);
 	game->set_screen_size(screen_size.x, screen_size.y);
 	Singleton<GL_Context>().release();

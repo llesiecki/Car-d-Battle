@@ -122,6 +122,7 @@ void MainMenu::change_state(State new_state)
 		buttons["1_opponent"]->set_pos({ left_offset + 400, bottom_offset + 195 });
 		buttons["1_opponent"]->set_size({ 40, 40 });
 		buttons["1_opponent"]->set_text("1");
+		buttons["1_opponent"]->set_id("1_opponent");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["2_opponents"] = std::move(button_ptr);
@@ -129,6 +130,7 @@ void MainMenu::change_state(State new_state)
 		buttons["2_opponents"]->set_pos({ left_offset + 400, bottom_offset + 130 });
 		buttons["2_opponents"]->set_size({ 40, 40 });
 		buttons["2_opponents"]->set_text("2");
+		buttons["2_opponents"]->set_id("2_opponents");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["3_opponents"] = std::move(button_ptr);
@@ -136,6 +138,7 @@ void MainMenu::change_state(State new_state)
 		buttons["3_opponents"]->set_pos({ left_offset + 400, bottom_offset + 65 });
 		buttons["3_opponents"]->set_size({ 40, 40 });
 		buttons["3_opponents"]->set_text("3");
+		buttons["3_opponents"]->set_id("3_opponents");
 
 		button_ptr = std::make_unique<Button>();
 		buttons["button_back"] = std::move(button_ptr);
@@ -353,15 +356,15 @@ void MainMenu::button_callback(const std::string& id)
 	}
 	else if (id == "1_opponent")
 	{
-		ui->start_game(1);
+		ui->start_game(1 + 1);
 	}
 	else if (id == "2_opponents")
 	{
-		ui->start_game(2);
+		ui->start_game(2 + 1);
 	}
 	else if (id == "3_opponents")
 	{
-		ui->start_game(3);
+		ui->start_game(3 + 1);
 	}
 	else if (id == "create_battle")
 	{
