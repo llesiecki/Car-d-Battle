@@ -170,6 +170,7 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Line.cpp" />
     <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="PauseMenu.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="MainMenu.h" />
+    <ClInclude Include="PauseMenu.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Singleton.h" />
