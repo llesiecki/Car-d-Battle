@@ -3,7 +3,6 @@
 #include "UI_Interface.h"
 #include "Button.h"
 #include "Text.h"
-#include "TextInput.h"
 #include "Blur.h"
 #include "Dimmer.h"
 #include <thread>
@@ -17,7 +16,6 @@ class PauseMenu
 	glm::mat4 mvp;
 	std::map<std::string, std::unique_ptr<Button>> buttons;
 	std::map<std::string, std::unique_ptr<Text>> texts;
-	std::map<std::string, std::unique_ptr<TextInput>> inputs;
 	Blur blur;
 	Dimmer dimmer;
 
