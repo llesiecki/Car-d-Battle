@@ -316,6 +316,22 @@ void UI::exit_game()
 	Singleton<GL_Context>().release();
 }
 
+void UI::set_pause(bool pause)
+{
+	this->pause = pause;
+}
+
+void UI::leave_battle()
+{
+	if (game != nullptr)
+	{
+		Singleton<GL_Context>().obtain();
+		delete game;
+		game = nullptr;
+		Singleton<GL_Context>().release();
+	}
+}
+
 void UI::render_pause_menu()
 {
 	const glm::vec2 ref_size(640, 480);

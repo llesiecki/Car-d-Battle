@@ -67,4 +67,6 @@ public:
 	void request_category();
 	void button_callback(const std::string&);
 	void exit_game();
+	void set_pause(bool);
+	void leave_battle();
 };
