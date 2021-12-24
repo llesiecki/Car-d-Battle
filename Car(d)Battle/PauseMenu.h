@@ -21,7 +21,6 @@ class PauseMenu
 
 	void configure(std::unique_ptr<Button>&);
 	void configure(std::unique_ptr<Text>&);
-	void configure(std::unique_ptr<TextInput>&);
 
 public:
 	PauseMenu();

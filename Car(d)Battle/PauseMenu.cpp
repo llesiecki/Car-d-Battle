@@ -5,11 +5,6 @@ PauseMenu::PauseMenu()
 {
 	ui = nullptr;
 	std::unique_ptr<Button> button_ptr = std::make_unique<Button>();
-	buttons["leave"] = std::move(button_ptr);
-	configure(buttons["leave"]);
-	buttons["leave"]->set_pos({ 220, 60 });
-	buttons["leave"]->set_text("Leave battle");
-	buttons["leave"]->set_id("button_leave");
 
 	buttons["resume"] = std::move(button_ptr);
 	configure(buttons["resume"]);
@@ -17,11 +12,19 @@ PauseMenu::PauseMenu()
 	buttons["resume"]->set_text("Resume");
 	buttons["resume"]->set_id("button_resume");
 
+	button_ptr = std::make_unique<Button>();
 	buttons["options"] = std::move(button_ptr);
 	configure(buttons["options"]);
 	buttons["options"]->set_pos({ 220, 160 });
 	buttons["options"]->set_text("Options...");
 	buttons["options"]->set_id("button_options");
+
+	button_ptr = std::make_unique<Button>();
+	buttons["leave"] = std::move(button_ptr);
+	configure(buttons["leave"]);
+	buttons["leave"]->set_pos({ 220, 60 });
+	buttons["leave"]->set_text("Leave battle");
+	buttons["leave"]->set_id("button_leave");
 
 	std::unique_ptr<Text> text_ptr = std::make_unique<Text>();
 	texts["title"] = std::move(text_ptr);
@@ -138,15 +141,36 @@ void PauseMenu::set_screen_size(const glm::ivec2 size)
 
 void PauseMenu::set_cursor_pos(std::pair<float, float> cursor_pos)
 {
-
+	for (auto& kv : buttons)
+	{
+		kv.second->set_cursor_pos(cursor_pos);
+	}
 }
 
 void PauseMenu::button_callback(const std::string& id)
 {
+	Singleton<GL_Context>().obtain();
 
+	if (id == "resume")
+	{
+		std::thread(&UI_Interface::set_pause, this->ui, false).detach();
+	}
+	else if (id == "options")
+	{
+		
+	}
+	else if (id == "leave")
+	{
+		std::thread(&UI_Interface::leave_battle, this->ui).detach();
+	}
+
+	Singleton<GL_Context>().release();
 }
 
 void PauseMenu::keyboard_callback(BYTE key, Keyboard::Key_action act)
 {
-
+	for (auto& kv : buttons)
+	{
+		kv.second->keyboard_callback(key, act);
+	}
 }
