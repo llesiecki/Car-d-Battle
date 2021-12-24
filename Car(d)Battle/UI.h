@@ -14,6 +14,7 @@
 #include "Blur.h"
 #include "TextInput.h"
 #include "MainMenu.h"
+#include "PauseMenu.h"
 
 class UI
 	:public UI_Interface
@@ -33,11 +34,7 @@ class UI
 	POINT screen_size;
 	std::pair<float, float> cursor_pos;
 	glm::mat4 ortho;
-	Text text;
-	Button button_start, button_stop;
-	Dimmer dimmer;
-	Blur blur;
-	TextInput input;
+	PauseMenu pausemenu;
 	MainMenu mainmenu;
 
 	void key_handler(BYTE, Keyboard::Key_action);
@@ -50,7 +47,6 @@ class UI
 	int start_battle();
 	std::string register_user(const std::string &, const std::string &);
 	std::string login_user(const std::string &, const std::string &);
-	void render_pause_menu();
 	void start_game(int);
 
 	UI();

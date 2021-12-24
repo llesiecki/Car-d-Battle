@@ -12,6 +12,7 @@ UI::UI()
 	kill_threads = false;
 	pause = false;
 	mainmenu.set_ui(this);
+	pausemenu.set_ui(this);
 	network_client.start();
 	std::string keys;
 	keys = "QWERTYUIOPASDFGHJKLZXCVBNM0123456789";
@@ -28,35 +29,6 @@ UI::UI()
 
 	keys_to_observe.insert(keys_to_observe.end(), keys.begin(), keys.end());
 
-	button_start.set_pos({ 0, 0 });
-	button_start.set_size({ 400, 40 });
-	button_start.set_text("Start Singleplayer");
-	button_start.set_texture("textures\\button.bmp");
-	button_start.set_font("arial.ttf");
-	button_start.set_id("start_sp");
-	std::function<void(const std::string&)> fp =
-		std::bind(&UI::button_callback, this, std::_Ph<1>());
-	button_start.set_press_function(fp);
-
-	button_stop.set_pos({ 60, 60 });
-	button_stop.set_size({ 400, 40 });
-	button_stop.set_text("Exit");
-	button_stop.set_texture("textures\\button.bmp");
-	button_stop.set_font("arial.ttf");
-	button_stop.set_id("stop");
-	fp = std::bind(&UI::button_callback, this, std::_Ph<1>());
-	button_stop.set_press_function(fp);
-
-	input.set_font("arial.ttf");
-	input.set_id("input");
-	input.set_text("Initial text");
-	input.set_size({ 300, 30 });
-	input.set_pos({ 120.0f, 120.0f });
-
-	text.set_text("Singleplayer");
-	text.set_font("arial.ttf");
-
-	text.set_color(glm::vec4(0, 0, 0, 1));
 	for (const BYTE vk_code : keys_to_observe)
 	{
 		std::function<void(BYTE, Keyboard::Key_action)> fp =
@@ -87,11 +59,8 @@ void UI::key_handler(BYTE key, Keyboard::Key_action action)
 		if (game != nullptr)
 			game->key_handler(key, action);
 	}
-
-	input.key_handler(key, action);
-	button_start.keyboard_callback(key, action);
-	button_stop.keyboard_callback(key, action);
 	mainmenu.keyboard_callback(key, action);
+	pausemenu.keyboard_callback(key, action);
 }
 
 std::map<std::string, std::string> UI::get_server_response(
@@ -237,26 +206,18 @@ void UI::set_screen_size(int x, int y)
 			0.0f, static_cast<float>(screen_size.x),
 			0.0f, static_cast<float>(screen_size.y)
 		);
-	text.set_mvp(ortho);
 	mainmenu.set_screen_size({ x, y });
+	pausemenu.set_screen_size({ x, y });
 	if (game != nullptr)
 		game->set_screen_size(x, y);
-	button_start.set_screen_size({ x, y });
-	button_stop.set_screen_size({ x, y });
-	input.set_screen_size({ x, y });
-	Singleton<GL_Context>().obtain();
-	blur.set_size({ x, y });
-	Singleton<GL_Context>().release();
 }
 
 void UI::set_cursor_pos(float x, float y)
 {
 	y = screen_size.y - y;
 	cursor_pos = { x, y };
-	button_stop.set_cursor_pos(cursor_pos);
-	button_start.set_cursor_pos(cursor_pos);
-	input.set_cursor_pos(cursor_pos);
 	mainmenu.set_cursor_pos(cursor_pos);
+	pausemenu.set_cursor_pos(cursor_pos);
 	if (game != nullptr)
 		game->set_cursor_pos(x, y);
 }
@@ -271,7 +232,7 @@ void UI::render()
 		game->draw();
 
 	if (pause)
-		render_pause_menu();
+		pausemenu.draw();
 
 	glFlush();
 
@@ -330,72 +291,6 @@ void UI::leave_battle()
 		game = nullptr;
 		Singleton<GL_Context>().release();
 	}
-}
-
-void UI::render_pause_menu()
-{
-	const glm::vec2 ref_size(640, 480);
-	const glm::vec2 ref_resolution(1280, 720);
-
-	// case 1 - increase the menu size on larger screens:
-	glm::vec2 scale(glm::vec2(screen_size.x, screen_size.y) / ref_resolution);
-	scale = glm::vec2(std::min(scale.x, scale.y), std::min(scale.x, scale.y));
-	glm::vec2 size = ref_size * scale;
-
-	// case 2 - don't make the menu size too small on smaller screens:
-	if (size.x < ref_size.x || size.y < ref_size.y)
-	{
-		size = ref_size;
-	}
-
-	// case 3 - match the menu size with a really small resolution:
-	if (size.x > screen_size.x)
-	{
-		size.x = static_cast<float>(screen_size.x);
-		size.y = size.x * ref_size.y / ref_size.x;
-	}
-
-	if (size.y > screen_size.y)
-	{
-		size.y = static_cast<float>(screen_size.y);
-		size.x = size.y * ref_size.x / ref_size.y;
-	}
-
-	// recalculate scale:
-	scale = size / ref_size;
-	const glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), glm::vec3(scale, 1));
-
-	// calculate origin:
-	const glm::vec2 origin(
-		(screen_size.x - size.x) / 2,
-		(screen_size.y - size.y) / 2
-	);
-	const glm::mat4 translate_mat = glm::translate(glm::mat4(1.0f), glm::vec3(origin, 0));
-
-	// create projection matrix:
-	const glm::mat4 menu_ortho = glm::ortho(
-		0.0f, static_cast<float>(screen_size.x),
-		0.0f, static_cast<float>(screen_size.y)
-	) * translate_mat * scale_mat;
-
-	button_start.set_projection(menu_ortho);
-
-	button_stop.set_projection(menu_ortho);
-
-	dimmer.set_mvp(menu_ortho);
-	dimmer.set_size(ref_size);
-
-	input.set_projection(menu_ortho);
-
-	glDisable(GL_DEPTH_TEST);
-	blur.draw();
-	dimmer.draw();
-	text.draw();
-	button_start.draw();
-	button_stop.draw();
-	input.draw();
-	mainmenu.draw();
-	glEnable(GL_DEPTH_TEST);
 }
 
 void UI::start_game(int players)

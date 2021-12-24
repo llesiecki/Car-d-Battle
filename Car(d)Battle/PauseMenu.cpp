@@ -80,6 +80,8 @@ void PauseMenu::set_ui(UI_Interface* ui)
 
 void PauseMenu::set_screen_size(const glm::ivec2 size)
 {
+	screen_size = size;
+
 	const glm::vec2 ref_size(640, 480);
 	const glm::vec2 ref_resolution(1280, 720);
 
