@@ -6,7 +6,8 @@ UI::UI()
 	battle_id(0),
 	kb(Singleton<Keyboard>()),
 	screen_size(),
-	mainmenu()
+	mainmenu(),
+	state(State::mainmenu)
 {
 	game = nullptr;
 	kill_threads = false;
@@ -47,20 +48,31 @@ UI::~UI()
 
 void UI::key_handler(BYTE key, Keyboard::Key_action action)
 {
-	if (key == VK_ESCAPE && action == Keyboard::Key_action::on_press)
+	switch (state)
 	{
-		pause ^= true;
-		if (game != nullptr)
-			game->set_pause(pause);
-	}
+	case UI::State::mainmenu:
 
-	if (!pause)
-	{
-		if (game != nullptr)
-			game->key_handler(key, action);
+		break;
+	case UI::State::battle:
+
+		if (key == VK_ESCAPE && action == Keyboard::Key_action::on_press)
+		{
+			pause ^= true;
+
+			if (game != nullptr)
+				game->set_pause(pause);
+		}
+
+		if (!pause)
+		{
+			if (game != nullptr)
+				game->key_handler(key, action);
+		}
+
+		break;
+	default:
+		break;
 	}
-	mainmenu.keyboard_callback(key, action);
-	pausemenu.keyboard_callback(key, action);
 }
 
 std::map<std::string, std::string> UI::get_server_response(
@@ -228,11 +240,25 @@ void UI::render()
 	Singleton<GL_Context>().obtain();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (game != nullptr)
-		game->draw();
+	switch (state)
+	{
+	case UI::State::mainmenu:
 
-	if (pause)
-		pausemenu.draw();
+		mainmenu.draw();
+
+		break;
+	case UI::State::battle:
+
+		if (game != nullptr)
+			game->draw();
+
+		if (pause)
+			pausemenu.draw();
+
+		break;
+	default:
+		break;
+	}
 
 	glFlush();
 
@@ -243,7 +269,7 @@ void UI::render()
 
 void UI::start()
 {
-	pause = true;
+	state = State::mainmenu;
 }
 
 void UI::request_category()
@@ -275,6 +301,7 @@ void UI::exit_game()
 	GLFWwindow* window = Singleton<GL_Context>().get_window();
 	glfwSetWindowShouldClose(window, 1);
 	Singleton<GL_Context>().release();
+	state = State::mainmenu;
 }
 
 void UI::set_pause(bool pause)
@@ -291,10 +318,12 @@ void UI::leave_battle()
 		game = nullptr;
 		Singleton<GL_Context>().release();
 	}
+	state = State::mainmenu;
 }
 
 void UI::start_game(int players)
 {
+	state = State::battle;
 	Singleton<GL_Context>().obtain();
 	game = new Game();
 	game->set_UI(this);

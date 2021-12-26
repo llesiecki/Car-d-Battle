@@ -19,6 +19,13 @@
 class UI
 	:public UI_Interface
 {
+	enum class State
+	{
+		mainmenu,
+		battle
+	};
+
+	State state;
 	int battle_id;
 	std::string user_token;
 	std::string nickname;
