@@ -52,18 +52,24 @@ void UI::key_handler(BYTE key, Keyboard::Key_action action)
 	{
 	case UI::State::mainmenu:
 
+		mainmenu.keyboard_callback(key, action);
+
 		break;
 	case UI::State::battle:
 
 		if (key == VK_ESCAPE && action == Keyboard::Key_action::on_press)
 		{
-			pause ^= true;
+			this->set_pause(!pause);
 
 			if (game != nullptr)
 				game->set_pause(pause);
 		}
 
-		if (!pause)
+		if (pause)
+		{
+			pausemenu.keyboard_callback(key, action);
+		}
+		else
 		{
 			if (game != nullptr)
 				game->key_handler(key, action);
@@ -279,20 +285,7 @@ void UI::request_category()
 
 void UI::button_callback(const std::string& button_id)
 {
-	std::cout << "Button " << button_id << " clicked.\n";
 
-	if (button_id == "start_sp" && game == nullptr)
-	{
-		start_game(4);
-	}
-
-	if (button_id == "stop" && game != nullptr)
-	{
-		Singleton<GL_Context>().obtain();
-		delete game;
-		game = nullptr;
-		Singleton<GL_Context>().release();
-	}
 }
 
 void UI::exit_game()
@@ -318,11 +311,13 @@ void UI::leave_battle()
 		game = nullptr;
 		Singleton<GL_Context>().release();
 	}
+	set_pause(false);
 	state = State::mainmenu;
 }
 
 void UI::start_game(int players)
 {
+	set_pause(false);
 	state = State::battle;
 	Singleton<GL_Context>().obtain();
 	game = new Game();

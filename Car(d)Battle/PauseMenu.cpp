@@ -153,15 +153,15 @@ void PauseMenu::button_callback(const std::string& id)
 {
 	Singleton<GL_Context>().obtain();
 
-	if (id == "resume")
+	if (id == "button_resume")
 	{
 		std::thread(&UI_Interface::set_pause, this->ui, false).detach();
 	}
-	else if (id == "options")
+	else if (id == "button_options")
 	{
-		
+
 	}
-	else if (id == "leave")
+	else if (id == "button_leave")
 	{
 		std::thread(&UI_Interface::leave_battle, this->ui).detach();
 	}

@@ -46,14 +46,14 @@ class UI
 
 	void key_handler(BYTE, Keyboard::Key_action);
 	std::map<std::string, std::string> get_server_response(
-		const std::string &,
-		const std::map<std::string, std::string> &
+		const std::string&,
+		const std::map<std::string, std::string>&
 	);
 	int create_battle();
-	int join_battle(int, const std::string &);
+	int join_battle(int, const std::string&);
 	int start_battle();
-	std::string register_user(const std::string &, const std::string &);
-	std::string login_user(const std::string &, const std::string &);
+	std::string register_user(const std::string&, const std::string&);
+	std::string login_user(const std::string&, const std::string&);
 	void start_game(int);
 
 	UI();
