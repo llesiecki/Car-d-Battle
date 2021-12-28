@@ -204,6 +204,11 @@ void UI::get_current_category()
 		if (s == "Thread killed")
 			return;
 	}
+	catch (std::runtime_error re)
+	{
+		std::cerr << re.what();
+		leave_battle();
+	}
 
 	if (game != nullptr)
 		game->set_category(std::stoi(response["current_category"]));

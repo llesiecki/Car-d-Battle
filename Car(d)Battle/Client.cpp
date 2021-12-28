@@ -92,7 +92,7 @@ bool Client::send_request(const std::string& address, const std::string& request
 
     if (!ptr)
     {
-        std::cerr << "connect faild: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
+        std::cerr << "connect failed: " << GetLastErrorAsString(WSAGetLastError()) << "\n";
         return false;
     }
 
