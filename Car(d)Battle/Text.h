@@ -6,11 +6,14 @@
 
 class Text
 {
+	glm::ivec2 pos;
 	std::string text;
 	std::string font;
 	glm::vec4 color;
-	glm::mat4 mvp;
+	glm::mat4 mvp, transform;
 	TrueTypeFont& ttf;
+
+	void recalculate_transform();
 
 public:
 	Text();
@@ -31,6 +34,7 @@ public:
 	void set_font(const std::string&);
 	void set_font(const std::string&, const std::string&);
 	void set_mvp(const glm::mat4&);
+	void set_pos(const glm::ivec2&);
 	int get_width();
 	int get_descent();
 };

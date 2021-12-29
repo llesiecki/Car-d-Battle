@@ -1,7 +1,7 @@
 #include "Text.h"
 
 Text::Text()
-	:ttf(Singleton<TrueTypeFont>())
+	:ttf(Singleton<TrueTypeFont>()), pos()
 {
 	set_color(glm::vec4(255, 255, 255, 255));
 }
@@ -35,6 +35,12 @@ Text& Text::operator=(const Text& text)
 	return *this;
 }
 
+void Text::recalculate_transform()
+{
+	glm::mat4 translate = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
+	transform = mvp * translate;
+}
+
 void Text::draw()
 {
 	const Shader& shader = ttf.get_shader();
@@ -46,7 +52,7 @@ void Text::draw()
 	for (const char c : text)
 	{
 		// render glyph texture over quad
-		shader.set("mvp", mvp * shift);
+		shader.set("mvp", transform * shift);
 		shift = glm::translate(shift, glm::vec3(ttf.get_char_width(font, c), 0.0f, 0.0f));
 		glBindTexture(GL_TEXTURE_2D, ttf.get_tex_id(font, c));
 		glBindVertexArray(ttf.get_VAO(font, c));
@@ -95,6 +101,13 @@ void Text::set_font(const std::string& path, const std::string& font)
 void Text::set_mvp(const glm::mat4& mvp)
 {
 	this->mvp = mvp;
+	recalculate_transform();
+}
+
+void Text::set_pos(const glm::ivec2& pos)
+{
+	this->pos = pos;
+	recalculate_transform();
 }
 
 int Text::get_width()
