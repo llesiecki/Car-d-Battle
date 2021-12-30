@@ -6,6 +6,7 @@
 
 class Text
 {
+	float scale;
 	glm::ivec2 pos;
 	std::string text;
 	std::string font;
@@ -35,6 +36,7 @@ public:
 	void set_font(const std::string&, const std::string&);
 	void set_mvp(const glm::mat4&);
 	void set_pos(const glm::ivec2&);
+	void set_scale(float);
 	int get_width();
 	int get_descent();
 };

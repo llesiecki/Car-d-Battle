@@ -1,7 +1,7 @@
 #include "Text.h"
 
 Text::Text()
-	:ttf(Singleton<TrueTypeFont>()), pos()
+	:ttf(Singleton<TrueTypeFont>()), pos(), scale(1.0f)
 {
 	set_color(glm::vec4(255, 255, 255, 255));
 }
@@ -38,7 +38,8 @@ Text& Text::operator=(const Text& text)
 void Text::recalculate_transform()
 {
 	glm::mat4 translate = glm::translate(glm::mat4(1.0f), { pos.x, pos.y, 0 });
-	transform = mvp * translate;
+	glm::mat4 scale_mat = glm::scale(glm::mat4(1.0f), { scale, scale, 1.0f });
+	transform = mvp * translate * scale_mat;
 }
 
 void Text::draw()
@@ -107,6 +108,12 @@ void Text::set_mvp(const glm::mat4& mvp)
 void Text::set_pos(const glm::ivec2& pos)
 {
 	this->pos = pos;
+	recalculate_transform();
+}
+
+void Text::set_scale(float scale)
+{
+	this->scale = scale;
 	recalculate_transform();
 }
 

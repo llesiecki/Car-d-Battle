@@ -30,8 +30,8 @@ PauseMenu::PauseMenu()
 	texts["title"] = std::move(text_ptr);
 	configure(texts["title"]);
 	texts["title"]->set_text("Pause Menu");
-	// TODO: Extend the Text class with a "set_pos" member function
-	// texts["opponents_num"]->set_pos({ 150, 30 });
+	const int title_offset = (ref_size.x - texts["title"]->get_width()) / 2;
+	texts["title"]->set_pos({ title_offset, 360});
 }
 
 PauseMenu::~PauseMenu()

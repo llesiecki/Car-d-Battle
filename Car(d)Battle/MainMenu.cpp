@@ -150,9 +150,9 @@ void MainMenu::change_state(State new_state)
 		std::unique_ptr<Text> text_ptr = std::make_unique<Text>();
 		texts["opponents_num"] = std::move(text_ptr);
 		configure(texts["opponents_num"]);
-		texts["opponents_num"]->set_text("Choose nuber of opponents:");
-		// TODO: Extend the Text class with a "set_pos" member function
-		// texts["opponents_num"]->set_pos({ 150, 30 });
+		texts["opponents_num"]->set_text("Number of opponents:");
+		texts["opponents_num"]->set_pos({ left_offset, bottom_offset + 205 });
+		texts["opponents_num"]->set_scale(0.7f);
 	}
 
 	if (new_state == State::multiplayer)
@@ -211,7 +211,7 @@ void MainMenu::configure(std::unique_ptr<Button>& button)
 void MainMenu::configure(std::unique_ptr<Text>& text)
 {
 	text->set_font("arial.ttf");
-	text->set_color(glm::vec4(0, 0, 0, 1));
+	text->set_color(glm::vec4(1, 1, 1, 1));
 	text->set_mvp(mvp);
 }
 
@@ -228,9 +228,12 @@ void MainMenu::configure(std::unique_ptr<TextInput>& input)
 
 void MainMenu::draw()
 {
+	glDisable(GL_DEPTH_TEST);
+
 	if (game != nullptr)
 		game->draw();
-	//blur.draw();
+
+	blur.draw();
 	dimmer.draw();
 
 	state_mutex.lock();
@@ -241,7 +244,12 @@ void MainMenu::draw()
 	for (auto& kv : buttons)
 		kv.second->draw();
 
+	for (auto& kv : texts)
+		kv.second->draw();
+
 	state_mutex.unlock();
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 void MainMenu::set_ui(UI_Interface* ui)
